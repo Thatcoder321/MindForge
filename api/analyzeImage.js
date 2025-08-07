@@ -39,6 +39,7 @@ export default async function handler(req,res) {
                         type: 'image_url',
                         image_url: {
                             url:image,
+                            detail: "low"
                         },
                     },
                 ],

@@ -128,19 +128,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let uploadedImageBase64 = null;
 
-  imageUploadInput.addEventListener('change',(e)=> {
-    const file = e.target.files[0];
-    if(file) {
-      const reader = new FileReader();
 
-      reader.onload = function(event) {
-        uploadedImageBase64 = event.target.result;
-        imagePreview.src = uploadedImageBase64;
-        imagePreviewContainer.style.display = 'block';
+imageUploadInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (file) {
+      try {
+
+          console.log('Resizing image...');
+          const resizedBase64 = await resizeImage(file);
+          
+          uploadedImageBase64 = resizedBase64;
+          imagePreview.src = uploadedImageBase64;
+          imagePreviewContainer.style.display = 'block';
+          console.log('Image resized successfully!');
+
+      } catch (error) {
+          console.error('Image resizing failed:', error);
+          alert('There was an error processing your image. Please try a different one.');
       }
-      reader.readAsDataURL(file);
-    }
-  });
+  }
+});
 
   analyzeImageButton.addEventListener('click',async() => {
     if(!uploadedImageBase64){
@@ -396,7 +403,49 @@ document.addEventListener('DOMContentLoaded', () => {
       const intensity = xpAmount / 25;
       particleSystem.createRipple(centerX, centerY, intensity);
   }
+/**
+ * Resizes an image file client-side before uploading.
+ * @param {File} file The image file to resize.
+ * @param {number} maxSize The maximum width or height of the resized image.
+ * @returns {Promise<string>} A promise that resolves with the base64 string of the resized image.
+ */
+function resizeImage(file, maxSize = 1024) {
+  return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+          const img = new Image();
+          img.onload = function() {
+              let width = img.width;
+              let height = img.height;
 
+              if (width > height) {
+                  if (width > maxSize) {
+                      height *= maxSize / width;
+                      width = maxSize;
+                  }
+              } else {
+                  if (height > maxSize) {
+                      width *= maxSize / height;
+                      height = maxSize;
+                  }
+              }
+
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              // Get the data-url from the canvas
+              resolve(canvas.toDataURL('image/jpeg', 0.9)); // Use JPEG for better compression
+          };
+          img.onerror = reject;
+          img.src = event.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+  });
+}
   // --- Event Listeners ---
   // Navigation handler
   const nav = document.querySelector('nav');
