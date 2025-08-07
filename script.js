@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function rejectAiSuggestion() {
   aiResultsDiv.style.display = 'none';
+  aiResultsDiv.classList.remove('debug-blinker');
   aiLogForm.reset();
   
   // Also reset the image uploader UI
@@ -176,7 +177,7 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
             // Hide the image preview and show the results
             imagePreviewContainer.style.display = 'none';
             aiResultsDiv.style.display = 'block';
-
+            aiResultsDiv.classList.add('debug-blinker');
             const appContainer = document.querySelector('.app-container');
             appContainer.scrollTo({ top: aiResultsDiv.offsetTop - 20, behavior: 'smooth' }); // -20 to give some padding
         } else {
