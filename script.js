@@ -180,6 +180,12 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
             aiResultsDiv.classList.add('debug-blinker');
             const appContainer = document.querySelector('.app-container');
             appContainer.scrollTo({ top: aiResultsDiv.offsetTop - 20, behavior: 'smooth' }); // -20 to give some padding
+
+            console.log('AI Results element:', aiResultsDiv);
+console.log('AI Results display style:', window.getComputedStyle(aiResultsDiv).display);
+console.log('AI Results visibility:', window.getComputedStyle(aiResultsDiv).visibility);
+console.log('AI Results position:', aiResultsDiv.getBoundingClientRect());
+
         } else {
             throw new Error('AI returned invalid or empty data.');
         }
