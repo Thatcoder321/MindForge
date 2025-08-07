@@ -47,7 +47,36 @@
 
       <section id="log" class="page">
         <h2>Activity Log</h2>
-        <!-- Log list gets added dynamically -->
+        <form id="ai-log-form">
+          <div class="form-group">
+            <label for="ai-log-description">Describe your study session to the AI</label>
+            <textarea id="ai-log-description" rows="3" placeholder="e.g., I finally understood how to complete the square for quadratic equations and solved 5 practice problems." required></textarea>
+
+          </div>
+          <button type="submit" id="ai-log-button" class="submit-button"></button>
+        <span class="button-text">Analyze & Generate XP</span>
+        <span class="spinner" style="display: none;"></span>
+        </button>
+        </form>
+
+        <div id="ai-results" style="display:none;">
+          <h3>AI Suggestion:</h3>
+          <div class="stat-item">
+            <h2>Suggested XP</h2>
+            <p id="ai-suggested-xp">45</p>
+          </div>
+          <p id="ai-justification">Justification: Understanding a core concept like this shows significant effort.</p>
+          <div class="modal-actions">
+            <button type="button" id="reject-ai-suggestion">Cancel</button>
+            <button type="button" id="accept-ai-suggestion" class="submit-button">Accept & Log</button>
+
+          </div>
+        </div>
+
+        <h2 class="history-title">Activity History</h2>
+        <ul id="log-list">
+          
+        </ul>
       </section>
 
       <section id="shop" class="page">
