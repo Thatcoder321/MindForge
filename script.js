@@ -96,22 +96,41 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   acceptAiSuggestionButton.addEventListener('click', () => {
-      if (!tempAiSuggestion) return;
-      const description = uploadedImageBase64 ? `Analyzed work from uploaded image.` : document.getElementById('ai-log-description').value;
-      const logData = { description: description, xp: tempAiSuggestion.xp, confidence: 'medium', concepts: tempAiSuggestion.concepts };
-      addXP(logData);
-      aiResultsDiv.style.display = 'none';
-      aiLogForm.reset();
-      imagePreviewContainer.style.display = 'none';
-      imageUploadInput.value = '';
-      uploadedImageBase64 = null;
-      tempAiSuggestion = null;
-  });
+    if (!tempAiSuggestion) return;
+    
+    // Determine the description based on the source type we stored
+    const description = tempAiSuggestion.sourceType === 'image'
+        ? `Analyzed work from uploaded image.` 
+        : document.getElementById('ai-log-description').value;
 
-  rejectAiSuggestionButton.addEventListener('click', () => {
-      aiResultsDiv.style.display = 'none';
-      tempAiSuggestion = null;
-  });
+    const logData = {
+        description: description,
+        xp: tempAiSuggestion.xp,
+        confidence: 'medium',
+        concepts: tempAiSuggestion.concepts
+    };
+
+    addXP(logData);
+    
+    // Call the reject/cancel function to clean up the UI
+    rejectAiSuggestion();
+});
+
+
+function rejectAiSuggestion() {
+  aiResultsDiv.style.display = 'none';
+  aiLogForm.reset();
+  
+  // Also reset the image uploader UI
+  imagePreviewContainer.style.display = 'none';
+  imageUploadInput.value = '';
+  uploadedImageBase64 = null;
+  
+  tempAiSuggestion = null;
+  console.log('AI suggestion UI has been cleared.');
+}
+
+rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
 
   imageUploadInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
@@ -124,72 +143,55 @@ document.addEventListener('DOMContentLoaded', () => {
           } catch (error) { console.error('Image resizing failed:', error); alert('There was an error processing your image. Please try a different one.'); }
       }
   });
-
-  // ✅ THIS IS THE FUNCTION WE ARE DEBUGGING
   analyzeImageButton.addEventListener('click', async () => {
-      // DEBUGGING CHECKPOINT 1: Confirm the button click is registered.
-      console.log('Analyze Image button clicked!');
+    console.log('Analyze Image button clicked!');
+    if (!uploadedImageBase64) { return; }
 
-      if (!uploadedImageBase64) {
-          alert('Please select an image first.');
-          return;
-      }
+    analyzeImageButton.disabled = true;
+    analyzeImageButton.innerHTML = `<span class="spinner"></span>`;
 
-      analyzeImageButton.disabled = true;
-      analyzeImageButton.innerHTML = `<span class="spinner"></span>`;
+    try {
+        console.log('Sending image to /api/analyzeImage...');
+        const response = await fetch('/api/analyzeImage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: uploadedImageBase64 }),
+        });
 
-      try {
-          // DEBUGGING CHECKPOINT 2: Confirm we are starting the API call.
-          console.log('Sending image to /api/analyzeImage...');
-          
-          const response = await fetch('/api/analyzeImage', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ image: uploadedImageBase64 }),
-          });
+        console.log('Raw response from server:', response);
+        if (!response.ok) { throw new Error(`Server responded with status: ${response.status}`); }
 
-          // DEBUGGING CHECKPOINT 3: See the raw response from the server.
-          console.log('Raw response from server:', response);
+        const data = await response.json();
+        console.log('Data received from AI:', data);
 
-          if (!response.ok) {
-              // This will give us more detail if the server returned an error
-              throw new Error(`Server responded with status: ${response.status}`);
-          }
+        if (data && typeof data.xp === 'number') {
+            // Store the data and a flag indicating it was from an image
+            tempAiSuggestion = { ...data, sourceType: 'image' }; 
 
-          const data = await response.json();
+            console.log('Data is valid. Updating and showing UI...');
+            aiSuggestedXp.innerText = data.xp;
+            aiJustification.innerText = data.justification;
+            
+            // --- The key fix ---
+            // Hide the image preview and show the results
+            imagePreviewContainer.style.display = 'none';
+            aiResultsDiv.style.display = 'block';
 
-          // DEBUGGING CHECKPOINT 4: This is the MOST IMPORTANT one. See what the AI actually sent back.
-          console.log('Data received from AI:', data);
-          
-          // Is the data object what we expect?
-          if (data && typeof data.xp === 'number') {
-              tempAiSuggestion = data;
+            const appContainer = document.querySelector('.app-container');
+            appContainer.scrollTo({ top: aiResultsDiv.offsetTop - 20, behavior: 'smooth' }); // -20 to give some padding
+        } else {
+            throw new Error('AI returned invalid or empty data.');
+        }
 
-              // DEBUGGING CHECKPOINT 5: Confirm we are about to update the UI.
-              console.log('Data is valid. Updating UI...');
-
-              aiSuggestedXp.innerText = data.xp;
-              aiJustification.innerText = data.justification;
-              aiResultsDiv.style.display = 'block';
-
-              const appContainer = document.querySelector('.app-container');
-              appContainer.scrollTo({ top: aiResultsDiv.offsetTop, behavior: 'smooth' });
-          } else {
-              // This will catch cases where the AI gives a weird response
-              throw new Error('AI returned invalid or empty data.');
-          }
-
-      } catch (error) {
-          // DEBUGGING CHECKPOINT 6: See if any error was caught.
-          console.error('An error occurred during image analysis:', error);
-          alert('An error occurred. Please check the console for details.');
-      } finally {
-          // DEBUGGING CHECKPOINT 7: Confirm we are resetting the button.
-          console.log('Resetting the Analyze button.');
-          analyzeImageButton.disabled = false;
-          analyzeImageButton.innerHTML = `Analyze Image`;
-      }
-  });
+    } catch (error) {
+        console.error('An error occurred during image analysis:', error);
+        alert('An error occurred. Please check the console for details.');
+    } finally {
+        console.log('Resetting the Analyze button.');
+        analyzeImageButton.disabled = false;
+        analyzeImageButton.innerHTML = `Analyze Image`;
+    }
+});
 
   // --- Initialization ---
   function init() {
