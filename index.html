@@ -61,6 +61,30 @@
       </section>
     </main>
   </div>
+  <div id="edit-modal-backdrop" class="modal-backdrop">
+    <div class="modal-content">
+      <h2>Edit Log Entry</h2>
+      <form id="edit-log-form">
+        <div class="form-group">
+          <label for="edit-log-description">Description</label>
+          <textarea id="edit-log-description" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="edit-log-confidence">Confidence Level</label>
+          <select id="edit-log-confidence" required>
+            <option value="high">High - Nailed it!</option>
+                    <option value="medium">Medium - Got it, but was slow</option>
+                    <option value="low">Low - Struggled, but got there</option>
+                </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancel-edit-button">Cancel</button>
+          <button type="submit" class="submit-button">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 <script src="script.js"></script>
 </html>

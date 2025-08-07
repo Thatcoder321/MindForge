@@ -1,213 +1,345 @@
 class Particle {
-    constructor(x, y, vx, vy, color, size) {
-      this.x = x;
-      this.y = y;
-      this.vx = vx;
-      this.vy = vy;
-      this.color = color;
-      this.size = size;
-      this.initialSize = size;
-      this.life = 1.0;
-      this.decay = Math.random() * 0.02 + 0.01;
-      this.gravity = 0.1;
-    }
+  constructor(x, y, vx, vy, color, size) {
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.color = color;
+    this.size = size;
+    this.initialSize = size;
+    this.life = 1.0;
+    this.decay = Math.random() * 0.02 + 0.01;
+    this.gravity = 0.1;
+  }
 
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.vy += this.gravity;
-      this.vx *= 0.98; // Air resistance
-      this.vy *= 0.98;
-      this.life -= this.decay;
-      this.size = this.initialSize * this.life;
-    }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += this.gravity;
+    this.vx *= 0.98;
+    this.vy *= 0.98;
+    this.life -= this.decay;
+    this.size = this.initialSize * this.life;
+  }
 
-    draw(ctx) {
-      if (this.life <= 0) return;
-      
-      ctx.save();
-      ctx.globalAlpha = this.life;
-      ctx.fillStyle = this.color;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Add glow effect
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = this.color;
-      ctx.fill();
-      
-      ctx.restore();
-    }
+  draw(ctx) {
+    if (this.life <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = this.life;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = this.color;
+    ctx.fill();
+    ctx.restore();
+  }
 
-    isDead() {
-      return this.life <= 0;
+  isDead() { return this.life <= 0; }
+}
+
+class ParticleSystem {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.particles = [];
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    this.animate();
+  }
+
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
+
+  createRipple(x, y, intensity = 1) {
+    const colors = ['#4f46e5', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981'];
+    const particleCount = Math.floor(30 * intensity);
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (Math.PI * 2 * i) / particleCount;
+      const speed = Math.random() * 8 + 4;
+      this.particles.push(new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, colors[Math.floor(Math.random() * colors.length)], Math.random() * 4 + 2));
+    }
+    for (let i = 0; i < Math.floor(20 * intensity); i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 12 + 2;
+      this.particles.push(new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, colors[Math.floor(Math.random() * colors.length)], Math.random() * 3 + 1));
     }
   }
 
-  class ParticleSystem {
-    constructor(canvas) {
-      this.canvas = canvas;
-      this.ctx = canvas.getContext('2d');
-      this.particles = [];
-      this.resize();
-      
-      window.addEventListener('resize', () => this.resize());
-      this.animate();
-    }
-
-    resize() {
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-    }
-
-    createRipple(x, y, intensity = 1) {
-      const colors = ['#4f46e5', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981'];
-      const particleCount = Math.floor(30 * intensity);
-      
-      for (let i = 0; i < particleCount; i++) {
-        const angle = (Math.PI * 2 * i) / particleCount;
-        const speed = Math.random() * 8 + 4;
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed;
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const size = Math.random() * 4 + 2;
-        
-        this.particles.push(new Particle(x, y, vx, vy, color, size));
-      }
-
-      // Add some random scattered particles
-      for (let i = 0; i < Math.floor(20 * intensity); i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 12 + 2;
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed;
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const size = Math.random() * 3 + 1;
-        
-        this.particles.push(new Particle(x, y, vx, vy, color, size));
-      }
-    }
-
-    update() {
-      this.particles.forEach(particle => particle.update());
-      this.particles = this.particles.filter(particle => !particle.isDead());
-    }
-
-    draw() {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.particles.forEach(particle => particle.draw(this.ctx));
-    }
-
-    animate() {
-      this.update();
-      this.draw();
-      requestAnimationFrame(() => this.animate());
-    }
+  update() {
+    this.particles.forEach(p => p.update());
+    this.particles = this.particles.filter(p => !p.isDead());
   }
 
-  // Main Application Logic
-  document.addEventListener('DOMContentLoaded', () => {
-    let state = { xp: 0, coins: 0, log: [] };
-    const XP_TO_COIN_RATE = 10;
+  draw() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.particles.forEach(p => p.draw(this.ctx));
+  }
 
-    // Initialize particle system
-    const canvas = document.getElementById('particles-canvas');
-    const particleSystem = new ParticleSystem(canvas);
+  animate() {
+    this.update();
+    this.draw();
+    requestAnimationFrame(() => this.animate());
+  }
+}
 
-    const xpDisplay = document.getElementById('xp-display');
-    const coinsDisplay = document.getElementById('coins-display');
-    const navButtons = document.querySelectorAll('.nav-button');
-    const pages = document.querySelectorAll('.page');
-    const xpButtons = document.querySelector('.xp-button-group');
+// --- Main Application Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+  let state = {
+      xp: 0,
+      coins: 0,
+      log: [],
+      currentlyEditingLogId: null
+  };
+  const XP_TO_COIN_RATE = 10;
 
-    function animateValue(element, start, end, duration) {
+  // --- DOM Elements ---
+  const canvas = document.getElementById('particles-canvas');
+  const particleSystem = canvas ? new ParticleSystem(canvas) : null;
+
+  const xpDisplay = document.getElementById('xp-display');
+  const coinsDisplay = document.getElementById('coins-display');
+  const navButtons = document.querySelectorAll('.nav-button');
+  const pages = document.querySelectorAll('.page');
+  const xpButtons = document.querySelector('.xp-button-group');
+  
+  // Modal Elements
+  const modalBackdrop = document.getElementById('edit-modal-backdrop');
+  const modalContent = document.querySelector('.modal-content');
+  const editForm = document.getElementById('edit-log-form');
+  const cancelEditButton = document.getElementById('cancel-edit-button');
+  const editDescriptionInput = document.getElementById('edit-log-description');
+  const editConfidenceInput = document.getElementById('edit-log-confidence');
+
+  // --- Data Persistence (using in-memory storage) ---
+  function saveState() {
+      // Using in-memory storage instead of localStorage for compatibility
+      window.mindforgeState = JSON.stringify(state);
+  }
+
+  function loadState() {
+      if (window.mindforgeState) {
+          state = JSON.parse(window.mindforgeState);
+          // Ensure log has default values if loading old data
+          state.log = state.log.map(entry => ({
+              description: 'Logged quick effort',
+              confidence: 'medium',
+              ...entry
+          }));
+      }
+  }
+
+  // --- UI Updates ---
+  function animateValue(element, start, end, duration) {
       if (start === end) return;
       let startTimestamp = null;
       const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        element.innerText = Math.floor(progress * (end - start) + start);
-        if (progress < 1) window.requestAnimationFrame(step);
+          if (!startTimestamp) startTimestamp = timestamp;
+          const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+          element.innerText = Math.floor(progress * (end - start) + start);
+          if (progress < 1) window.requestAnimationFrame(step);
       };
       window.requestAnimationFrame(step);
-    }
+  }
 
-    function updateDashboard() {
+  function updateDashboard() {
       const currentXP = parseInt(xpDisplay.innerText, 10) || 0;
       const currentCoins = parseInt(coinsDisplay.innerText, 10) || 0;
       animateValue(xpDisplay, currentXP, state.xp, 500);
       animateValue(coinsDisplay, currentCoins, state.coins, 500);
-    }
+  }
 
-    function renderLog() {
-      const logList = document.getElementById('log-list');
-      if (!logList) return;
-      logList.innerHTML = '';
-      state.log.slice().reverse().forEach(entry => {
+  // Renders log entries with an "Edit" button
+  function renderLog() {
+    const logListElement = document.getElementById('log-list');
+    if (!logListElement) {
+        console.warn('Log list element not found');
+        return;
+    }
+    
+    logListElement.innerHTML = ''; // Clear existing list
+    
+    if (state.log.length === 0) {
+        logListElement.innerHTML = '<li class="log-entry no-entries">No activities logged yet.</li>';
+        return;
+    }
+    
+    state.log.slice().reverse().forEach(entry => {
         const li = document.createElement('li');
         li.className = 'log-entry';
-        li.innerHTML = `<span class="description">${entry.description}</span><span class="xp-gain">+${entry.xp} XP</span>`;
-        logList.appendChild(li);
-      });
-    }
+        li.dataset.logId = entry.timestamp; // Use timestamp as a unique ID
 
-    function addXP(amount) {
-      const coinsEarned = Math.floor(amount / XP_TO_COIN_RATE);
-      state.xp += amount;
-      state.coins += coinsEarned;
-      state.log.push({
-        description: `Logged quick effort`,
-        xp: amount,
-        timestamp: new Date().toISOString()
-      });
-      updateDashboard();
-      renderLog();
-    }
+        // Handle confidence display
+        let confidenceText;
+        if (entry.confidence === 'not_picked' || !entry.confidence) {
+            confidenceText = 'Not picked';
+        } else {
+            confidenceText = entry.confidence.charAt(0).toUpperCase() + entry.confidence.slice(1);
+        }
 
-    function handleNavClick(e) {
+        li.innerHTML = `
+            <div class="log-details">
+              <div class="description">${entry.description}</div>
+              <div class="log-entry-details">Confidence: ${confidenceText}</div>
+            </div>
+            <div class="log-actions">
+                <span class="xp-gain">+${entry.xp} XP</span>
+                <button class="edit-log-button">Edit</button>
+            </div>
+        `;
+        logListElement.appendChild(li);
+    });
+}
+  
+  // --- Modal Logic ---
+  function openEditModal(logId) {
+      const entryToEdit = state.log.find(entry => entry.timestamp === logId);
+      if (!entryToEdit) return;
+
+      state.currentlyEditingLogId = logId;
+      editDescriptionInput.value = entryToEdit.description;
+      editConfidenceInput.value = entryToEdit.confidence;
+
+      modalBackdrop.classList.add('visible');
+      modalContent.classList.add('visible');
+  }
+
+  function closeEditModal() {
+      state.currentlyEditingLogId = null;
+      modalBackdrop.classList.remove('visible');
+      modalContent.classList.remove('visible');
+  }
+
+  // --- Core Logic ---
+  function addXP(xpAmount) {
+    const coinsEarned = Math.floor(xpAmount / XP_TO_COIN_RATE);
+    state.xp += xpAmount;
+    state.coins += coinsEarned;
+
+    // Create a new log entry with a unique timestamp ID
+    const logEntry = {
+        description: 'Logged quick effort',
+        xp: xpAmount,
+        confidence: 'not_picked', // Changed from 'medium' to 'not_picked'
+        timestamp: new Date().toISOString() + Math.random()
+    };
+    state.log.push(logEntry);
+
+    saveState();
+    updateDashboard();
+    renderLog();
+}
+
+  // --- Navigation Handler ---
+  function handleNavClick(e) {
       const targetButton = e.target.closest('.nav-button');
       if (!targetButton) return;
-      const targetPageId = targetButton.dataset.page;
-      navButtons.forEach(button => button.classList.remove('active'));
-      targetButton.classList.add('active');
-      pages.forEach(page => page.classList.toggle('active', page.id === targetPageId));
-    }
 
-    function createParticleExplosion(event, buttonElement, xpAmount) {
+      const targetPageId = targetButton.dataset.page;
+      
+      // Update the visual style of the buttons
+      navButtons.forEach(button => {
+          button.classList.remove('active');
+      });
+      targetButton.classList.add('active');
+
+      // Switch the visible page
+      pages.forEach(page => {
+          if (page.id === targetPageId) {
+              page.classList.add('active');
+          } else {
+              page.classList.remove('active');
+          }
+      });
+  }
+
+  // --- Particle Explosion Helper ---
+  function createParticleExplosion(buttonElement, xpAmount) {
       const rect = buttonElement.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
-      
-      // Calculate intensity based on XP amount
-      const intensity = xpAmount / 25; // Normalize based on max XP button value
-      
+      const intensity = xpAmount / 25;
       particleSystem.createRipple(centerX, centerY, intensity);
-    }
+  }
 
-    // Event listeners
-    document.querySelector('nav').addEventListener('click', handleNavClick);
-
+  // --- Event Listeners ---
+  // Navigation handler
+  const nav = document.querySelector('nav');
+  if (nav) {
+    nav.addEventListener('click', handleNavClick);
+  }
+  
+  if (xpButtons) {
     xpButtons.addEventListener('click', (e) => {
-      const button = e.target.closest('.xp-button');
-      if (button) {
-        const xpToAdd = parseInt(button.dataset.xp, 10);
-        createParticleExplosion(e, button, xpToAdd);
-        addXP(xpToAdd);
-      }
+        const button = e.target.closest('.xp-button');
+        if (button) {
+            const xpToAdd = parseInt(button.dataset.xp, 10);
+            if (particleSystem) {
+              createParticleExplosion(button, xpToAdd);
+            }
+            addXP(xpToAdd);
+        }
     });
+  }
 
-    function init() {
+  // Listener for the "Edit" button on log entries (uses event delegation)
+  // We'll add this listener to the document since log entries are added dynamically
+  document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('edit-log-button')) {
+          const logEntryElement = e.target.closest('.log-entry');
+          const logId = logEntryElement.dataset.logId;
+          openEditModal(logId);
+      }
+  });
+
+  // Listeners for the modal form
+  if (editForm) {
+    editForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const logId = state.currentlyEditingLogId;
+        const entryToUpdate = state.log.find(entry => entry.timestamp === logId);
+
+        if (entryToUpdate) {
+            entryToUpdate.description = editDescriptionInput.value;
+            entryToUpdate.confidence = editConfidenceInput.value;
+        }
+
+        saveState();
+        renderLog();
+        closeEditModal();
+    });
+  }
+
+  if (cancelEditButton) {
+    cancelEditButton.addEventListener('click', closeEditModal);
+  }
+  
+  if (modalBackdrop) {
+    modalBackdrop.addEventListener('click', (e) => {
+        if (e.target === modalBackdrop) {
+            closeEditModal();
+        }
+    });
+  }
+
+  // --- Initialization ---
+  function init() {
+      // Create log list if it doesn't exist
       const logPage = document.getElementById('log');
       if (logPage && !logPage.querySelector('#log-list')) {
-        const ul = document.createElement('ul');
-        ul.id = 'log-list';
-        logPage.appendChild(ul);
+          const ul = document.createElement('ul');
+          ul.id = 'log-list';
+          logPage.appendChild(ul);
       }
+      
+      loadState();
       xpDisplay.innerText = state.xp;
       coinsDisplay.innerText = state.coins;
       renderLog();
-    }
-
-    init();
-  });
+  }
+  
+  init();
+});
