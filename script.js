@@ -118,13 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function rejectAiSuggestion() {
-  aiResultsDiv.classList.remove('show');
-  aiResultsDiv.classList.remove('debug-blinker');
+  aiResultsDiv.style.display = 'none';
   aiLogForm.reset();
   
   // Also reset the image uploader UI
   imagePreviewContainer.style.display = 'none';
   imageUploadInput.value = '';
+
+  document.getElementById('image-context-text').value = ''; 
   uploadedImageBase64 = null;
   
   tempAiSuggestion = null;
@@ -143,58 +144,44 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
               imagePreviewContainer.style.display = 'block';
           } catch (error) { console.error('Image resizing failed:', error); alert('There was an error processing your image. Please try a different one.'); }
       }
-  });
-  analyzeImageButton.addEventListener('click', async () => {
-    console.log('Analyze Image button clicked!');
-    if (!uploadedImageBase64) { return; }
+  });analyzeImageButton.addEventListener('click', async () => {
+    if (!uploadedImageBase64) {
+        alert('Please select an image first.');
+        return;
+    }
+
+
+    const contextText = document.getElementById('image-context-text').value;
 
     analyzeImageButton.disabled = true;
     analyzeImageButton.innerHTML = `<span class="spinner"></span>`;
 
     try {
-        console.log('Sending image to /api/analyzeImage...');
         const response = await fetch('/api/analyzeImage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: uploadedImageBase64 }),
+
+            body: JSON.stringify({ image: uploadedImageBase64, text: contextText }),
         });
 
-        console.log('Raw response from server:', response);
-        if (!response.ok) { throw new Error(`Server responded with status: ${response.status}`); }
+        if (!response.ok) { throw new Error(`Server error: ${response.statusText}`); }
 
         const data = await response.json();
-        console.log('Data received from AI:', data);
+        tempAiSuggestion = { ...data, sourceType: 'image' };
 
-        if (data && typeof data.xp === 'number') {
-            // Store the data and a flag indicating it was from an image
-            tempAiSuggestion = { ...data, sourceType: 'image' }; 
+        aiSuggestedXp.innerText = data.xp;
+        aiJustification.innerText = data.justification;
+        
+        imagePreviewContainer.style.display = 'none';
+        aiResultsDiv.style.display = 'block';
 
-            console.log('Data is valid. Updating and showing UI...');
-            aiSuggestedXp.innerText = data.xp;
-            aiJustification.innerText = data.justification;
-            
-            // --- The key fix ---
-            // Hide the image preview and show the results
-            imagePreviewContainer.style.display = 'none';
-            aiResultsDiv.classList.add('show');
-            aiResultsDiv.classList.add('debug-blinker');
-            const appContainer = document.querySelector('.app-container');
-            appContainer.scrollTo({ top: aiResultsDiv.offsetTop - 20, behavior: 'smooth' }); // -20 to give some padding
-
-            console.log('AI Results element:', aiResultsDiv);
-console.log('AI Results display style:', window.getComputedStyle(aiResultsDiv).display);
-console.log('AI Results visibility:', window.getComputedStyle(aiResultsDiv).visibility);
-console.log('AI Results position:', aiResultsDiv.getBoundingClientRect());
-
-        } else {
-            throw new Error('AI returned invalid or empty data.');
-        }
+        const appContainer = document.querySelector('.app-container');
+        appContainer.scrollTo({ top: aiResultsDiv.offsetTop - 20, behavior: 'smooth' });
 
     } catch (error) {
         console.error('An error occurred during image analysis:', error);
         alert('An error occurred. Please check the console for details.');
     } finally {
-        console.log('Resetting the Analyze button.');
         analyzeImageButton.disabled = false;
         analyzeImageButton.innerHTML = `Analyze Image`;
     }
