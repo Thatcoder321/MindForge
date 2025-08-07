@@ -489,3 +489,38 @@
 }
 
 
+#image-preview-container .form-group {
+  display: flex;
+  flex-direction: column; /* Stacks the label on top of the textarea */
+  gap: 8px;              /* Adds nice spacing between them */
+  text-align: left;        /* Aligns the label text correctly to the left */
+  margin-bottom: 20px;     /* Adds space between the textarea and the "Analyze" button */
+}
+
+
+#image-preview-container .form-group label {
+  font-weight: 500;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+
+#image-context-text {
+  width: 100%;
+  background-color: #1f2937;
+  border: 1px solid #4b5563;
+  color: #d1d5db;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  resize: vertical; /* Allows user to resize it vertically */
+  min-height: 80px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#image-context-text:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4);
+}
