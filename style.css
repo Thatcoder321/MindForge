@@ -375,11 +375,13 @@
 }
 
 #ai-results {
-  background-color: #1f2937;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #4b5563;
-  margin-bottom: 40px;
+  display: none !important;
+  position: relative;
+  z-index: 10;
+}
+
+#ai-results.show {
+  display: block !important;
 }
 
 
