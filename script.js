@@ -113,6 +113,73 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelEditButton = document.getElementById('cancel-edit-button');
   const editDescriptionInput = document.getElementById('edit-log-description');
   const editConfidenceInput = document.getElementById('edit-log-confidence');
+  const aiLogForm = document.getElementById('ai-log-form');
+  const aiLogButton = document.getElementById('ai-log-button');
+  const aiResultsDiv = document.getElementById('ai-results');
+  const aiSuggestedXp = document.getElementById('ai-suggested-xp');
+  const aiJustification = document.getElementById('ai-justification');
+  const acceptAiSuggestionButton = document.getElementById('accept-ai-suggestion');
+  const rejectAiSuggestionButton = document.getElementById('reject-ai-suggestion');
+
+  let tempAiSuggestion = null;
+
+  aiLogForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const description = document.getElementById('ai-log-description').value;
+
+    aiLogButton.disabled = true;
+    aiLogButton.querySelector('.button-text').style.display = 'none';
+    aiLogButton.querySelector('.spinner').style.display = 'inline-block';
+
+    try {
+      const response = await fetch('/api/generateXP', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({description}),
+      });
+
+      if(!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      tempAiSuggestion = data;
+
+      aiSuggestedXp.innerText = data.xp;
+      aiJustification.innerText = data.justification;
+      aiResultsDiv.style.display = 'block';
+
+    } catch(error) {
+      console.error('Failed to fetch AI suggestion:', error);
+      alert('Could not get an AI suggestion. Please try again.');
+    } finally {
+      aiLogButton.disabled = false;
+      aiLogButton.querySelector('.button-text').style.display = 'inline-block';
+      aiLogButton.querySelector('.spinner').style.display = 'none';
+    }
+  });
+
+  acceptAiSuggestionButton.addEventListener('click', () => {
+    if (!tempAiSuggestion) return;
+
+    const logData = {
+      description: document.getElementById('ai-log-description').value,
+      xp: tempAiSuggestion.xp,
+      confidence: 'medium',
+      concepts: tempAiSuggestion.concepts
+    };
+
+    addXP(logData);
+
+    aiResultsDiv.style.display = 'none';
+    aiLogForm.reset();
+    tempAiSuggestion = null;
+  });
+
+  rejectAiSuggestionButton.addEventListener('click', () => {
+    aiResultsDiv.style.display = 'none';
+    tempAiSuggestion = null;
+  });
 
   // --- Data Persistence (using in-memory storage) ---
   function saveState() {
@@ -192,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         logListElement.appendChild(li);
     });
-}
+  }
   
   // --- Modal Logic ---
   function openEditModal(logId) {
@@ -214,16 +281,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Core Logic ---
-  function addXP(xpAmount) {
+  function addXP(data) {
+    const isQuickAdd = typeof data === 'number';
+    
+    const xpAmount = isQuickAdd ? data : data.xp;
     const coinsEarned = Math.floor(xpAmount / XP_TO_COIN_RATE);
     state.xp += xpAmount;
     state.coins += coinsEarned;
 
-    // Create a new log entry with a unique timestamp ID
     const logEntry = {
-        description: 'Logged quick effort',
+        description: isQuickAdd ? 'Logged quick effort' : data.description,
         xp: xpAmount,
-        confidence: 'not_picked', // Changed from 'medium' to 'not_picked'
+        confidence: isQuickAdd ? 'not_picked' : data.confidence,
+        concepts: isQuickAdd ? [] : data.concepts, // Store concepts!
         timestamp: new Date().toISOString() + Math.random()
     };
     state.log.push(logEntry);
@@ -231,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveState();
     updateDashboard();
     renderLog();
-}
+  }
 
   // --- Navigation Handler ---
   function handleNavClick(e) {
