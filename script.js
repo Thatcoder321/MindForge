@@ -121,6 +121,64 @@ document.addEventListener('DOMContentLoaded', () => {
   const acceptAiSuggestionButton = document.getElementById('accept-ai-suggestion');
   const rejectAiSuggestionButton = document.getElementById('reject-ai-suggestion');
 
+  const imageUploadInput = document.getElementById('image-upload');
+  const imagePreviewContainer = document.getElementById('image-preview-container');
+  const imagePreview = document.getElementById('image-preview');
+  const analyzeImageButton = document.getElementById('analyze-image-button');
+
+  let uploadedImageBase64 = null;
+
+  imageUploadInput.addEventListener('change',(e)=> {
+    const file = e.target.files[0];
+    if(file) {
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        uploadedImageBase64 = event.target.result;
+        imagePreview.src = uploadedImageBase64;
+        imagePreviewContainer.style.display = 'block';
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+
+  analyzeImageButton.addEventListener('click',async() => {
+    if(!uploadedImageBase64){
+      alert('Please select an image first.');
+      return;
+    }
+
+    analyzeImageButton.disabled=true;
+    analyzeImageButton.innerHTML = `<span class="spinner"></span>`;
+
+    try {
+        const response = await fetch('/api/analyzeImage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: uploadedImageBase64 }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        tempAiSuggestion = data;
+
+        aiSuggestedXp.innerText=data.xp;
+        aiJustification.innerText = data.justification;
+        aiResultsDiv.style.display = 'block';
+
+        aiResultsDiv.scrollIntoView({behavior:'smooth'});
+  }catch(error) {
+    console.error('Failed to fetch image analysis:',
+      error);
+      alert('Could not analyze the image. Please try again.');
+  }finally {
+    analyzeImageButton.disabled=false;
+    analyzeImageButton.innerHTML= `Analyze Image`;
+    }
+});
   let tempAiSuggestion = null;
 
   aiLogForm.addEventListener('submit', async (e) => {
@@ -161,25 +219,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   acceptAiSuggestionButton.addEventListener('click', () => {
     if (!tempAiSuggestion) return;
+    
+    // Check if the source was an image upload or text
+    const description = uploadedImageBase64 
+        ? `Analyzed work from uploaded image.` 
+        : document.getElementById('ai-log-description').value;
 
     const logData = {
-      description: document.getElementById('ai-log-description').value,
-      xp: tempAiSuggestion.xp,
-      confidence: 'medium',
-      concepts: tempAiSuggestion.concepts
+        description: description,
+        xp: tempAiSuggestion.xp,
+        confidence: 'medium',
+        concepts: tempAiSuggestion.concepts
     };
 
     addXP(logData);
-
+    
+    // Reset and hide everything
     aiResultsDiv.style.display = 'none';
     aiLogForm.reset();
+    imagePreviewContainer.style.display = 'none';
+    imageUploadInput.value = ''; // Reset file input
+    uploadedImageBase64 = null;
     tempAiSuggestion = null;
-  });
-
-  rejectAiSuggestionButton.addEventListener('click', () => {
-    aiResultsDiv.style.display = 'none';
-    tempAiSuggestion = null;
-  });
+});
 
   // --- Data Persistence (using in-memory storage) ---
   function saveState() {
