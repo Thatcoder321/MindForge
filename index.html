@@ -55,9 +55,12 @@
           </div>
           <button type="submit" id="ai-log-button" class="submit-button">
             <span class="button-text">Analyze & Generate XP</span>
+
             <span class="spinner" style="display: none;"></span>
           </button>
-        
+          <div id="tip" class="tip">
+            <a>Tip: The more precise you are with your descriptions, the more XP you can get!</a>
+          </div>
         </form>
 
         <div id="ai-results" style="display:none;">
@@ -68,7 +71,7 @@
           </div>
           <p id="ai-justification">Justification: Understanding a core concept like this shows significant effort.</p>
           <div class="modal-actions">
-            <button type="button" id="reject-ai-suggestion">Cancel</button>
+            <button type="button" id="reject-ai-suggestion" class="secondary-button">Cancel</button>
             <button type="button" id="accept-ai-suggestion" class="submit-button">Accept & Log</button>
 
           </div>
@@ -109,7 +112,7 @@
         </div>
 
         <div class="modal-actions">
-          <button type="button" id="cancel-edit-button">Cancel</button>
+          <button type="button" id="cancel-edit-button" class="secondary-button">Cancel</button
           <button type="submit" class="submit-button">Save Changes</button>
         </div>
       </form>

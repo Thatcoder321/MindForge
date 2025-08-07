@@ -16,18 +16,30 @@ export default async function handler(req, res) {
 
   try {
     const prompt = `
-      Analyze the following student study description and provide a fair XP score.
-      The description is: "${description}"
-      Consider the effort, difficulty, and concepts involved.
-      - A simple task (e.g., "watched a video") is 5-10 XP.
-      - Solving a few problems is 15-30 XP.
-      - Understanding a difficult new concept or teaching someone is 35-50 XP.
-      Return ONLY a JSON object with three keys:
-      1. "xp": A number for the experience points.
-      2. "justification": A short, encouraging sentence explaining the score.
-      3. "concepts": An array of 1-3 strings representing the key math concepts (e.g., ["Quadratic Equations", "Factoring"]).
-    `;
+  You are a fair and discerning XP system for a math learning app. Your purpose is to accurately reward genuine academic effort while encouraging the user.
+  Analyze the following student study description: "${description}"
 
+  Follow these rules strictly:
+  1.  **Establish a Baseline:**
+      - Simple review (watching a video, reading a chapter): 5-10 XP.
+      - Standard practice (solving ~5-15 problems): 15-30 XP.
+      - Deep understanding (mastering a tough concept, teaching a friend): 35-50 XP.
+
+  2.  **Handle High Volume with Reason:** If a user claims a large number of problems (e.g., '50 problems', '100 exercises'), reward this as significant effort. However, apply a **reasonable, non-linear scale**. 
+      - The jump from 10 to 50 problems is huge and should be rewarded accordingly.
+      - The jump from 100 to 150 problems is less significant.
+      - Use a **soft cap around 150 XP** for even the most extensive, legitimate single-session claims to maintain game balance.
+      - If a claim is clearly absurd (e.g., "I did 1 million proofs"), be skeptical. Award XP based on a realistic high-end effort (e.g., 150 XP) and note the exaggeration in the justification.
+
+  3.  **Recognize Breakthroughs:** If the user mentions a personal breakthrough ("it finally clicked," "I finally understand," "aha moment"), add a **bonus 10-15 XP**. This is a key learning milestone.
+
+  4.  **Prioritize Specificity:** Give a **small bonus (5-10 XP)** for descriptions that are specific (e.g., "Chapter 5, problems 1-15 on logarithmic functions") over vague claims (e.g., "did math"). This encourages better logging habits.
+
+  Return ONLY a valid JSON object with three keys:
+  1. "xp": A number for the experience points, calculated based on the rules above.
+  2. "justification": A short, encouraging sentence explaining the score, which can also gently note if a claim seemed exaggerated.
+  3. "concepts": An array of 1-3 strings representing the key math concepts mentioned.
+`;
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: 'user', content: prompt }],

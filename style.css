@@ -266,7 +266,7 @@
     margin-top: 24px;
   }
 
-  #cancel-edit-button {
+  .secondary-button {
     background-color: #374151;
     color: #e5e7eb;
     border: none;
@@ -277,6 +277,10 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+  }
+  
+  .secondary-button:hover {
+      background-color: #4b5563;
   }
 
   .edit-log-button {
@@ -412,4 +416,14 @@
 
 @keyframes spin {
   to {transform: rotate(360deg);}
+}
+
+
+.tip {
+  background-color: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 20px;
 }
