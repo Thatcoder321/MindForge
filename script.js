@@ -85,8 +85,111 @@ document.addEventListener('DOMContentLoaded', () => {
   function animateValue(element, start, end, duration) { if (start === end) {element.innerText=end; return}; let startTimestamp = null; const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); element.innerText = Math.floor(progress * (end - start) + start); if (progress < 1) window.requestAnimationFrame(step); }; window.requestAnimationFrame(step); }
   function openEditModal(logId) { const entryToEdit = state.log.find(entry => entry.timestamp === logId); if (!entryToEdit) return; state.currentlyEditingLogId = logId; editDescriptionInput.value = entryToEdit.description; editConfidenceInput.value = entryToEdit.confidence; modalBackdrop.classList.add('visible'); modalContent.classList.add('visible'); }
   function closeEditModal() { state.currentlyEditingLogId = null; modalBackdrop.classList.remove('visible'); modalContent.classList.remove('visible'); }
-  function handleNavClick(e) { const targetButton = e.target.closest('.nav-button'); if (!targetButton) return; const targetPageId = targetButton.dataset.page; navButtons.forEach(button => button.classList.remove('active')); targetButton.classList.add('active'); pages.forEach(page => { page.classList.toggle('active', page.id === targetPageId); }); }
+  function handleNavClick(e) { const targetButton = e.target.closest('.nav-button'); if (!targetButton) return; const targetPageId = targetButton.dataset.page; navButtons.forEach(button => button.classList.remove('active')); targetButton.classList.add('active'); pages.forEach(page => { page.classList.toggle('active', page.id === targetPageId); });
+if (targetPageId === 'stats') {
+    updateStatsPage();
+} 
+  }
   function createParticleExplosion(buttonElement, xpAmount) { const rect = buttonElement.getBoundingClientRect(); const centerX = rect.left + rect.width / 2; const centerY = rect.top + rect.height / 2; const intensity = xpAmount / 25; particleSystem.createRipple(centerX, centerY, intensity); }
+
+  let xpChart = null;
+  let confidenceChart = null;
+  
+  function updateStatsPage() {
+      console.log("Updating stats page...");
+  
+      // --- 1. Process the Log Data ---
+      const conceptData = {};
+      const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 };
+      
+      state.log.forEach(entry => {
+          // Aggregate confidence
+          confidenceData[entry.confidence]++;
+  
+          // Aggregate XP for each concept
+          if (entry.concepts && entry.concepts.length > 0) {
+              entry.concepts.forEach(concept => {
+                  if (!conceptData[concept]) {
+                      conceptData[concept] = 0;
+                  }
+                  conceptData[concept] += entry.xp;
+              });
+          }
+      });
+  
+      // --- 2. Update Key Metrics ---
+      document.getElementById('total-sessions').innerText = state.log.length;
+      const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
+      document.getElementById('avg-xp').innerText = avgXp;
+      
+      const topConcept = Object.keys(conceptData).length > 0 
+          ? Object.entries(conceptData).sort((a, b) => b[1] - a[1])[0][0]
+          : 'None';
+      document.getElementById('top-concept').innerText = topConcept;
+  
+      // --- 3. Render the Charts ---
+  
+
+      if (xpChart) xpChart.destroy();
+      if (confidenceChart) confidenceChart.destroy();
+  
+      // Bar Chart: XP by Concept
+      const xpCtx = document.getElementById('xp-by-concept-chart').getContext('2d');
+      xpChart = new Chart(xpCtx, {
+          type: 'bar',
+          data: {
+              labels: Object.keys(conceptData),
+              datasets: [{
+                  label: 'XP Earned',
+                  data: Object.values(conceptData),
+                  backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                  borderColor: 'rgba(79, 70, 229, 1)',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              scales: {
+                  y: { beginAtZero: true }
+              },
+              plugins: {
+                  legend: { display: false }
+              }
+          }
+      });
+  
+
+      const confidenceCtx = document.getElementById('confidence-chart').getContext('2d');
+      confidenceChart = new Chart(confidenceCtx, {
+          type: 'doughnut',
+          data: {
+              labels: ['High', 'Medium', 'Low', 'Not Picked'],
+              datasets: [{
+                  data: [
+                      confidenceData.high, 
+                      confidenceData.medium, 
+                      confidenceData.low, 
+                      confidenceData.not_picked
+                  ],
+                  backgroundColor: [
+                      'rgba(16, 185, 129, 0.7)', // Green for High
+                      'rgba(245, 158, 11, 0.7)',  // Amber for Medium
+                      'rgba(239, 68, 68, 0.7)',   // Red for Low
+                      'rgba(107, 114, 128, 0.7)' // Gray for Not Picked
+                  ],
+                  borderColor: '#1f2937',
+                  borderWidth: 2,
+              }]
+          },
+          options: {
+              plugins: {
+                  legend: {
+                      position: 'top',
+                  }
+              }
+          }
+      });
+  }
+
 
   // --- Event Listeners ---
   document.querySelector('nav').addEventListener('click', handleNavClick);

@@ -113,7 +113,33 @@
 
       <section id="stats" class="page">
         <h2>Your Stats</h2>
-        <!-- Coming soon -->
+        <div class="stats-grid">
+          <div class="chart-container">
+            <h3>XP by Concept</h3>
+            <canvas id="xp-by-concept-chart"></canvas>
+
+          </div>
+          <div class="chart-container">
+            <h3>Confidence Breakdown</h3>
+            <canvas id="confidence-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="key-metrics">
+          <div class="metric-card">
+            <h4>Total Sessions</h4>
+            <p id="total-sessions">0</p>
+
+          </div>
+          <div class = "metric-card">
+            <h4>Average XP / Session</h4>
+            <p id="avg-xp">0</p>
+          </div>
+          <div class="metric-card">
+            <h4>Top Concept</h4>
+            <p id="top-concept">None</p>
+          </div>
+        </div>
       </section>
     </main>
   </div>
@@ -142,5 +168,6 @@
     </div>
   </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npn/chart.js"></script>
 <script src="script.js"></script>
 </html>
