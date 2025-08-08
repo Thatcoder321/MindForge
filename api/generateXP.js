@@ -35,6 +35,8 @@ export default async function handler(req, res) {
 
   4.  **Prioritize Specificity:** Give a **small bonus (5-10 XP)** for descriptions that are specific (e.g., "Chapter 5, problems 1-15 on logarithmic functions") over vague claims (e.g., "did math"). This encourages better logging habits.
 
+  
+
   Return ONLY a valid JSON object with three keys:
   1. "xp": A number for the experience points, calculated based on the rules above.
   2. "justification": A short, encouraging sentence explaining the score, which can also gently note if a claim seemed exaggerated.

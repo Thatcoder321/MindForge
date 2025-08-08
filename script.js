@@ -97,22 +97,37 @@ if (targetPageId === 'stats') {
   
   function updateStatsPage() {
       console.log("Updating stats page...");
-  
+
       // --- 1. Process the Log Data ---
       const conceptData = {};
       const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 };
+
+      // Mapping similar concepts to a single category
+      const conceptMap = {
+        "triangle similarity": "Geometry Proofs",
+        "triangle similarity proofs": "Geometry Proofs",
+        "congruent angles": "Geometry Proofs",
+        "congruence theorems": "Geometry Proofs",
+        "geometry proofs": "Geometry Proofs",
+        // Add more mappings as needed
+      };
+      function normalizeConcept(concept) {
+        const key = concept.toLowerCase().trim();
+        return conceptMap[key] || concept;
+      }
       
       state.log.forEach(entry => {
           // Aggregate confidence
           confidenceData[entry.confidence]++;
-  
-          // Aggregate XP for each concept
+
+          // Aggregate XP for each concept, normalized
           if (entry.concepts && entry.concepts.length > 0) {
               entry.concepts.forEach(concept => {
-                  if (!conceptData[concept]) {
-                      conceptData[concept] = 0;
+                  const normalized = normalizeConcept(concept);
+                  if (!conceptData[normalized]) {
+                      conceptData[normalized] = 0;
                   }
-                  conceptData[concept] += entry.xp;
+                  conceptData[normalized] += entry.xp;
               });
           }
       });

@@ -30,13 +30,15 @@ export default async function handler(req, res) {
       2.  **Text Provides Context:** Use the student's text to understand their thought process, difficulty, or breakthroughs. If the user says "it was easy," be more conservative with XP. If they say "it finally clicked" or "this was very hard," award bonus XP for the breakthrough.
       3.  **Calculate XP:** Based on BOTH the image and text, calculate a fair XP score. A dense worksheet is 50-80 XP. A few complex problems are 40 XP. Notes are 10 XP. Apply bonuses or reductions based on the text.
       4.  **Identify Concepts:** Determine the key math concepts shown in the image.
+      5. Group concepts into a limited set of standardized categories so the user can track progress on broader skills. Choose from: "Geometry Proofs", "Algebraic Manipulation", "Trigonometric Ratios", "Statistics & Data", "Calculus Techniques", "Mathematical Reasoning", "Other" you can also add more catagories, but if you have for example geometry proofs, do not split AAA Theorem and SAS, they are both part of proofs, so instead of saying two, just say geometric proofs.
 
       ${userTextContext}
 
-      Return ONLY a valid JSON object with three keys:
+      Return ONLY a valid JSON object with four keys:
       1. "xp": A number for the experience points.
       2. "justification": A short, encouraging sentence explaining your assessment, referencing both the image and the user's text if provided.
-      3. "concepts": An array of 1-3 strings representing the key math concepts.
+      3. "subject": The general subject area of the work (e.g. "Mathematics").
+      4. "concepts": An array of 1-3 strings representing the key math concepts, chosen only from the standardized categories listed above.
     `;
 
     const response = await openai.chat.completions.create({
