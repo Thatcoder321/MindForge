@@ -121,6 +121,13 @@ aiJustification.innerText = justificationValue;
   });
 
   acceptAiSuggestionButton.addEventListener('click', () => {
+    console.log('Accept button clicked');
+    console.log('tempAiSuggestion:', tempAiSuggestion);
+    
+    if (!tempAiSuggestion) {
+        console.log('tempAiSuggestion is null/undefined - returning early');
+        return;
+    }
     if (!tempAiSuggestion) return;
     
     // Determine the description based on the source type we stored
