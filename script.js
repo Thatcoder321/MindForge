@@ -57,8 +57,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadState() { const savedState = localStorage.getItem('mindforgeState'); if (savedState) { state = JSON.parse(savedState); state.log = state.log.map(entry => ({ description: 'Logged quick effort', confidence: 'medium', ...entry })); } }
   function resizeImage(file, maxSize = 1024) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { let width = img.width; let height = img.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', 0.9)); }; img.onerror = reject; img.src = event.target.result; }; reader.onerror = reject; reader.readAsDataURL(file); }); }
   function addXP(data) { const isQuickAdd = typeof data === 'number'; const xpAmount = isQuickAdd ? data : data.xp; const coinsEarned = Math.floor(xpAmount / XP_TO_COIN_RATE); state.xp += xpAmount; state.coins += coinsEarned; const logEntry = { description: isQuickAdd ? 'Logged quick effort' : data.description, xp: xpAmount, confidence: isQuickAdd ? 'not_picked' : data.confidence, concepts: isQuickAdd ? [] : (data.concepts || []), timestamp: new Date().toISOString() + Math.random() }; state.log.push(logEntry); saveState(); updateDashboard(); renderLog(); }
-  function renderLog() { if (!logList) return; logList.innerHTML = ''; state.log.slice().reverse().forEach(entry => { const li = document.createElement('li'); li.className = 'log-entry'; li.dataset.logId = entry.timestamp; const confidenceText = entry.confidence.charAt(0).toUpperCase() + entry.confidence.slice(1); li.innerHTML = `<div class="log-details"><div class="description">${entry.description}</div><div class="log-entry-details">Confidence: ${confidenceText}</div></div><div class="log-actions"><span class="xp-gain">+${entry.xp} XP</span><button class="edit-log-button">Edit</button></div>`; logList.appendChild(li); }); }
-  function updateDashboard() { const currentXP = parseInt(xpDisplay.innerText, 10) || 0; const currentCoins = parseInt(coinsDisplay.innerText, 10) || 0; animateValue(xpDisplay, currentXP, state.xp, 500); animateValue(coinsDisplay, currentCoins, state.coins, 500); }
+  function renderLog() {
+    const logList = document.getElementById('log-list'); 
+    if (!logList) return;
+
+    logList.innerHTML = '';
+    state.log.slice().reverse().forEach(entry => {
+        const li = document.createElement('li');
+        li.className = 'log-entry';
+        li.dataset.logId = entry.timestamp;
+        const confidenceText = entry.confidence.charAt(0).toUpperCase() + entry.confidence.slice(1);
+        li.innerHTML = `
+            <div class="log-details">
+                <div class="description">${entry.description}</div>
+                <div class="log-entry-details">Confidence: ${confidenceText}</div>
+            </div>
+            <div class="log-actions">
+                <span class="xp-gain">+${entry.xp} XP</span>
+                <button class="edit-log-button">Edit</button>
+            </div>`;
+        logList.appendChild(li);
+    });
+}
   function animateValue(element, start, end, duration) { if (start === end) {element.innerText=end; return}; let startTimestamp = null; const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); element.innerText = Math.floor(progress * (end - start) + start); if (progress < 1) window.requestAnimationFrame(step); }; window.requestAnimationFrame(step); }
   function openEditModal(logId) { const entryToEdit = state.log.find(entry => entry.timestamp === logId); if (!entryToEdit) return; state.currentlyEditingLogId = logId; editDescriptionInput.value = entryToEdit.description; editConfidenceInput.value = entryToEdit.confidence; modalBackdrop.classList.add('visible'); modalContent.classList.add('visible'); }
   function closeEditModal() { state.currentlyEditingLogId = null; modalBackdrop.classList.remove('visible'); modalContent.classList.remove('visible'); }
