@@ -130,9 +130,9 @@ aiJustification.innerText = justificationValue;
 
     const logData = {
         description: description,
-        xp: tempAiSuggestion.xp,
+        xp: tempAiSuggestion.xp ?? tempAiSuggestion.data?.xp,
         confidence: 'medium',
-        concepts: tempAiSuggestion.concepts
+        concepts: tempAiSuggestion.concepts ?? tempAiSuggestion.data?.concepts ?? []
     };
 
     addXP(logData);
