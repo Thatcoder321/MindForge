@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       2.  **Text Provides Context:** Use the student's text to understand their thought process, difficulty, or breakthroughs. If the user says "it was easy," be more conservative with XP. If they say "it finally clicked" or "this was very hard," award bonus XP for the breakthrough.
       3.  **Calculate XP:** Based on BOTH the image and text, calculate a fair XP score. A dense worksheet is 50-80 XP. A few complex problems are 40 XP. Notes are 10 XP. Apply bonuses or reductions based on the text.
       4.  **Identify Concepts:** Determine the key math concepts shown in the image.
-      5. Group concepts into a limited set of standardized categories so the user can track progress on broader skills. Choose from: "Geometry Proofs", "Algebraic Manipulation", "Trigonometric Ratios", "Statistics & Data", "Calculus Techniques", "Mathematical Reasoning", "Other" you can also add more catagories, but if you have for example geometry proofs, do not split AAA Theorem and SAS, they are both part of proofs, so instead of saying two, just say geometric proofs.
+      5. Group concepts into a limited set of standardized categories so the user can track progress on broader skills. Choose from: "Geometry Proofs", "Algebraic Manipulation", "Trigonometric Ratios", "Statistics & Data", "Calculus Techniques", "Mathematical Reasoning", "Other" you can also add more catagories, but if you have for example geometry proofs, do not split AAA Theorem and SAS, they are both part of proofs, so instead of saying two, just say geometric proofs. DO NOT just say AAA Theorem or SAS, they are both part of proofs, so instead of saying two, just say geometric proofs, same goes for anything else.
 
       ${userTextContext}
 
