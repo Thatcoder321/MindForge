@@ -66,26 +66,22 @@
 
         <div id="image-log-area">
           <div class="form-group">
-            <label>Upload an image of your work</label>
-
-            <label for="image-upload" class="file-upload-label">
-              <span>Select Image</span>
-            </label>
-            <input type="file" id="image-upload" accept="image/*" style="display:none;">          </div>
-        </div>
-
-        <div id="image-preview-container" style="display:none;">
-          <img id="image-preview" src="#" alt="Image Preview"/>
-
-          <div class="form-group">
-            <label for="image-context-text">Add context for the AI (optional)</label>
-            <textarea id="image-context-text" rows="2" placeholder="e.g., This was really hard but it finally clicked!" ></textarea>
-
+              <label>Upload an image of your work</label>
+              <label for="image-upload" class="file-upload-label">
+                  <span>Select Image</span>
+              </label>
+              <input type="file" id="image-upload" accept="image/*" style="display:none;">
           </div>
-          <button id="analyze-image-button" class="submit-button">Analyze Image</button>
+      
           
-
-        
+          <div id="image-preview-container" style="display:none;">
+              <img id="image-preview" src="#" alt="Image Preview"/>
+              <div class="form-group">
+                  <label for="image-context-text">Add context for the AI (optional)</label>
+                  <textarea id="image-context-text" rows="2" placeholder="e.g., This was really hard but it finally clicked!"></textarea>
+              </div>
+              <button id="analyze-image-button" class="submit-button">Analyze Image</button>
+          </div>
       </div>
         <div id="ai-results" style="display:none;">
           <h3>AI Suggestion:</h3>
