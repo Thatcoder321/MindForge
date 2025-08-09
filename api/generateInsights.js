@@ -18,12 +18,18 @@ export default async function handler(req,res) {
     }
 
     const formattedLog = log.map(entry => {
-        const conepts = entry.concepts &&
-        entry.concepts.length > 0 ? entry.concepts.join (', ') :
-        'N/A';
-
-        return `- Description: "${entry.description}", XP: ${entry.xp}, Confidence: ${entry.confidence}, Concepts: [${concepts}]`;
-    }).join('\n');
+        // Ensure entry and its properties exist to prevent crashes
+        const description = entry.description || 'No description';
+        const xp = entry.xp || 0;
+        const confidence = entry.confidence || 'not_picked';
+        
+        // Check for the 'concepts' array, and format it safely
+        const conceptsString = (entry.concepts && Array.isArray(entry.concepts) && entry.concepts.length > 0)
+          ? entry.concepts.join(', ')
+          : 'N/A';
+      
+        return `- Description: "${description}", XP: ${xp}, Confidence: ${confidence}, Concepts: [${conceptsString}]`;
+      }).join('\n');
 
     const prompt = `
     You are an expert, encouraging, and insighful AI academic advisor for a math learning app called MindForge.
