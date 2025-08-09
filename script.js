@@ -48,7 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const imagePreviewContainer = document.getElementById('image-preview-container');
   const imagePreview = document.getElementById('image-preview');
   const analyzeImageButton = document.getElementById('analyze-image-button');
-
+  const getAiInsightsButton = document.getElementById('get-ai-insights-button');
+  const aiInsightsResultDiv = document.getElementById('ai-insights-result');
+  const markdownConverter = new showdown.Converter();
   let uploadedImageBase64 = null;
   let tempAiSuggestion = null;
 
@@ -315,7 +317,52 @@ function updateStatsPage() {
         }
     });
 }
+getAiInsightsButton.addEventListener('click', async () => {
+    if (state.log.length < 3) {
+      alert('You need to log at least 3 study sessions to get a useful analysis.');
+      return;
+    }
 
+    const buttonText = getAiInsightsButton.querySelector('.button-text');
+    const spinner = getAiInsightsButton.querySelector('.spinner');
+
+    // Show loading state
+    getAiInsightsButton.disabled = true;
+    buttonText.style.display = 'none';
+    spinner.style.display = 'inline-block';
+    aiInsightsResultDiv.style.display = 'none'; // Hide previous results
+
+    try {
+      const response = await fetch('/api/generateInsights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ log: state.log }),
+      });
+
+      if (!response.ok) {
+        throw new Error('The AI advisor is busy, please try again in a moment.');
+      }
+
+      const data = await response.json();
+      
+      if (data.insights) {
+        // Convert the markdown response to HTML and display it
+        const htmlInsights = markdownConverter.makeHtml(data.insights);
+        aiInsightsResultDiv.innerHTML = htmlInsights;
+        aiInsightsResultDiv.style.display = 'block';
+      }
+
+    } catch (error) {
+      console.error('Failed to get AI insights:', error);
+      aiInsightsResultDiv.innerHTML = `<p style="color: #ef4444;">${error.message}</p>`;
+      aiInsightsResultDiv.style.display = 'block';
+    } finally {
+      // Hide loading state
+      getAiInsightsButton.disabled = false;
+      buttonText.style.display = 'inline-block';
+      spinner.style.display = 'none';
+    }
+  });
   // --- Event Listeners ---
   document.querySelector('nav').addEventListener('click', handleNavClick);
   xpButtons.addEventListener('click', (e) => { const button = e.target.closest('.xp-button'); if (button) { const xpToAdd = parseInt(button.dataset.xp, 10); createParticleExplosion(button, xpToAdd); addXP(xpToAdd); } });

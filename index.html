@@ -109,6 +109,20 @@
 
       <section id="stats" class="page">
         <h2>Your Stats</h2>
+        <div id="ai-insights-section" class="stat-item">
+          <h2>AI-Powered Insights</h2>
+          <p>Get a personalized analysis of your study habits and recommendations for what to work on next.</p>
+          <button id="get-ai-insights-button"
+          class="submit-button" style="margin-top: 16px;">
+          <span class="button-text">Analyze My
+            Progress</span>
+            <span class="spinner" style="display: none;"></span>
+
+
+          </button>
+
+          <div id="ai-insights-result" style="display:none; margin-top: 20px;"></div>
+        
         <div class="stats-grid">
           <div class="chart-container">
             <h3>XP by Concept</h3>
@@ -165,5 +179,6 @@
   </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
 <script src="script.js"></script>
 </html>

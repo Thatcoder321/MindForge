@@ -581,3 +581,65 @@
   font-weight: 700;
   color: #f9fafb;
 }
+/* --- AI Insights Section Styling --- */
+
+#ai-insights-section {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+#ai-insights-section p {
+  font-size: 1rem;
+  color: #9ca3af;
+  max-width: 600px;
+  margin: 8px auto 0;
+  line-height: 1.6;
+}
+
+#ai-insights-result {
+  margin-top: 24px;
+  padding: 20px;
+  background-color: rgba(12, 10, 24, 0.4); /* Slightly darker background to stand out */
+  border-radius: 8px;
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  text-align: left;
+  animation: fadeIn 0.5s forwards;
+}
+
+/* Styling for the HTML generated from the AI's Markdown response */
+#ai-insights-result h3 {
+  font-size: 1.1rem;
+  color: #a78bfa; /* Highlight color for headers */
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #374151;
+}
+
+#ai-insights-result p {
+  color: #d1d5db;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+#ai-insights-result ul {
+  list-style-position: inside;
+  padding-left: 10px;
+  margin-top: 12px;
+}
+
+#ai-insights-result li {
+  color: #d1d5db;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+#ai-insights-result li::marker {
+  color: #4f46e5;
+  font-weight: bold;
+}
+
+#ai-insights-result strong {
+  color: #e5e7eb;
+  font-weight: 600;
+}
