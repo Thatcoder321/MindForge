@@ -41,15 +41,16 @@ export default async function handler(req, res) {
            - "Number Theory" (includes prime numbers, divisibility, modular arithmetic, sequences, series, etc.)
            - "Other" (only use if the work truly doesn't fit any of the above categories)
   
-        **CRITICAL CONCEPT GROUPING RULES:**
-        - NEVER use specific theorem names like "AAA Theorem" or "SAS Theorem" - these ALL belong under "Geometry Proofs"
+  **CRITICAL CONCEPT GROUPING RULES:**
+        - NEVER use specific theorem names like "AAA Theorem", "SAS Theorem", "SSS Theorem", "AAS Theorem", etc. - these ALL belong under "Geometry Proofs"
         - NEVER use specific technique names like "Quadratic Formula" or "Completing the Square" - these ALL belong under "Algebraic Manipulation"
         - NEVER use specific function names like "Sine Function" or "Cosine Function" - these ALL belong under "Trigonometric Ratios"
+        - NEVER use specific rule names like "Chain Rule" or "Product Rule" - these ALL belong under "Calculus Techniques"
         - Always think: "What is the broader mathematical skill being practiced?" and choose the appropriate category
         - If you see triangle congruence work, angle proofs, parallel line theorems, or ANY geometric proof work → use "Geometry Proofs"
         - If you see equation solving, factoring, or algebraic work → use "Algebraic Manipulation"
         - Maximum 3 categories per response, minimum 1 category
-  
+        - YOU MUST ONLY USE THE EXACT CATEGORY NAMES FROM THE LIST ABOVE - no variations, no specific theorem names, no technique names
         **Examples of Correct Categorization:**
         - Student works on SSS triangle congruence → "Geometry Proofs"
         - Student solves quadratic equations using multiple methods → "Algebraic Manipulation"

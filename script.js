@@ -104,12 +104,68 @@ if (targetPageId === 'stats') {
 
       // Mapping similar concepts to a single category
       const conceptMap = {
+        // Geometry Proofs - catch all specific theorem names
+        "aaa theorem": "Geometry Proofs",
+        "saa theorem": "Geometry Proofs", 
+        "sas theorem": "Geometry Proofs",
+        "sss theorem": "Geometry Proofs",
+        "aas theorem": "Geometry Proofs",
+        "asa theorem": "Geometry Proofs",
+        "triangle congruence": "Geometry Proofs",
         "triangle similarity": "Geometry Proofs",
         "triangle similarity proofs": "Geometry Proofs",
+        "congruent triangles": "Geometry Proofs",
+        "similar triangles": "Geometry Proofs",
         "congruent angles": "Geometry Proofs",
         "congruence theorems": "Geometry Proofs",
         "geometry proofs": "Geometry Proofs",
-        // Add more mappings as needed
+        "parallel lines": "Geometry Proofs",
+        "angle relationships": "Geometry Proofs",
+        "corresponding angles": "Geometry Proofs",
+        "alternate interior angles": "Geometry Proofs",
+        
+        // Algebraic Manipulation - catch specific techniques
+        "quadratic formula": "Algebraic Manipulation",
+        "completing the square": "Algebraic Manipulation",
+        "factoring": "Algebraic Manipulation",
+        "factoring polynomials": "Algebraic Manipulation",
+        "solving equations": "Algebraic Manipulation",
+        "linear equations": "Algebraic Manipulation",
+        "quadratic equations": "Algebraic Manipulation",
+        "systems of equations": "Algebraic Manipulation",
+        "inequalities": "Algebraic Manipulation",
+        "algebraic expressions": "Algebraic Manipulation",
+        
+        // Trigonometric Ratios - catch specific functions
+        "sine function": "Trigonometric Ratios",
+        "cosine function": "Trigonometric Ratios", 
+        "tangent function": "Trigonometric Ratios",
+        "sin": "Trigonometric Ratios",
+        "cos": "Trigonometric Ratios",
+        "tan": "Trigonometric Ratios",
+        "unit circle": "Trigonometric Ratios",
+        "trig identities": "Trigonometric Ratios",
+        "inverse trig functions": "Trigonometric Ratios",
+        
+        // Functions & Relations
+        "function notation": "Functions & Relations",
+        "domain and range": "Functions & Relations",
+        "function transformations": "Functions & Relations",
+        "graphing functions": "Functions & Relations",
+        "logarithmic functions": "Functions & Relations",
+        "exponential functions": "Functions & Relations",
+        
+        // Calculus Techniques
+        "derivatives": "Calculus Techniques",
+        "integrals": "Calculus Techniques",
+        "limits": "Calculus Techniques",
+        "chain rule": "Calculus Techniques",
+        "product rule": "Calculus Techniques",
+        "quotient rule": "Calculus Techniques",
+        "optimization": "Calculus Techniques",
+        "related rates": "Calculus Techniques",
+        
+      
       };
       function normalizeConcept(concept) {
         const key = concept.toLowerCase().trim();
