@@ -95,16 +95,20 @@ if (targetPageId === 'stats') {
   let xpChart = null;
   let confidenceChart = null;
   
-  function updateStatsPage() {
-      console.log("Updating stats page...");
 
-      // --- 1. Process the Log Data ---
-      const conceptData = {};
-      const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 };
+function updateStatsPage() {
+    console.log("Updating stats page...");
 
-      // Mapping similar concepts to a single category
-      const conceptMap = {
-        // Geometry Proofs - catch all specific theorem names
+    // --- 1. Process the Log Data ---
+    const conceptData = {};
+    const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 };
+
+    
+    const conceptMap = {
+        // Geometry Proofs - catch all variations
+        "geometry proofs": "Geometry Proofs",
+        "congruence proofs": "Geometry Proofs", 
+        "proofs": "Geometry Proofs", 
         "aaa theorem": "Geometry Proofs",
         "saa theorem": "Geometry Proofs", 
         "sas theorem": "Geometry Proofs",
@@ -118,13 +122,13 @@ if (targetPageId === 'stats') {
         "similar triangles": "Geometry Proofs",
         "congruent angles": "Geometry Proofs",
         "congruence theorems": "Geometry Proofs",
-        "geometry proofs": "Geometry Proofs",
         "parallel lines": "Geometry Proofs",
         "angle relationships": "Geometry Proofs",
         "corresponding angles": "Geometry Proofs",
         "alternate interior angles": "Geometry Proofs",
         
         // Algebraic Manipulation - catch specific techniques
+        "algebraic manipulation": "Algebraic Manipulation",
         "quadratic formula": "Algebraic Manipulation",
         "completing the square": "Algebraic Manipulation",
         "factoring": "Algebraic Manipulation",
@@ -137,6 +141,7 @@ if (targetPageId === 'stats') {
         "algebraic expressions": "Algebraic Manipulation",
         
         // Trigonometric Ratios - catch specific functions
+        "trigonometric ratios": "Trigonometric Ratios",
         "sine function": "Trigonometric Ratios",
         "cosine function": "Trigonometric Ratios", 
         "tangent function": "Trigonometric Ratios",
@@ -148,6 +153,7 @@ if (targetPageId === 'stats') {
         "inverse trig functions": "Trigonometric Ratios",
         
         // Functions & Relations
+        "functions & relations": "Functions & Relations",
         "function notation": "Functions & Relations",
         "domain and range": "Functions & Relations",
         "function transformations": "Functions & Relations",
@@ -156,6 +162,7 @@ if (targetPageId === 'stats') {
         "exponential functions": "Functions & Relations",
         
         // Calculus Techniques
+        "calculus techniques": "Calculus Techniques",
         "derivatives": "Calculus Techniques",
         "integrals": "Calculus Techniques",
         "limits": "Calculus Techniques",
@@ -165,102 +172,149 @@ if (targetPageId === 'stats') {
         "optimization": "Calculus Techniques",
         "related rates": "Calculus Techniques",
         
-      
-      };
-      function normalizeConcept(concept) {
+        // Mathematical Reasoning
+        "mathematical reasoning": "Mathematical Reasoning",
+        "logic": "Mathematical Reasoning",
+        "problem solving": "Mathematical Reasoning",
+        "proof writing": "Mathematical Reasoning",
+        
+        // Statistics & Data
+        "statistics & data": "Statistics & Data",
+        "mean": "Statistics & Data",
+        "median": "Statistics & Data",
+        "mode": "Statistics & Data",
+        "probability": "Statistics & Data",
+        "data analysis": "Statistics & Data",
+        
+        // Number Theory
+        "number theory": "Number Theory",
+        "prime numbers": "Number Theory",
+        "sequences": "Number Theory",
+        "series": "Number Theory",
+    };
+    
+    function normalizeConcept(concept) {
+        if (!concept || typeof concept !== 'string') return "Other";
+        
         const key = concept.toLowerCase().trim();
-        return conceptMap[key] || concept;
-      }
-      
-      state.log.forEach(entry => {
-          // Aggregate confidence
-          confidenceData[entry.confidence]++;
+        const normalized = conceptMap[key];
+        
+        // If we have a direct mapping, use it
+        if (normalized) {
+            return normalized;
+        }
+        
+        // If no direct mapping found, check if it's already a standardized category
+        const standardizedCategories = [
+            "Geometry Proofs",
+            "Algebraic Manipulation", 
+            "Trigonometric Ratios",
+            "Statistics & Data",
+            "Calculus Techniques",
+            "Mathematical Reasoning",
+            "Functions & Relations",
+            "Number Theory",
+            "Other"
+        ];
+        
+        // Check if the concept (with proper capitalization) is already standardized
+        for (const category of standardizedCategories) {
+            if (category.toLowerCase() === key) {
+                return category;
+            }
+        }
+        
+        // If nothing matches, return "Other"
+        return "Other";
+    }
+    
+    state.log.forEach(entry => {
+        // Aggregate confidence
+        if (entry.confidence && confidenceData.hasOwnProperty(entry.confidence)) {
+            confidenceData[entry.confidence]++;
+        }
 
-          // Aggregate XP for each concept, normalized
-          if (entry.concepts && entry.concepts.length > 0) {
-              entry.concepts.forEach(concept => {
-                  const normalized = normalizeConcept(concept);
-                  if (!conceptData[normalized]) {
-                      conceptData[normalized] = 0;
-                  }
-                  conceptData[normalized] += entry.xp;
-              });
-          }
-      });
-  
-      // --- 2. Update Key Metrics ---
-      document.getElementById('total-sessions').innerText = state.log.length;
-      const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
-      document.getElementById('avg-xp').innerText = avgXp;
-      
-      const topConcept = Object.keys(conceptData).length > 0 
-          ? Object.entries(conceptData).sort((a, b) => b[1] - a[1])[0][0]
-          : 'None';
-      document.getElementById('top-concept').innerText = topConcept;
-  
-      // --- 3. Render the Charts ---
-  
+        // Aggregate XP for each concept, normalized
+        if (entry.concepts && Array.isArray(entry.concepts) && entry.concepts.length > 0) {
+            entry.concepts.forEach(concept => {
+                const normalized = normalizeConcept(concept);
+                if (!conceptData[normalized]) {
+                    conceptData[normalized] = 0;
+                }
+                conceptData[normalized] += entry.xp || 0;
+            });
+        }
+    });
 
-      if (xpChart) xpChart.destroy();
-      if (confidenceChart) confidenceChart.destroy();
-  
-      // Bar Chart: XP by Concept
-      const xpCtx = document.getElementById('xp-by-concept-chart').getContext('2d');
-      xpChart = new Chart(xpCtx, {
-          type: 'bar',
-          data: {
-              labels: Object.keys(conceptData),
-              datasets: [{
-                  label: 'XP Earned',
-                  data: Object.values(conceptData),
-                  backgroundColor: 'rgba(79, 70, 229, 0.6)',
-                  borderColor: 'rgba(79, 70, 229, 1)',
-                  borderWidth: 1
-              }]
-          },
-          options: {
-              scales: {
-                  y: { beginAtZero: true }
-              },
-              plugins: {
-                  legend: { display: false }
-              }
-          }
-      });
-  
+    // --- 2. Update Key Metrics ---
+    document.getElementById('total-sessions').innerText = state.log.length;
+    const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
+    document.getElementById('avg-xp').innerText = avgXp;
+    
+    const topConcept = Object.keys(conceptData).length > 0 
+        ? Object.entries(conceptData).sort((a, b) => b[1] - a[1])[0][0]
+        : 'None';
+    document.getElementById('top-concept').innerText = topConcept;
 
-      const confidenceCtx = document.getElementById('confidence-chart').getContext('2d');
-      confidenceChart = new Chart(confidenceCtx, {
-          type: 'doughnut',
-          data: {
-              labels: ['High', 'Medium', 'Low', 'Not Picked'],
-              datasets: [{
-                  data: [
-                      confidenceData.high, 
-                      confidenceData.medium, 
-                      confidenceData.low, 
-                      confidenceData.not_picked
-                  ],
-                  backgroundColor: [
-                      'rgba(16, 185, 129, 0.7)', // Green for High
-                      'rgba(245, 158, 11, 0.7)',  // Amber for Medium
-                      'rgba(239, 68, 68, 0.7)',   // Red for Low
-                      'rgba(107, 114, 128, 0.7)' // Gray for Not Picked
-                  ],
-                  borderColor: '#1f2937',
-                  borderWidth: 2,
-              }]
-          },
-          options: {
-              plugins: {
-                  legend: {
-                      position: 'top',
-                  }
-              }
-          }
-      });
-  }
+    // --- 3. Render the Charts ---
+    if (xpChart) xpChart.destroy();
+    if (confidenceChart) confidenceChart.destroy();
 
+    // Bar Chart: XP by Concept
+    const xpCtx = document.getElementById('xp-by-concept-chart').getContext('2d');
+    xpChart = new Chart(xpCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(conceptData),
+            datasets: [{
+                label: 'XP Earned',
+                data: Object.values(conceptData),
+                backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    const confidenceCtx = document.getElementById('confidence-chart').getContext('2d');
+    confidenceChart = new Chart(confidenceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['High', 'Medium', 'Low', 'Not Picked'],
+            datasets: [{
+                data: [
+                    confidenceData.high, 
+                    confidenceData.medium, 
+                    confidenceData.low, 
+                    confidenceData.not_picked
+                ],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.7)', // Green for High
+                    'rgba(245, 158, 11, 0.7)',  // Amber for Medium
+                    'rgba(239, 68, 68, 0.7)',   // Red for Low
+                    'rgba(107, 114, 128, 0.7)' // Gray for Not Picked
+                ],
+                borderColor: '#1f2937',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+}
 
   // --- Event Listeners ---
   document.querySelector('nav').addEventListener('click', handleNavClick);
