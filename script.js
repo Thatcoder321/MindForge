@@ -19,8 +19,9 @@ class ParticleSystem {
 
 // --- Main Application Logic ---
 document.addEventListener('DOMContentLoaded', () => {
-  let state = {xp:0, coins: 0, log: [], inventory: [],
-    currentlyEditingLogId: null };
+  let state = {xp:0,coins:0,log:[],inventory: [],
+    activeTheme: 'theme_dark', currentlyEditingLogId: null
+  };
   
   const XP_TO_COIN_RATE = 10;
 
@@ -197,6 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
       updateStatsPage();
     } else if (targetPageId === 'shop') {
       renderShop();
+    } else if (targetPageId === 'dashboard') {
+        renderThemeSelector();
     }
   }
 
@@ -572,6 +575,20 @@ aiJustification.innerText = justificationValue;
       }
   });
 
+const themeSelectorContainer =
+document.getElementById('theme-selector-area');
+if (themeSelectorContainer) {
+    themeSelectorContainer.addEventListener('click', (e) => {
+    const themeButton = e.target.closest('.theme-button');
+    if(themeButton) {
+        const themeId = themeButton.dataset.themeId;
+        applyTheme(themeId);
+
+        renderThemeSelector();
+    }
+});
+}
+
   acceptAiSuggestionButton.addEventListener('click', () => {
     console.log('Accept button clicked');
     console.log('tempAiSuggestion:', tempAiSuggestion);
@@ -600,8 +617,34 @@ aiJustification.innerText = justificationValue;
     rejectAiSuggestion();
 });
 
-function renderThemeSelctor() {
-    console.log("Theme selector called, UI not made yet")
+function applyTheme(themeId) {
+    document.body.className = themeId || 'theme_dark';
+    state.activeTheme = themeId;
+    saveState();
+}
+
+function renderThemeSelector() {
+    const selectorList = document.getElementById('theme-selector-list');
+    if(!selectorList) return;
+    selectorList.innerHTML = '';
+
+    const ownedThemes = shopItems.filter (item =>
+        item.type === 'theme' &&
+        state.inventory.includes(item.id)
+
+    );
+
+    ownedThemes.forEach(theme => {
+        const button = document.createElement('button');
+        button.className = 'theme-button';
+        button.innerText = theme.name;
+        button.dataset.themeId = theme.id;
+
+        if(state.activeTheme === theme.id) {
+            button.classList.add('active');
+        }
+        selectorList.appendChild(button);
+    });
 }
 
 
@@ -688,6 +731,8 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
       loadState();
       xpDisplay.innerText = state.xp;
       coinsDisplay.innerText = state.coins;
+      applyTheme(state.activeTheme);
+      renderThemeSelector();
       renderLog();
   }
   
