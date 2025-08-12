@@ -19,8 +19,39 @@ class ParticleSystem {
 
 // --- Main Application Logic ---
 document.addEventListener('DOMContentLoaded', () => {
-  let state = { xp: 0, coins: 0, log: [], currentlyEditingLogId: null };
+  let state = {xp:0, coins: 0, log: [], inventory: [],
+    currentlyEditingLogId: null };
+  
   const XP_TO_COIN_RATE = 10;
+
+  const shopItems = [
+    {
+        id: 'theme_dark',
+        name: 'Default Aurora',
+        description: 'The standard, cool-tined dark theme. You already own this.',
+        cost: 0,
+        type: 'theme'
+
+        
+        
+    },
+    {
+        id: 'theme_light',
+        name: 'Light Mode',
+        description: 'A clean, bright theme for daytime productivity. A classic look.',
+        cost: 100,
+        type: 'theme'
+    },
+    {
+        id: 'theme_cyberpunk',
+        name: 'Cyberpunk Neon',
+        description: 'High-contrast pink, cyan, and purple on a deep black background.',
+        cost: 250,
+        type: 'theme'
+    }
+    ];
+
+
 
   // --- DOM Elements ---
   const canvas = document.getElementById('particles-canvas');
@@ -56,12 +87,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Helper Functions ---
   function saveState() { localStorage.setItem('mindforgeState', JSON.stringify(state)); }
-  function loadState() { const savedState = localStorage.getItem('mindforgeState'); if (savedState) { state = JSON.parse(savedState); state.log = state.log.map(entry => ({ description: 'Logged quick effort', confidence: 'medium', ...entry })); } }
+  function loadState() {
+    const savedState = localStorage.getItem('mindforgeState');
+    if (savedState) {
+      state = JSON.parse(savedState);
+      // Ensure state object has all necessary keys to prevent errors with old data
+      state.xp = state.xp || 0;
+      state.coins = state.coins || 0;
+      state.log = state.log || [];
+      state.inventory = state.inventory || []; // Add inventory if it's missing
+      state.currentlyEditingLogId = state.currentlyEditingLogId || null;
+
+      // Map over old log entries to ensure they have the confidence property
+      state.log = state.log.map(entry => ({ 
+        description: 'Logged quick effort', 
+        confidence: 'medium', 
+        ...entry 
+      }));
+    }
+
+   
+    if (!state.inventory.includes('theme_dark')) {
+      state.inventory.push('theme_dark');
+    }
+  }
   function resizeImage(file, maxSize = 1024) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { let width = img.width; let height = img.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', 0.9)); }; img.onerror = reject; img.src = event.target.result; }; reader.onerror = reject; reader.readAsDataURL(file); }); }
   function addXP(data) { const isQuickAdd = typeof data === 'number'; const xpAmount = isQuickAdd ? data : data.xp; const coinsEarned = Math.floor(xpAmount / XP_TO_COIN_RATE); state.xp += xpAmount; state.coins += coinsEarned; const logEntry = { description: isQuickAdd ? 'Logged quick effort' : data.description, xp: xpAmount, confidence: isQuickAdd ? 'not_picked' : data.confidence, concepts: isQuickAdd ? [] : (data.concepts || []), timestamp: new Date().toISOString() + Math.random() }; state.log.push(logEntry); saveState(); const previousXP = state.xp - xpAmount;
+  
   const previousCoins = state.coins - coinsEarned;
   animateValue(xpDisplay, previousXP, state.xp, 800);
   animateValue(coinsDisplay, previousCoins, state.coins, 800); renderLog(); }
+  
+  function buyItem(itemId) {
+    const item = shopItems.find(i => i.id === itemId);
+
+    if(!item) {
+        console.error('Attempted to buy an item that does not exist: ', itemId);
+        return;
+    }
+    if(state.inventory.includes(itemId)) {
+        console.warn('Attempted to buy an item that is already owned: ', itemId);
+        return;
+    }
+
+    if(state.coins < item.cost) {
+        alert("You don't have enough coins for this item!");
+        return;
+    }
+
+    const previousCoins = state.coins;
+    state.coins -= item.cost;
+    animateValue(coinsDisplay, previousCoins, state.coins, 800);
+
+    const shopCoinDisplayAmount = document.getElementById('shop-coin-display-amount');
+    if (shopCoinDisplayAmount) {
+      shopCoinDisplayAmount.innerText = state.coins;
+    }
+
+
+    state.inventory.push(item.id);
+    
+    saveState();
+
+    renderShop();
+
+    renderThemeSelector();
+  }
+  
   function renderLog() {
     const logList = document.getElementById('log-list'); 
     if (!logList) return;
@@ -87,17 +179,80 @@ document.addEventListener('DOMContentLoaded', () => {
   function animateValue(element, start, end, duration) { if (start === end) {element.innerText=end; return}; let startTimestamp = null; const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); element.innerText = Math.floor(progress * (end - start) + start); if (progress < 1) window.requestAnimationFrame(step); }; window.requestAnimationFrame(step); }
   function openEditModal(logId) { const entryToEdit = state.log.find(entry => entry.timestamp === logId); if (!entryToEdit) return; state.currentlyEditingLogId = logId; editDescriptionInput.value = entryToEdit.description; editConfidenceInput.value = entryToEdit.confidence; modalBackdrop.classList.add('visible'); modalContent.classList.add('visible'); }
   function closeEditModal() { state.currentlyEditingLogId = null; modalBackdrop.classList.remove('visible'); modalContent.classList.remove('visible'); }
-  function handleNavClick(e) { const targetButton = e.target.closest('.nav-button'); if (!targetButton) return; const targetPageId = targetButton.dataset.page; navButtons.forEach(button => button.classList.remove('active')); targetButton.classList.add('active'); pages.forEach(page => { page.classList.toggle('active', page.id === targetPageId); });
-if (targetPageId === 'stats') {
-    updateStatsPage();
-} 
+  function handleNavClick(e) {
+    const targetButton = e.target.closest('.nav-button');
+    if (!targetButton) return;
+
+    const targetPageId = targetButton.dataset.page;
+
+    navButtons.forEach(button => button.classList.remove('active'));
+    targetButton.classList.add('active');
+
+    pages.forEach(page => {
+      page.classList.toggle('active', page.id === targetPageId);
+    });
+
+    // Conditional rendering based on the active page
+    if (targetPageId === 'stats') {
+      updateStatsPage();
+    } else if (targetPageId === 'shop') {
+      renderShop();
+    }
   }
+
+  
   function createParticleExplosion(buttonElement, xpAmount) { const rect = buttonElement.getBoundingClientRect(); const centerX = rect.left + rect.width / 2; const centerY = rect.top + rect.height / 2; const intensity = xpAmount / 25; particleSystem.createRipple(centerX, centerY, intensity); }
 
   let xpChart = null;
   let confidenceChart = null;
-  
+  function renderShop() {
+    const shopList = document.getElementById('shop-item-list');
+    if (!shopList) return;
 
+const shopCoinDisplayAmount =
+document.getElementById('shop-coin-display-amount');
+if(shopCoinDisplayAmount) {
+    shopCoinDisplayAmount.innerText = state.coins;
+}
+
+
+    shopList.innerHTML = ''; // Clear existing items
+
+    shopItems.forEach(item => {
+        const isOwned = state.inventory.includes(item.id);
+        const canAfford = state.coins >= item.cost;
+        
+        const itemCard = document.createElement('div');
+        itemCard.className = 'shop-item-card';
+
+        
+        let buttonHtml;
+        if (isOwned) {
+            buttonHtml = `<button class="shop-buy-button" disabled>Owned</button>`;
+        } else if (!canAfford) {
+            // Specifically check if the user cannot afford it
+            buttonHtml = `<button class="shop-buy-button" disabled>Insufficient Coins</button>`;
+        } else {
+            // The only remaining case: not owned AND can afford it
+            buttonHtml = `<button class="shop-buy-button" data-item-id="${item.id}">Buy</button>`;
+        }
+       
+
+        itemCard.innerHTML = `
+          <div class="item-details">
+            <h3>${item.name}</h3>
+            <p>${item.description}</p>
+          </div>
+          <div class="item-actions">
+            <div class="item-cost">
+              <span class="coin-icon"></span> ${item.cost} Coins
+            </div>
+            ${buttonHtml}
+          </div>`;
+          
+        shopList.appendChild(itemCard);
+    });
+}
 function updateStatsPage() {
     console.log("Updating stats page...");
 
@@ -371,6 +526,25 @@ getAiInsightsButton.addEventListener('click', async () => {
   cancelEditButton.addEventListener('click', closeEditModal);
   modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) { closeEditModal(); } });
 
+
+const shopListContainer = document.getElementById('shop-item-list');
+if(shopListContainer) {
+    shopListContainer.addEventListener('click',(e)=> {
+        const buyButton = e.target.closest('.shop-buy-button');
+
+
+        if(buyButton && !buyButton.disabled) {
+            const itemId = buyButton.dataset.itemId;
+            if(itemId) {
+                buyItem(itemId);
+            }
+        }
+    });
+}
+
+
+
+
   aiLogForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const description = document.getElementById('ai-log-description').value;
@@ -425,6 +599,10 @@ aiJustification.innerText = justificationValue;
     // Call the reject/cancel function to clean up the UI
     rejectAiSuggestion();
 });
+
+function renderThemeSelctor() {
+    console.log("Theme selector called, UI not made yet")
+}
 
 
 function rejectAiSuggestion() {
