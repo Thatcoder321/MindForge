@@ -212,14 +212,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const shopList = document.getElementById('shop-item-list');
     if (!shopList) return;
 
-const shopCoinDisplayAmount =
-document.getElementById('shop-coin-display-amount');
-if(shopCoinDisplayAmount) {
-    shopCoinDisplayAmount.innerText = state.coins;
-}
+    // Update the dedicated shop coin display
+    const shopCoinDisplayAmount = document.getElementById('shop-coin-display-amount');
+    if (shopCoinDisplayAmount) {
+        shopCoinDisplayAmount.innerText = state.coins;
+    }
 
-
-    shopList.innerHTML = ''; // Clear existing items
+    shopList.innerHTML = ''; // Clear existing items before rendering
 
     shopItems.forEach(item => {
         const isOwned = state.inventory.includes(item.id);
@@ -228,19 +227,15 @@ if(shopCoinDisplayAmount) {
         const itemCard = document.createElement('div');
         itemCard.className = 'shop-item-card';
 
-        
         let buttonHtml;
         if (isOwned) {
             buttonHtml = `<button class="shop-buy-button" disabled>Owned</button>`;
         } else if (!canAfford) {
-            // Specifically check if the user cannot afford it
             buttonHtml = `<button class="shop-buy-button" disabled>Insufficient Coins</button>`;
         } else {
-            // The only remaining case: not owned AND can afford it
             buttonHtml = `<button class="shop-buy-button" data-item-id="${item.id}">Buy</button>`;
         }
        
-
         itemCard.innerHTML = `
           <div class="item-details">
             <h3>${item.name}</h3>
@@ -253,6 +248,18 @@ if(shopCoinDisplayAmount) {
             ${buttonHtml}
           </div>`;
           
+
+        if (item.type === 'theme') {
+            // Event for when the mouse enters the card
+            itemCard.addEventListener('mouseenter', () => {
+                document.body.className = item.id; // Preview the theme
+            });
+
+            // Event for when the mouse leaves the card
+            itemCard.addEventListener('mouseleave', () => {
+                applyTheme(state.activeTheme); // Revert to the equipped theme
+            });
+        }
         shopList.appendChild(itemCard);
     });
 }
@@ -530,21 +537,21 @@ getAiInsightsButton.addEventListener('click', async () => {
   modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) { closeEditModal(); } });
 
 
-const shopListContainer = document.getElementById('shop-item-list');
-if(shopListContainer) {
-    shopListContainer.addEventListener('click',(e)=> {
-        const buyButton = e.target.closest('.shop-buy-button');
-
-
-        if(buyButton && !buyButton.disabled) {
-            const itemId = buyButton.dataset.itemId;
-            if(itemId) {
-                buyItem(itemId);
-            }
-        }
-    });
-}
-
+  const shopListContainer = document.getElementById('shop-item-list');
+  if (shopListContainer) {
+      shopListContainer.addEventListener('click', (e) => {
+          const buyButton = e.target.closest('.shop-buy-button');
+          
+          if (buyButton && !buyButton.disabled) {
+              const itemId = buyButton.dataset.itemId;
+              if (itemId) {
+                  
+                  applyTheme(state.activeTheme); 
+                  buyItem(itemId);
+              }
+          }
+      });
+  }
 
 
 
