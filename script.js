@@ -19,8 +19,9 @@ class ParticleSystem {
 
 // --- Main Application Logic ---
 document.addEventListener('DOMContentLoaded', () => {
+    setInterval(updatePowerupTimers, 1000);
   let state = {xp:0,coins:0,log:[],inventory: [],
-    activeTheme: 'theme_dark', currentlyEditingLogId: null
+    activeTheme: 'theme_dark', activePowerups: [], currentlyEditingLogId: null
   };
   
   const XP_TO_COIN_RATE = 10;
@@ -49,6 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
         description: 'High-contrast pink, cyan, and purple on a deep black background.',
         cost: 250,
         type: 'theme'
+    },
+    {
+        id:'potion_double_xp',
+        name: 'Elixir of Focus (2x XP)',
+        description: 'Doubles all XP earned from logging for the next 30 minutes.',
+        cost: 50,
+        type: 'powerup',
+        duration: 30
     }
     ];
 
@@ -97,6 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
       state.coins = state.coins || 0;
       state.log = state.log || [];
       state.inventory = state.inventory || []; // Add inventory if it's missing
+      state.activeTheme = state.activeTheme ||
+      'theme_dark';
+      state.activePowerups = state.activePowerups || [];
       state.currentlyEditingLogId = state.currentlyEditingLogId || null;
 
       // Map over old log entries to ensure they have the confidence property
@@ -113,11 +125,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   function resizeImage(file, maxSize = 1024) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { let width = img.width; let height = img.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', 0.9)); }; img.onerror = reject; img.src = event.target.result; }; reader.onerror = reject; reader.readAsDataURL(file); }); }
-  function addXP(data) { const isQuickAdd = typeof data === 'number'; const xpAmount = isQuickAdd ? data : data.xp; const coinsEarned = Math.floor(xpAmount / XP_TO_COIN_RATE); state.xp += xpAmount; state.coins += coinsEarned; const logEntry = { description: isQuickAdd ? 'Logged quick effort' : data.description, xp: xpAmount, confidence: isQuickAdd ? 'not_picked' : data.confidence, concepts: isQuickAdd ? [] : (data.concepts || []), timestamp: new Date().toISOString() + Math.random() }; state.log.push(logEntry); saveState(); const previousXP = state.xp - xpAmount;
-  
-  const previousCoins = state.coins - coinsEarned;
-  animateValue(xpDisplay, previousXP, state.xp, 800);
-  animateValue(coinsDisplay, previousCoins, state.coins, 800); renderLog(); }
+  // In script.js
+
+function addXP(data) {
+    const isQuickAdd = typeof data === 'number';
+    let xpAmount = isQuickAdd ? data : data.xp;
+    let description = isQuickAdd ? 'Logged quick effort' : data.description;
+
+
+    const now = new Date().getTime();
+    state.activePowerups = state.activePowerups.filter(p => p.expiresAt > now);
+
+    const doubleXpPotion = state.activePowerups.find(p => p.id === 'potion_double_xp');
+    if (doubleXpPotion) {
+        xpAmount *= 2;
+
+        description += " (x2 Bonus!)"; 
+        console.log("Double XP active! Awarding", xpAmount, "XP.");
+    }
+
+
+    const coinsEarned = Math.floor(xpAmount / XP_TO_COIN_RATE);
+    state.xp += xpAmount;
+    state.coins += coinsEarned;
+    
+
+    const logEntry = {
+        description: description,
+        xp: xpAmount,
+        confidence: isQuickAdd ? 'not_picked' : data.confidence,
+        concepts: isQuickAdd ? [] : (data.concepts || []),
+        timestamp: new Date().toISOString() + Math.random()
+    };
+    
+    state.log.push(logEntry);
+    saveState();
+    
+    const previousXP = state.xp - xpAmount;
+    const previousCoins = state.coins - coinsEarned;
+    animateValue(xpDisplay, previousXP, state.xp, 800);
+    animateValue(coinsDisplay, previousCoins, state.coins, 800);
+    renderLog();
+}
+
   
   function buyItem(itemId) {
     const item = shopItems.find(i => i.id === itemId);
@@ -153,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderShop();
 
     renderThemeSelector();
+    
+    renderPowerups();
   }
   
   function renderLog() {
@@ -177,6 +229,21 @@ document.addEventListener('DOMContentLoaded', () => {
         logList.appendChild(li);
     });
 }
+function showNotification(message) {
+    const container = document.getElementById('notification-container');
+    if (!container) return;
+  
+    const notification = document.createElement('div');
+    notification.className = 'notification-banner';
+    notification.innerText = message;
+  
+    container.appendChild(notification);
+  
+   
+    setTimeout(() => {
+      notification.remove();
+    }, 4000); 
+  }
   function animateValue(element, start, end, duration) { if (start === end) {element.innerText=end; return}; let startTimestamp = null; const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); element.innerText = Math.floor(progress * (end - start) + start); if (progress < 1) window.requestAnimationFrame(step); }; window.requestAnimationFrame(step); }
   function openEditModal(logId) { const entryToEdit = state.log.find(entry => entry.timestamp === logId); if (!entryToEdit) return; state.currentlyEditingLogId = logId; editDescriptionInput.value = entryToEdit.description; editConfidenceInput.value = entryToEdit.confidence; modalBackdrop.classList.add('visible'); modalContent.classList.add('visible'); }
   function closeEditModal() { state.currentlyEditingLogId = null; modalBackdrop.classList.remove('visible'); modalContent.classList.remove('visible'); }
@@ -200,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderShop();
     } else if (targetPageId === 'dashboard') {
         renderThemeSelector();
+        renderPowerups();
     }
   }
 
@@ -536,6 +604,18 @@ getAiInsightsButton.addEventListener('click', async () => {
   cancelEditButton.addEventListener('click', closeEditModal);
   modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) { closeEditModal(); } });
 
+const powerupContainer =
+document.getElementById('powerup-area');
+if(powerupContainer) {
+    powerupContainer.addEventListener('click', (e) => {
+        const powerupButton = e.target.closest('.powerup-button');
+        if (powerupButton) {
+            const itemId = powerupButton.dataset.itemId;
+            usePowerup(itemId);
+        }
+    });
+}
+
 
   const shopListContainer = document.getElementById('shop-item-list');
   if (shopListContainer) {
@@ -654,6 +734,103 @@ function renderThemeSelector() {
     });
 }
 
+function usePowerup(itemId) {
+    const item = shopItems.find(i => i.id === itemId);
+    if(!item) return;
+
+
+    state.inventory = state.inventory.filter(id => id !==
+        itemId);
+
+        const expirationTime = new Date().getTime() +
+        item.duration * 60 * 1000;
+        state.activePowerups.push({
+            id: item.id,
+            expiresAt: expirationTime
+        });
+        showNotification(`Activated: ${item.name}`);
+
+        saveState();
+        renderPowerups();
+        updatePowerupTimers();
+}
+function updatePowerupTimers() {
+    const container = document.getElementById('active-powerup-timers');
+    if (!container) return;
+  
+    const now = new Date().getTime();
+    
+
+    const activeTimerIds = [];
+  
+
+    state.activePowerups.forEach(powerup => {
+      const timeLeft = powerup.expiresAt - now;
+      const timerId = `timer-${powerup.id}`;
+      activeTimerIds.push(timerId); 
+  
+      if (timeLeft > 0) {
+        const minutes = Math.floor(timeLeft / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+  
+
+        let timerEl = document.getElementById(timerId);
+  
+
+        if (!timerEl) {
+          timerEl = document.createElement('div');
+          timerEl.id = timerId;
+          timerEl.className = 'timer-capsule'; 
+          container.appendChild(timerEl);
+        }
+  
+       
+        const itemName = shopItems.find(i => i.id === powerup.id)?.name || 'Power-up';
+        timerEl.innerHTML = `
+          <span>${itemName}</span>
+          <span>${minutes}:${seconds.toString().padStart(2, '0')}</span>
+        `;
+        
+       
+        if (timeLeft < 10000 && !timerEl.classList.contains('expiring')) {
+            timerEl.classList.add('expiring');
+        } else if (timeLeft >= 10000 && timerEl.classList.contains('expiring')) {
+            timerEl.classList.remove('expiring');
+        }
+  
+      }
+    });
+  
+    const allTimerElements = container.querySelectorAll('.timer-capsule');
+    allTimerElements.forEach(el => {
+      if (!activeTimerIds.includes(el.id)) {
+        el.remove();
+      }
+    });
+  }
+function renderPowerups() {
+    const powerupList = document.getElementById('powerup-list');
+
+    if(!powerupList) return;
+    powerupList.innerHTML = '';
+
+    const ownedPowerups = state.inventory
+    .map(itemId => shopItems.find(item => item.id ===
+        itemId && item.type === 'powerup'))
+        .filter(item => item);
+    
+        if(ownedPowerups.length === 0) {
+            powerupList.innerHTML = '<p class="empty-state-text">No power-ups in inventory. Visit the shop!</p>';
+        return;
+    }
+        ownedPowerups.forEach(powerup => {
+        const button = document.createElement('button');
+        button.className = 'powerup-button';
+        button.dataset.itemId = powerup.id;
+        button.innerHTML = `Use <span>${powerup.name}</span>`;
+        powerupList.appendChild(button);
+    });
+}
 
 function rejectAiSuggestion() {
   aiResultsDiv.style.display = 'none';
@@ -740,6 +917,7 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
       coinsDisplay.innerText = state.coins;
       applyTheme(state.activeTheme);
       renderThemeSelector();
+      renderPowerups();
       renderLog();
   }
   
