@@ -249,9 +249,19 @@ class Particle {
       }, 4000); 
     }
     function animateValue(element, start, end, duration) { if (start === end) {element.innerText=end; return}; let startTimestamp = null; const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); element.innerText = Math.floor(progress * (end - start) + start); if (progress < 1) window.requestAnimationFrame(step); }; window.requestAnimationFrame(step); }
-    function openEditModal(logId) { const entryToEdit = state.log.find(entry => entry.timestamp === logId); if (!entryToEdit) return; state.currentlyEditingLogId = logId; editDescriptionInput.value = entryToEdit.description; editConfidenceInput.value = entryToEdit.confidence; modalBackdrop.classList.add('visible'); modalContent.classList.add('visible'); }
-    function closeEditModal() { state.currentlyEditingLogId = null; modalBackdrop.classList.remove('visible'); modalContent.classList.remove('visible'); }
-    // In script.js
+    function openEditModal(logId) {
+        const entryToEdit = state.log.find(entry => entry.timestamp === logId);
+        if (!entryToEdit) return;
+    
+        state.currentlyEditingLogId = logId;
+        editDescriptionInput.value = entryToEdit.description;
+        editConfidenceInput.value = entryToEdit.confidence;
+    
+     
+        modalBackdrop.classList.remove('hidden');
+    }
+    function closeEditModal() { state.currentlyEditingLogId = null; modalBackdrop.classList.remove('visible'); modalContent.classList.remove('hidden'); }
+
 
 function handleNavClick(e) {
     const targetButton = e.target.closest('.nav-button');
@@ -562,52 +572,52 @@ function handleNavClick(e) {
           }
       });
   }
-  getAiInsightsButton.addEventListener('click', async () => {
-      if (state.log.length < 3) {
+  getAiInsightsButton.addEventListener('click', async (e) => {
+   
+    
+    if (state.log.length < 3) {
         alert('You need to log at least 3 study sessions to get a useful analysis.');
         return;
-      }
-  
-      const buttonText = getAiInsightsButton.querySelector('.button-text');
-      const spinner = getAiInsightsButton.querySelector('.spinner');
-  
-      // Show loading state
-      getAiInsightsButton.disabled = true;
-      buttonText.style.display = 'none';
-      spinner.style.display = 'inline-block';
-      aiInsightsResultDiv.style.display = 'none'; // Hide previous results
-  
-      try {
+    }
+
+    const buttonText = getAiInsightsButton.querySelector('.button-text');
+    const spinner = getAiInsightsButton.querySelector('.spinner');
+
+    // --- Start Loading Animation ---
+    getAiInsightsButton.disabled = true;
+    getAiInsightsButton.classList.add('loading');
+    buttonText.style.opacity = '0';
+    spinner.classList.remove('hidden');
+    spinner.style.opacity = '1';
+
+    try {
         const response = await fetch('/api/generateInsights', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ log: state.log }),
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ log: state.log }),
         });
-  
-        if (!response.ok) {
-          throw new Error('The AI advisor is busy, please try again in a moment.');
-        }
-  
+
+        if (!response.ok) { throw new Error('The AI advisor is busy, please try again.'); }
+
         const data = await response.json();
-        
         if (data.insights) {
-          // Convert the markdown response to HTML and display it
-          const htmlInsights = markdownConverter.makeHtml(data.insights);
-          aiInsightsResultDiv.innerHTML = htmlInsights;
-          aiInsightsResultDiv.style.display = 'block';
+            const htmlInsights = markdownConverter.makeHtml(data.insights);
+            aiInsightsResultDiv.innerHTML = htmlInsights;
+            aiInsightsResultDiv.classList.remove('hidden'); 
         }
-  
-      } catch (error) {
+    } catch (error) {
         console.error('Failed to get AI insights:', error);
-        aiInsightsResultDiv.innerHTML = `<p style="color: #ef4444;">${error.message}</p>`;
-        aiInsightsResultDiv.style.display = 'block';
-      } finally {
-        // Hide loading state
+        aiInsightsResultDiv.innerHTML = `<p style="color: red;">${error.message}</p>`;
+        aiInsightsResultDiv.classList.remove('hidden');
+    } finally {
+
         getAiInsightsButton.disabled = false;
-        buttonText.style.display = 'inline-block';
-        spinner.style.display = 'none';
-      }
-    });
+        getAiInsightsButton.classList.remove('loading');
+        buttonText.style.opacity = '1';
+        spinner.style.opacity = '0';
+        setTimeout(() => spinner.classList.add('hidden'), 200);
+    }
+});
     // --- Event Listeners ---
     document.querySelectorAll('.tabs-trigger').forEach(trigger => {
         trigger.addEventListener('click', function() {
@@ -906,8 +916,12 @@ logList.addEventListener('click', (e) => {
                 const resizedBase64 = await resizeImage(file);
                 uploadedImageBase64 = resizedBase64;
                 imagePreview.src = uploadedImageBase64;
-                imagePreviewContainer.style.display = 'block';
-            } catch (error) { console.error('Image resizing failed:', error); alert('There was an error processing your image. Please try a different one.'); }
+                
+                imagePreviewContainer.classList.remove('hidden');
+            } catch (error) {
+                console.error('Image processing failed:', error);
+                alert('There was an error processing your image. Please try a different one.');
+            }
         }
     });
     
