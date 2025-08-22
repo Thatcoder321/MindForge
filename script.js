@@ -896,7 +896,7 @@ logList.addEventListener('click', (e) => {
     aiResultsDiv.style.display = 'none';
     aiLogForm.reset();
     
-    // Also reset the image uploader UI
+
     imagePreviewContainer.style.display = 'none';
     imageUploadInput.value = '';
   
@@ -926,48 +926,62 @@ logList.addEventListener('click', (e) => {
     });
     
     analyzeImageButton.addEventListener('click', async () => {
-      if (!uploadedImageBase64) {
-          alert('Please select an image first.');
-          return;
-      }
-  
-  
-      const contextText = document.getElementById('image-context-text').value;
-  
-      analyzeImageButton.disabled = true;
-      analyzeImageButton.innerHTML = `<span class="spinner"></span>`;
-  
-      try {
-          const response = await fetch('/api/analyzeImage', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-  
-              body: JSON.stringify({ image: uploadedImageBase64, text: contextText }),
-          });
-  
-          if (!response.ok) { throw new Error(`Server error: ${response.statusText}`); }
-  
-          const data = await response.json();
-          tempAiSuggestion = { ...data, sourceType: 'image' };
-  
-          aiSuggestedXp.innerText = data.xp;
-          aiJustification.innerText = data.justification;
+        if (!uploadedImageBase64) {
+            alert('Please select an image first.');
+            return;
+        }
+    
+        const contextText = document.getElementById('image-context-text').value;
+    
+      
+        analyzeImageButton.disabled = true;
+        analyzeImageButton.classList.add('loading');
+   
+        analyzeImageButton.innerHTML = `<span class="spinner"></span>`;
+    
+        try {
+            const response = await fetch('/api/analyzeImage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: uploadedImageBase64, text: contextText }),
+            });
+    
           
-          imagePreviewContainer.style.display = 'none';
-          aiResultsDiv.style.display = 'block';
-  
-          const appContainer = document.querySelector('.app-container');
-          appContainer.scrollTo({ top: aiResultsDiv.offsetTop - 20, behavior: 'smooth' });
-  
-      } catch (error) {
-          console.error('An error occurred during image analysis:', error);
-          alert('An error occurred. Please check the console for details.');
-      } finally {
-          analyzeImageButton.disabled = false;
-          analyzeImageButton.innerHTML = `Analyze Image`;
-      }
-  });
-  
+            if (!response.ok) {
+              
+                const errorBody = await response.json().catch(() => ({ error: "Server returned an invalid error format." }));
+                throw new Error(`Server error: ${response.statusText} - ${errorBody.error}`);
+            }
+    
+            const data = await response.json();
+
+            if (!data || typeof data.xp === 'undefined') {
+                console.error('Invalid data structure received from server:', data);
+                throw new Error('AI returned an unexpected response. Please try again.');
+            }
+    
+            tempAiSuggestion = { ...data, sourceType: 'image' };
+    
+
+            aiSuggestedXp.innerText = data.xp;
+            aiJustification.innerText = data.justification;
+            
+
+            imagePreviewContainer.classList.add('hidden');
+            aiResultsDiv.classList.remove('hidden');
+    
+        } catch (error) {
+            console.error('An error occurred during image analysis:', error);
+
+            alert(`An error occurred: ${error.message}`);
+        } finally {
+
+            analyzeImageButton.disabled = false;
+            analyzeImageButton.classList.remove('loading');
+
+            analyzeImageButton.innerHTML = `Analyze Image`;
+        }
+    });
     // --- Initialization ---
     function init() {
         const logPage = document.getElementById('log');
