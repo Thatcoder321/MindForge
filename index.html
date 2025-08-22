@@ -37,13 +37,14 @@
         <div class="grid grid-cols-2 gap-md">
           <div class="card">
             <div class="card-header"><h3 class="card-title text-muted">Current XP</h3></div>
-            <div class="card-body"><p id="xp-display" class="text-3xl font-bold">1,247</p></div>
+
+            <div class="card-body"><p id="xp-display" class="text-3xl font-bold">0</p></div>
           </div>
           <div class="card">
             <div class="card-header"><h3 class="card-title text-muted">Available Coins</h3></div>
-            <div class="card-body"><p id="coins-display" class="text-3xl font-bold">89</p></div>
+
+            <div class="card-body"><p id="coins-display" class="text-3xl font-bold">0</p></div>
           </div>
-        </div>
         
         <div class="mt-xl space-y-lg">
           <div>
@@ -124,20 +125,11 @@
         </div>
         <h2 class="text-2xl font-bold mt-xl mb-md">Activity History</h2>
         <ul id="log-list" class="space-y-md">
-          <li class="card">
-            <div class="card-body">
-              <div class="flex justify-between">
-                <div>
-                  <p class="font-semibold">Algebra Practice</p>
-                  <p class="text-sm text-muted">Worked on quadratic equations</p>
-                </div>
-                <div class="text-right">
-                  <p class="font-bold">+45 XP</p>
-                  <p class="text-sm text-muted">2 hours ago</p>
+          
                 </div>
               </div>
             </div>
-          </li>
+        
         </ul>
       </section>
 
@@ -190,10 +182,21 @@
             </div>
           </div>
           <div class="grid grid-cols-3 gap-md">
-            <div class="card text-center"><h4 class="card-title text-sm font-medium text-muted">Total Sessions</h4><p id="total-sessions" class="text-3xl font-bold">23</p></div>
-            <div class="card text-center"><h4 class="card-title text-sm font-medium text-muted">Average XP / Session</h4><p id="avg-xp" class="text-3xl font-bold">54</p></div>
-            <div class="card text-center"><h4 class="card-title text-sm font-medium text-muted">Top Concept</h4><p id="top-concept" class="text-3xl font-bold">Algebra</p></div>
-          </div>
+            <div class="card text-center">
+                <h4 class="card-title text-sm font-medium text-muted">Total Sessions</h4>
+               
+                <p id="total-sessions" class="text-3xl font-bold">0</p>
+            </div>
+            <div class="card text-center">
+                <h4 class="card-title text-sm font-medium text-muted">Average XP / Session</h4>
+ 
+                <p id="avg-xp" class="text-3xl font-bold">0</p>
+            </div>
+            <div class="card text-center">
+                <h4 class="card-title text-sm font-medium text-muted">Top Concept</h4>
+
+                <p id="top-concept" class="text-3xl font-bold">None</p>
+            </div>
         </div>
       </section>
     </main>
