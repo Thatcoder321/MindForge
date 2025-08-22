@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Dynamically create the context part of the prompt
+    
     const userTextContext = text 
         ? `The user also provided this text context: "${text}"`
         : "The user did not provide any extra text context.";

@@ -1,208 +1,229 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MindForge</title>
-  <link rel="stylesheet" href="style.css">
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <canvas id="particles-canvas"></canvas>
-<div id = "notification-container"></div>
+  <div id="notification-container"></div>
+  <div id="active-powerup-timers"></div>
 
-<div id="active-powerup-timers"></div>
   <div class="app-container">
     <header>
-      <nav>
-        <button class="nav-button active" data-page="dashboard">Dashboard</button>
-        <button class="nav-button" data-page="log">Log</button>
-        <button class="nav-button" data-page="shop">Shop</button>
-        <button class="nav-button" data-page="stats">Stats</button>
+      <nav class="tabs" data-orientation="horizontal">
+        <div class="tabs-list">
+          <button class="tabs-trigger" data-state="active" data-page="dashboard">Dashboard</button>
+          <button class="tabs-trigger" data-page="log">Log</button>
+          <button class="tabs-trigger" data-page="shop">Shop</button>
+          <button class="tabs-trigger" data-page="stats">Stats</button>
+        </div>
       </nav>
     </header>
 
     <main>
+      <!-- Dashboard -->
       <section id="dashboard" class="page active">
-        <h1>Dashboard</h1>
-
-        <div class="stats-display">
-          <div class="stat-item">
-            <h2>Current XP</h2>
-            <p id="xp-display">0</p>
+        <h1 class="text-3xl font-bold mb-lg">Dashboard</h1>
+        <div class="grid grid-cols-2 gap-md">
+          <div class="card">
+            <div class="card-header"><h3 class="card-title text-muted">Current XP</h3></div>
+            <div class="card-body"><p id="xp-display" class="text-3xl font-bold">1,247</p></div>
           </div>
-          <div class="stat-item">
-            <h2>Available Coins</h2>
-            <p id="coins-display">0</p>
+          <div class="card">
+            <div class="card-header"><h3 class="card-title text-muted">Available Coins</h3></div>
+            <div class="card-body"><p id="coins-display" class="text-3xl font-bold">89</p></div>
           </div>
         </div>
-        <div class="xp-actions">
-          <h3>Log Quick Effort</h3>
-          <div class="xp-button-group">
-            <button class="xp-button" data-xp="10">+10 XP</button>
-            <button class="xp-button" data-xp="25">+25 XP</button>
-            <button class="xp-button" data-xp="50">+50 XP</button>
+        
+        <div class="mt-xl space-y-lg">
+          <div>
+            <h3 class="text-lg font-semibold mb-md">Log Quick Effort</h3>
+            <div class="flex gap-sm">
+              <button class="btn btn-secondary flex-1" data-xp="10">+10 XP</button>
+              <button class="btn btn-secondary flex-1" data-xp="25">+25 XP</button>
+              <button class="btn btn-secondary flex-1" data-xp="50">+50 XP</button>
+            </div>
           </div>
           <div id="theme-selector-area">
-            <h3>Equip Theme</h3>
-            <div id="theme-selector-list"></div>
+            <h3 class="text-lg font-semibold mb-md">Theme</h3>
+            <div id="theme-selector-list" class="flex flex-wrap gap-sm">
+              <button class="btn btn-secondary">Dark</button>
+              <button class="btn btn-secondary">Light</button>
+              <button class="btn btn-secondary">Ocean</button>
+            </div>
           </div>
-
           <div id="powerup-area">
-            <h3>My Power-Ups</h3>
-            <div id="powerup-list"></div>
+            <h3 class="text-lg font-semibold mb-md">My Power-Ups</h3>
+            <div id="powerup-list" class="flex flex-wrap gap-sm">
+              <button class="btn btn-primary">2x XP (5min)</button>
+              <button class="btn btn-primary">Focus Mode</button>
+            </div>
           </div>
         </div>
       </section>
 
+      <!-- Log -->
       <section id="log" class="page">
-        <h2>Activity Log</h2>
-        <form id="ai-log-form">
-          <div class="form-group">
-            <label for="ai-log-description">Describe your study session to the AI</label>
-            <textarea id="ai-log-description" rows="3" placeholder="e.g., I finally understood how to complete the square for quadratic equations and solved 5 practice problems." required></textarea>
-
-          </div>
-          <button type="submit" id="ai-log-button" class="submit-button">
-            <span class="button-text">Analyze & Generate XP</span>
-
-            <span class="spinner" style="display: none;"></span>
-          </button>
-          <div id="tip" class="tip">
-            <a>Tip: The more precise you are with your descriptions, the more XP you can get!</a>
-          </div>
-        </form>
-        <div class="divider">OR</div>
-
-        <div id="image-log-area">
-          <div class="form-group">
-              <label>Upload an image of your work</label>
-              <label for="image-upload" class="file-upload-label">
-                  <span>Select Image</span>
-              </label>
-              <input type="file" id="image-upload" accept="image/*" style="display:none;">
-          </div>
-      
-          
-          <div id="image-preview-container" style="display:none;">
-              <img id="image-preview" src="#" alt="Image Preview"/>
+        <h2 class="text-2xl font-bold mb-lg">Activity Log</h2>
+        <div class="card">
+          <div class="card-body space-y-md">
+            <form id="ai-log-form" class="space-y-md">
               <div class="form-group">
-                  <label for="image-context-text">Add context for the AI (optional)</label>
-                  <textarea id="image-context-text" rows="2" placeholder="e.g., This was really hard but it finally clicked!"></textarea>
+                <label for="ai-log-description" class="label">Describe your study session</label>
+                <textarea id="ai-log-description" class="textarea" rows="3" placeholder="e.g., I finally understood how to complete the square..."></textarea>
               </div>
-              <button id="analyze-image-button" class="submit-button">Analyze Image</button>
-          </div>
-      </div>
-        <div id="ai-results" style="display:none;">
-          <h3>AI Suggestion:</h3>
-          <div class="stat-item">
-            <h2>Suggested XP</h2>
-            <p id="ai-suggested-xp">45</p>
-          </div>
-          <p id="ai-justification">...</p>
-          <div class="modal-actions">
-            <button type="button" id="reject-ai-suggestion" class="secondary-button">Cancel</button>
-            <button type="button" id="accept-ai-suggestion" class="submit-button">Accept & Log</button>
+              <button type="submit" id="ai-log-button" class="btn btn-primary w-full">
+                <span class="button-text">Analyze & Generate XP</span>
+                <span class="spinner hidden"></span>
+              </button>
+            </form>
+            <div class="divider">OR</div>
+            <div id="image-log-area" class="space-y-md">
+              <div class="form-group">
+                <label class="label">Upload an image of your work</label>
+                <label for="image-upload" class="btn btn-secondary w-full cursor-pointer">Select Image</label>
+                <input type="file" id="image-upload" accept="image/*" class="hidden">
+              </div>
+              <div id="image-preview-container" class="hidden space-y-md">
+                <img id="image-preview" src="#" alt="Image Preview" class="rounded-lg border border-default"/>
+                <div class="form-group">
+                  <label for="image-context-text" class="label">Add context (optional)</label>
+                  <textarea id="image-context-text" class="textarea" rows="2" placeholder="e.g., This was really hard..."></textarea>
+                </div>
+                <button id="analyze-image-button" class="btn btn-primary w-full">Analyze Image</button>
+              </div>
+            </div>
           </div>
         </div>
-
-        <h2 class="history-title">Activity History</h2>
-        <ul id="log-list">
-
+        <div id="ai-results" class="hidden mt-lg">
+          <h3 class="text-lg font-semibold mb-md">AI Suggestion:</h3>
+          <div class="card">
+            <div class="card-header"><h3 class="card-title text-muted">Suggested XP</h3></div>
+            <div class="card-body"><p id="ai-suggested-xp" class="text-3xl font-bold">45</p></div>
+          </div>
+          <p id="ai-justification" class="text-sm text-muted mt-md">Great work on understanding quadratic equations! This shows solid conceptual progress.</p>
+          <div class="flex justify-end gap-sm mt-md">
+            <button type="button" id="reject-ai-suggestion" class="btn btn-secondary">Cancel</button>
+            <button type="button" id="accept-ai-suggestion" class="btn btn-primary">Accept & Log</button>
+          </div>
+        </div>
+        <h2 class="text-2xl font-bold mt-xl mb-md">Activity History</h2>
+        <ul id="log-list" class="space-y-md">
+          <li class="card">
+            <div class="card-body">
+              <div class="flex justify-between">
+                <div>
+                  <p class="font-semibold">Algebra Practice</p>
+                  <p class="text-sm text-muted">Worked on quadratic equations</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold">+45 XP</p>
+                  <p class="text-sm text-muted">2 hours ago</p>
+                </div>
+              </div>
+            </div>
+          </li>
         </ul>
       </section>
 
+      <!-- Shop -->
       <section id="shop" class="page">
-        <h2>Item Shop</h2>
-        <div id="shop-coin-display">
-          <span class="coin-icon"></span>
-          <span id="shop-coin-display-amount">0</span>
-
+        <h2 class="text-2xl font-bold mb-sm">Item Shop</h2>
+        <div id="shop-coin-display"><span class="coin-icon"></span><span id="shop-coin-display-amount">89</span></div>
+        <p class="text-muted text-center mb-lg">Spend your hard-earned coins on cosmetic themes and powerful upgrades.</p>
+        <div id="shop-item-list" class="space-y-md">
+          <div class="card">
+            <div class="card-body">
+              <div class="flex justify-between">
+                <div>
+                  <h3 class="font-semibold">Ocean Theme</h3>
+                  <p class="text-sm text-muted">Calming blue color scheme</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold">50 🪙</p>
+                  <button class="btn btn-primary">Buy</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <p class="shop-description">Spend your hard-earned coins on cosmetic themes and powerful upgrades.</p>
-        <div id="shop-item-list">
-
-        </div>
-
-        
       </section>
 
-      
-
+      <!-- Stats -->
       <section id="stats" class="page">
-        <h2>Your Stats</h2>
-        <div id="ai-insights-section" class="stat-item">
-          <h2>AI-Powered Insights</h2>
-          <p>Get a personalized analysis of your study habits and recommendations for what to work on next.</p>
-          <button id="get-ai-insights-button"
-          class="submit-button" style="margin-top: 16px;">
-          <span class="button-text">Analyze My
-            Progress</span>
-            <span class="spinner" style="display: none;"></span>
-
-
-          </button>
-
-          <div id="ai-insights-result" style="display:none; margin-top: 20px;"></div>
-        x
-        <div class="stats-grid">
-          <div class="chart-container">
-            <h3>XP by Concept</h3>
-            <canvas id="xp-by-concept-chart"></canvas>
-
+        <h2 class="text-2xl font-bold mb-lg">Your Stats</h2>
+        <div class="space-y-lg">
+          <div id="ai-insights-section" class="card text-center">
+            <div class="card-header"><h3 class="card-title">AI-Powered Insights</h3></div>
+            <div class="card-body">
+              <p class="text-muted">Get a personalized analysis of your study habits.</p>
+              <button id="get-ai-insights-button" class="btn btn-primary mt-md">
+                <span class="button-text">Analyze My Progress</span>
+                <span class="spinner hidden"></span>
+              </button>
+              <div id="ai-insights-result" class="hidden mt-md text-left"></div>
+            </div>
           </div>
-          <div class="chart-container">
-            <h3>Confidence Breakdown</h3>
-            <canvas id="confidence-chart"></canvas>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="card md:col-span-2">
+              <div class="card-header"><h3 class="card-title">XP by Concept</h3></div>
+              <div class="card-body"><canvas id="xp-by-concept-chart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Confidence Breakdown</h3></div>
+              <div class="card-body"><canvas id="confidence-chart"></canvas></div>
+            </div>
           </div>
-        </div>
-
-        <div class="key-metrics">
-          <div class="metric-card">
-            <h4>Total Sessions</h4>
-            <p id="total-sessions">0</p>
-
-          </div>
-          <div class = "metric-card">
-            <h4>Average XP / Session</h4>
-            <p id="avg-xp">0</p>
-          </div>
-          <div class="metric-card">
-            <h4>Top Concept</h4>
-            <p id="top-concept">None</p>
+          <div class="grid grid-cols-3 gap-md">
+            <div class="card text-center"><h4 class="card-title text-sm font-medium text-muted">Total Sessions</h4><p id="total-sessions" class="text-3xl font-bold">23</p></div>
+            <div class="card text-center"><h4 class="card-title text-sm font-medium text-muted">Average XP / Session</h4><p id="avg-xp" class="text-3xl font-bold">54</p></div>
+            <div class="card text-center"><h4 class="card-title text-sm font-medium text-muted">Top Concept</h4><p id="top-concept" class="text-3xl font-bold">Algebra</p></div>
           </div>
         </div>
       </section>
     </main>
   </div>
-  <div id="edit-modal-backdrop" class="modal-backdrop">
-    <div class="modal-content">
-      <h2>Edit Log Entry</h2>
-      <form id="edit-log-form">
-        <div class="form-group">
-          <label for="edit-log-description">Description</label>
-          <textarea id="edit-log-description" rows="3" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="edit-log-confidence">Confidence Level</label>
-          <select id="edit-log-confidence" required>
-            <option value="high">High - Nailed it!</option>
-                    <option value="medium">Medium - Got it, but was slow</option>
-                    <option value="low">Low - Struggled, but got there</option>
-                </select>
-        </div>
 
-        <div class="modal-actions">
-          <button type="button" id="cancel-edit-button" class="secondary-button">Cancel</button>
-          <button type="submit" class="submit-button">Save Changes</button>
-        </div>
-      </form>
+  <!-- Edit Modal -->
+  <div id="edit-modal-backdrop" class="modal hidden">
+    <div class="dialog" role="dialog" aria-modal="true">
+      <h2 class="dialog-title">Edit Log Entry</h2>
+      <div class="dialog-body">
+        <form id="edit-log-form" class="space-y-md">
+          <div class="form-group">
+            <label for="edit-log-description" class="label">Description</label>
+            <textarea id="edit-log-description" class="textarea" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-log-confidence" class="label">Confidence Level</label>
+            <select id="edit-log-confidence" class="select" required>
+              <option value="high">High - Nailed it!</option>
+              <option value="medium">Medium - Got it, but was slow</option>
+              <option value="low">Low - Struggled, but got there</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" id="cancel-edit-button" class="btn btn-secondary">Cancel</button>
+        <button type="submit" form="edit-log-form" class="btn btn-primary">Save Changes</button>
+      </div>
     </div>
   </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+  <script src="script.js"></script>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
-<script src="script.js"></script>
 </html>
