@@ -352,13 +352,11 @@ class Particle {
   function updateStatsPage() {
     console.log("Updating stats page with live data and concept normalization...");
 
-
     const totalSessionsEl = document.getElementById('total-sessions');
     const avgXpEl = document.getElementById('avg-xp');
     const topConceptEl = document.getElementById('top-concept');
     const xpCtx = document.getElementById('xp-by-concept-chart')?.getContext('2d');
     const confidenceCtx = document.getElementById('confidence-chart')?.getContext('2d');
-
 
     if (!totalSessionsEl || !xpCtx || !confidenceCtx) {
         return;
@@ -366,7 +364,6 @@ class Particle {
 
     const conceptData = {};
     const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 }; // Keep not_picked for now
-
 
     const conceptMap = {
         "geometry proofs": "Geometry Proofs", "congruence proofs": "Geometry Proofs", "proofs": "Geometry Proofs", "aaa theorem": "Geometry Proofs", "saa theorem": "Geometry Proofs", "sas theorem": "Geometry Proofs", "sss theorem": "Geometry Proofs", "aas theorem": "Geometry Proofs", "asa theorem": "Geometry Proofs", "triangle congruence": "Geometry Proofs", "triangle similarity": "Geometry Proofs", "triangle similarity proofs": "Geometry Proofs", "congruent triangles": "Geometry Proofs", "similar triangles": "Geometry Proofs", "congruent angles": "Geometry Proofs", "congruence theorems": "Geometry Proofs", "parallel lines": "Geometry Proofs", "angle relationships": "Geometry Proofs", "corresponding angles": "Geometry Proofs", "alternate interior angles": "Geometry Proofs",
@@ -406,13 +403,19 @@ class Particle {
         }
     });
 
-
     totalSessionsEl.innerText = state.log.length;
     const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
     avgXpEl.innerText = avgXp;
     const topConcept = Object.keys(conceptData).length > 0 ? Object.entries(conceptData).sort((a, b) => b[1] - a[1])[0][0] : 'None';
     topConceptEl.innerText = topConcept;
 
+    // Get CSS custom property values for consistent theming
+    const rootStyles = getComputedStyle(document.documentElement);
+    const foregroundColor = rootStyles.getPropertyValue('--foreground').trim();
+    const mutedForegroundColor = rootStyles.getPropertyValue('--muted-foreground').trim();
+    const borderColor = rootStyles.getPropertyValue('--border').trim();
+    const primaryColor = rootStyles.getPropertyValue('--primary').trim();
+    const cardColor = rootStyles.getPropertyValue('--card').trim();
 
     if (xpChart) xpChart.destroy();
     if (confidenceChart) confidenceChart.destroy();
@@ -424,7 +427,7 @@ class Particle {
             datasets: [{
                 label: 'XP Earned',
                 data: Object.values(conceptData),
-                backgroundColor: `hsl(var(--primary))`, 
+                backgroundColor: `hsl(${primaryColor})`, 
                 borderRadius: 4,
             }]
         },
@@ -432,18 +435,27 @@ class Particle {
             scales: {
                 y: { 
                     beginAtZero: true,
-                    ticks: { color: `hsl(var(--muted-foreground))` }, 
-                    grid: { color: `hsl(var(--border))` } 
+                    ticks: { 
+                        color: `hsl(${mutedForegroundColor})`,
+                        font: { size: 12 }
+                    }, 
+                    grid: { color: `hsl(${borderColor})` } 
                 },
                 x: {
-                    ticks: { color: `hsl(var(--muted-foreground))` },
+                    ticks: { 
+                        color: `hsl(${mutedForegroundColor})`,
+                        font: { size: 12 }
+                    },
                     grid: { display: false } 
                 }
             },
-            plugins: { legend: { display: false } }
+            plugins: { 
+                legend: { 
+                    display: false 
+                }
+            }
         }
     });
-
 
     confidenceChart = new Chart(confidenceCtx, {
         type: 'doughnut',
@@ -452,11 +464,11 @@ class Particle {
             datasets: [{
                 data: [confidenceData.high, confidenceData.medium, confidenceData.low],
                 backgroundColor: [
-                    'hsl(142, 71%, 45%)', 
-                    'hsl(48, 95%, 53%)',  
-                    'hsl(0, 84%, 60%)'    
+                    'hsl(142, 71%, 45%)', // Green for high
+                    'hsl(48, 95%, 53%)',  // Yellow for medium
+                    'hsl(0, 84%, 60%)'    // Red for low
                 ],
-                borderColor: `hsl(var(--card))`, 
+                borderColor: `hsl(${cardColor})`, 
                 borderWidth: 5,
             }]
         },
@@ -465,7 +477,7 @@ class Particle {
                 legend: {
                     position: 'top',
                     labels: { 
-                        color: `hsl(var(--muted-foreground))`, // Light grey text for legend
+                        color: `hsl(${mutedForegroundColor})`,
                         font: { size: 14 }
                     }
                 }
@@ -473,6 +485,7 @@ class Particle {
         }
     });
 }
+
   getAiInsightsButton.addEventListener('click', async (e) => {
    
     
