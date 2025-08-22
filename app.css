@@ -520,3 +520,59 @@ header nav {
 .onboarding-popover.arrow-bottom::after { bottom: -0.5rem; left: 2rem; }
 .onboarding-popover.arrow-left::after { left: -0.5rem; top: 2rem; }
 
+
+
+
+html.default_theme {
+  --background: 220 10% 10%;
+  --foreground: 220 15% 88%;
+  --card: 220 10% 14%;
+  --muted-foreground: 220 10% 55%;
+  --border: 220 10% 20%;
+  --primary: hsl(220, 15%, 96%);
+  --primary-darker: hsl(220, 15%, 85%);
+  --primary-foreground: hsl(220, 10%, 15%);
+  --secondary: hsl(220, 10%, 22%);
+  --secondary-darker: hsl(220, 15%, 88%);
+}
+
+html.theme_ocean {
+  --background: 210 30% 12%; 
+  --foreground: 190 40% 90%; 
+  --card: 210 30% 18%;       
+  --muted-foreground: 200 25% 60%;
+  --border: 210 30% 25%;
+  
+  --primary: hsl(180, 60%, 85%);
+  --primary-darker: hsl(180, 60%, 70%);
+  --primary-foreground: hsl(210, 30%, 12%);
+
+  --secondary: hsl(200, 20%, 25%);
+  --secondary-darker: hsl(200, 20%, 15%);
+  --secondary-foreground: hsl(190, 40%, 90%);
+}
+
+
+html.theme_sunset {
+  --background: 260 30% 10%; 
+  --foreground: 35 80% 92%;  
+  --card: 260 30% 16%;
+  --muted-foreground: 30 40% 65%;
+  --border: 260 30% 22%;
+  
+  --primary: hsl(25, 90%, 65%); 
+  --primary-darker: hsl(25, 90%, 50%);
+  --primary-foreground: hsl(0, 0%, 100%);
+
+  --secondary: hsl(300, 15%, 25%);
+  --secondary-darker: hsl(300, 15%, 15%);
+  --secondary-foreground: hsl(35, 80% L92%);
+}
+
+
+.theme-button.active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary-darker);
+  border-bottom-width: 4px; 
+}

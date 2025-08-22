@@ -704,10 +704,9 @@ logList.addEventListener('click', (e) => {
     const themeSelectorContainer = document.getElementById('theme-selector-area');
     if (themeSelectorContainer) {
         themeSelectorContainer.addEventListener('click', (e) => {
-            const themeButton = e.target.closest('.btn');
-            if (themeButton && themeButton.dataset.theme) {
-                const theme = themeButton.dataset.theme;
-                applyTheme(theme);
+            const themeButton = e.target.closest('.theme-button');
+            if (themeButton && themeButton.dataset.themeId) {
+                applyTheme(themeButton.dataset.themeId);
                 renderThemeSelector(); 
             }
         });
@@ -742,25 +741,38 @@ logList.addEventListener('click', (e) => {
       rejectAiSuggestion();
   });
   
-  function applyTheme(theme) { 
-    if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
+  
+function applyTheme(themeId) {
+    console.log("Applying theme:", themeId);
+
+    const themeClasses = ['default_theme', 'theme_ocean', 'theme_sunset'];
+    
+
+    document.documentElement.classList.remove(...themeClasses);
+
+
+    if (themeId) {
+        document.documentElement.classList.add(themeId);
     } else {
-        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('default_theme'); 
     }
-    state.activeTheme = theme;
+
+    state.activeTheme = themeId;
     saveState();
-}function renderThemeSelector() {
+}
+
+function renderThemeSelector() {
     const selectorList = document.getElementById('theme-selector-list');
     if (!selectorList) return;
 
     selectorList.innerHTML = ''; 
 
+
     const defaultButton = document.createElement('button');
-    defaultButton.className = 'btn btn-secondary';
+    defaultButton.className = 'btn btn-secondary theme-button';
     defaultButton.innerText = 'Default';
-    defaultButton.dataset.themeId = 'default_theme'; 
-    if (state.activeTheme === 'default_theme') {
+    defaultButton.dataset.themeId = 'default_theme';
+    if (state.activeTheme === 'default_theme' || !state.activeTheme) {
         defaultButton.classList.add('active');
     }
     selectorList.appendChild(defaultButton);
@@ -768,14 +780,14 @@ logList.addEventListener('click', (e) => {
 
     const ownedThemes = state.inventory
         .map(itemId => shopItems.find(item => item.id === itemId && item.type === 'theme'))
-        .filter(item => item);
+        .filter(item => item); 
 
 
     ownedThemes.forEach(theme => {
         const button = document.createElement('button');
-        button.className = 'btn btn-secondary';
-        button.innerText = theme.name;
-        button.dataset.themeId = theme.id;
+        button.className = 'btn btn-secondary theme-button';
+        button.innerText = theme.name; 
+        button.dataset.themeId = theme.id; 
 
         if (state.activeTheme === theme.id) {
             button.classList.add('active');
