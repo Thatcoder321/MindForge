@@ -231,7 +231,7 @@ main { margin-top: 2rem; }
   min-height: 80px;
 }
 
-/* A simple divider style */
+
 .divider {
     text-align: center;
     color: hsl(var(--muted-foreground));
@@ -240,4 +240,45 @@ main { margin-top: 2rem; }
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin: 1.5rem 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1.25rem; 
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 3px solid hsla(var(--primary-foreground), 0.3);
+  border-top-color: hsl(var(--primary-foreground));
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+.btn.loading {
+  cursor: wait;
+  filter: brightness(0.9);
+  animation: pulse-subtle 1.5s infinite ease-in-out;
+}
+
+.btn.loading:active {
+  transform: translateY(0);
+  border-bottom-width: 4px;
+}
+
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+}
+
+
+.btn .button-text, .btn .spinner {
+  transition: opacity 0.2s ease-in-out;
 }

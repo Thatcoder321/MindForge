@@ -634,7 +634,20 @@ function handleNavClick(e) {
         }
     });
   }
-    logList.addEventListener('click', (e) => { if (e.target.classList.contains('edit-log-button')) { openEditModal(e.target.closest('.log-entry').dataset.logId); } });
+    // In script.js
+
+logList.addEventListener('click', (e) => {
+   
+    const editButton = e.target.closest('.edit-log-button');
+    
+    if (editButton) {
+        
+        const logEntryElement = editButton.closest('.log-entry');
+        if (logEntryElement) {
+            openEditModal(logEntryElement.dataset.logId);
+        }
+    }
+});
     editForm.addEventListener('submit', (e) => { e.preventDefault(); const entryToUpdate = state.log.find(entry => entry.timestamp === state.currentlyEditingLogId); if (entryToUpdate) { entryToUpdate.description = editDescriptionInput.value; entryToUpdate.confidence = editConfidenceInput.value; } saveState(); renderLog(); closeEditModal(); });
     cancelEditButton.addEventListener('click', closeEditModal);
     modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) { closeEditModal(); } });
