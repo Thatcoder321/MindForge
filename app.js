@@ -1,22 +1,4 @@
 
-class Particle {
-    constructor(x, y, vx, vy, color, size) {
-      this.x = x; this.y = y; this.vx = vx; this.vy = vy; this.color = color; this.size = size;
-      this.initialSize = size; this.life = 1.0; this.decay = Math.random() * 0.02 + 0.01; this.gravity = 0.1;
-    }
-    update() { this.x += this.vx; this.y += this.vy; this.vy += this.gravity; this.vx *= 0.98; this.vy *= 0.98; this.life -= this.decay; this.size = this.initialSize * this.life; }
-    draw(ctx) { if (this.life <= 0) return; ctx.save(); ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 10; ctx.shadowColor = this.color; ctx.fill(); ctx.restore(); }
-    isDead() { return this.life <= 0; }
-  }
-  class ParticleSystem {
-    constructor(canvas) { this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.particles = []; this.resize(); window.addEventListener('resize', () => this.resize()); this.animate(); }
-    resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; }
-    createRipple(x, y, intensity = 1) { const colors = ['#4f46e5', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981']; const particleCount = Math.floor(30 * intensity); for (let i = 0; i < particleCount; i++) { const angle = (Math.PI * 2 * i) / particleCount; const speed = Math.random() * 8 + 4; this.particles.push(new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, colors[Math.floor(Math.random() * colors.length)], Math.random() * 4 + 2)); } for (let i = 0; i < Math.floor(20 * intensity); i++) { const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 12 + 2; this.particles.push(new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, colors[Math.floor(Math.random() * colors.length)], Math.random() * 3 + 1)); } }
-    update() { this.particles.forEach(p => p.update()); this.particles = this.particles.filter(p => !p.isDead()); }
-    draw() { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); this.particles.forEach(p => p.draw(this.ctx)); }
-    animate() { this.update(); this.draw(); requestAnimationFrame(() => this.animate()); }
-  }
-  
   // --- Main Application Logic ---
   document.addEventListener('DOMContentLoaded', () => {
       setInterval(updatePowerupTimers, 1000);
@@ -423,15 +405,11 @@ class Particle {
             datasets: [{
                 label: 'XP Earned',
                 data: Object.values(conceptData),
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                borderColor: 'rgba(255, 255, 255, 1)', 
-                borderWidth: 1,
+                backgroundColor: `hsl(${primaryColor})`, 
                 borderRadius: 4,
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
             scales: {
                 y: { 
                     beginAtZero: true,
@@ -439,20 +417,14 @@ class Particle {
                         color: `hsl(${mutedForegroundColor})`,
                         font: { size: 12 }
                     }, 
-                    grid: { 
-                        color: `hsl(${borderColor})`,
-                        borderColor: `hsl(${mutedForegroundColor})`
-                    } 
+                    grid: { color: `hsl(${borderColor})` } 
                 },
                 x: {
                     ticks: { 
                         color: `hsl(${mutedForegroundColor})`,
                         font: { size: 12 }
                     },
-                    grid: { 
-                        display: false 
-                    },
-                    borderColor: `hsl(${mutedForegroundColor})`
+                    grid: { display: false } 
                 }
             },
             plugins: { 
@@ -491,7 +463,10 @@ class Particle {
         }
     });
 }
-getAiInsightsButton.addEventListener('click', async (e) => {
+
+  getAiInsightsButton.addEventListener('click', async (e) => {
+   
+    
     if (state.log.length < 3) {
         alert('You need to log at least 3 study sessions to get a useful analysis.');
         return;
@@ -500,10 +475,12 @@ getAiInsightsButton.addEventListener('click', async (e) => {
     const buttonText = getAiInsightsButton.querySelector('.button-text');
     const spinner = getAiInsightsButton.querySelector('.spinner');
 
+    // --- Start Loading Animation ---
     getAiInsightsButton.disabled = true;
-    buttonText.textContent = 'Analyzing...'; 
-
-    spinner.classList.add('hidden');
+    getAiInsightsButton.classList.add('loading');
+    buttonText.style.opacity = '0';
+    spinner.classList.remove('hidden');
+    spinner.style.opacity = '1';
 
     try {
         const response = await fetch('/api/generateInsights', {
@@ -525,9 +502,12 @@ getAiInsightsButton.addEventListener('click', async (e) => {
         aiInsightsResultDiv.innerHTML = `<p style="color: red;">${error.message}</p>`;
         aiInsightsResultDiv.classList.remove('hidden');
     } finally {
-      
+
         getAiInsightsButton.disabled = false;
-        buttonText.textContent = 'Analyze My Progress'; 
+        getAiInsightsButton.classList.remove('loading');
+        buttonText.style.opacity = '1';
+        spinner.style.opacity = '0';
+        setTimeout(() => spinner.classList.add('hidden'), 200);
     }
 });
     // --- Event Listeners ---
@@ -600,11 +580,12 @@ logList.addEventListener('click', (e) => {
         const buttonText = aiLogButton.querySelector('.button-text');
         const spinner = aiLogButton.querySelector('.spinner');
     
-
+        // --- Start Loading Animation ---
         aiLogButton.disabled = true;
-        buttonText.textContent = 'Analyzing...'; 
-
-        spinner.classList.add('hidden');
+        aiLogButton.classList.add('loading'); // Add the pulsing animation class
+        buttonText.style.opacity = '0'; // Fade out the text
+        spinner.classList.remove('hidden');
+        spinner.style.opacity = '1'; // Fade in the spinner
     
         try {
             const response = await fetch('/api/generateXP', {
@@ -626,9 +607,12 @@ logList.addEventListener('click', (e) => {
             console.error('Failed to fetch AI suggestion:', error);
             alert('Could not get an AI suggestion. Please try again.');
         } finally {
- 
+            // --- End Loading Animation ---
             aiLogButton.disabled = false;
-            buttonText.textContent = 'Analyze & Generate XP'; 
+            aiLogButton.classList.remove('loading'); 
+            buttonText.style.opacity = '1'; 
+            spinner.style.opacity = '0'; 
+            setTimeout(() => spinner.classList.add('hidden'), 200); 
         }
     });
   
@@ -791,7 +775,25 @@ logList.addEventListener('click', (e) => {
           powerupList.appendChild(button);
       });
   }
-  
+  function usePowerup(itemId) {
+    const item = shopItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    
+    state.inventory = state.inventory.filter(id => id !== itemId);
+
+    
+    const expirationTime = new Date().getTime() + item.duration * 60 * 1000;
+    state.activePowerups.push({
+        id: item.id,
+        expiresAt: expirationTime
+    });
+
+    showNotification(`Activated: ${item.name}`);
+
+    saveState();
+    renderPowerups();
+}
   function rejectAiSuggestion() {
     aiResultsDiv.style.display = 'none';
     aiLogForm.reset();
@@ -825,9 +827,7 @@ logList.addEventListener('click', (e) => {
                 alert('There was an error processing your image. Please try a different one.');
             }
         }
-    });
-    
-    analyzeImageButton.addEventListener('click', async () => {
+    });analyzeImageButton.addEventListener('click', async () => {
         if (!uploadedImageBase64) {
             alert('Please select an image first.');
             return;
@@ -839,7 +839,7 @@ logList.addEventListener('click', (e) => {
         console.log("Sending request to /api/analyzeImage...");
     
         analyzeImageButton.disabled = true;
-        analyzeImageButton.innerText = "Analyzing..."; 
+        analyzeImageButton.innerText = "Analyzing...";
     
         try {
             const response = await fetch('/api/analyzeImage', {
@@ -863,6 +863,7 @@ logList.addEventListener('click', (e) => {
                     aiSuggestedXp.innerText = data.xp;
                     aiJustification.innerText = data.justification;
                     
+                  
                     const imagePreviewBox = document.getElementById('image-preview-box');
                     const imageAnalysisForm = document.getElementById('image-analysis-form');
                     
@@ -873,6 +874,7 @@ logList.addEventListener('click', (e) => {
                         imageAnalysisForm.classList.add('hidden');
                     }
                     
+                  
                     if (aiResultsDiv) {
                         aiResultsDiv.classList.remove('hidden');
                     }
@@ -891,7 +893,7 @@ logList.addEventListener('click', (e) => {
             alert(`A network error occurred: ${networkError.message}`);
         } finally {
             analyzeImageButton.disabled = false;
-            analyzeImageButton.innerText = "Analyze Image"; // Reset to original text
+            analyzeImageButton.innerText = "Analyze Image";
         }
     });
     // --- Initialization ---
