@@ -288,31 +288,30 @@ main { margin-top: 2rem; }
 
 @keyframes pulse-subtle {
   0%, 100% {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
   50% {
-    transform: scale(0.98);
+    transform: scale(0.98) translateY(0);
   }
 }
-
 .btn .button-text {
-  
   transition: opacity 0.2s ease-in-out;
+  position: relative; 
+  z-index: 1; 
 }
-
 .btn .spinner {
   position: absolute; 
- 
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   transition: opacity 0.2s ease-in-out;
-  
   opacity: 0; 
 }
 
+.btn.loading {
+  filter: brightness(0.9);
 
-
+}
 .btn-primary .spinner {
   border-color: hsla(var(--primary-foreground), 0.3);
   border-top-color: hsl(var(--primary-foreground));
