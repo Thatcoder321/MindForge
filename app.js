@@ -3,7 +3,7 @@
   document.addEventListener('DOMContentLoaded', () => {
       setInterval(updatePowerupTimers, 1000);
     let state = {xp:0,coins:0,log:[],inventory: [],
-      activeTheme: 'theme_dark', activePowerups: [], currentlyEditingLogId: null
+      activeTheme: 'default_theme', activePowerups: [], currentlyEditingLogId: null
     };
     
     const XP_TO_COIN_RATE = 10;
