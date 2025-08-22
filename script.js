@@ -27,40 +27,32 @@ class Particle {
     const XP_TO_COIN_RATE = 10;
   
     const shopItems = [
-      {
-          id: 'theme_dark',
-          name: 'Default Aurora',
-          description: 'The standard, cool-tined dark theme. You already own this.',
-          cost: 0,
-          type: 'theme'
-  
-          
-          
-      },
-      {
-          id: 'theme_light',
-          name: 'Light Mode',
-          description: 'A clean, bright theme for daytime productivity. A classic look.',
-          cost: 100,
-          type: 'theme'
-      },
-      {
-          id: 'theme_cyberpunk',
-          name: 'Cyberpunk Neon',
-          description: 'High-contrast pink, cyan, and purple on a deep black background.',
-          cost: 250,
-          type: 'theme'
-      },
-      {
-          id:'potion_double_xp',
-          name: 'Elixir of Focus (2x XP)',
-          description: 'Doubles all XP earned from logging for the next 30 minutes.',
-          cost: 50,
-          type: 'powerup',
-          duration: 30
-      }
+
+        {
+            id: 'potion_double_xp',
+            name: 'Elixir of Focus (2x XP)',
+            description: 'Doubles all XP earned from logging for the next 30 minutes.',
+            cost: 50,
+            type: 'powerup',
+            duration: 30
+        },
+
+        {
+            id: 'theme_ocean',
+            name: 'Oceanic Theme',
+            description: 'A calming, deep-blue color scheme to help you focus.',
+            cost: 150,
+            type: 'theme'
+        },
+        {
+            id: 'theme_sunset',
+            name: 'Sunset Theme',
+            description: 'Warm orange and purple tones to inspire creativity.',
+            cost: 200,
+            type: 'theme'
+        }
+       
       ];
-  
   
   
     // --- DOM Elements ---
@@ -703,32 +695,35 @@ logList.addEventListener('click', (e) => {
     const selectorList = document.getElementById('theme-selector-list');
     if (!selectorList) return;
 
-    selectorList.innerHTML = `
-        <button class="btn ${state.activeTheme === 'light' ? 'btn-primary' : 'btn-secondary'}" data-theme="light">Light</button>
-        <button class="btn ${state.activeTheme === 'dark' ? 'btn-primary' : 'btn-secondary'}" data-theme="dark">Dark</button>
-    `;
+    selectorList.innerHTML = ''; 
+
+    const defaultButton = document.createElement('button');
+    defaultButton.className = 'btn btn-secondary';
+    defaultButton.innerText = 'Default';
+    defaultButton.dataset.themeId = 'default_theme'; 
+    if (state.activeTheme === 'default_theme') {
+        defaultButton.classList.add('active');
+    }
+    selectorList.appendChild(defaultButton);
+
+
+    const ownedThemes = state.inventory
+        .map(itemId => shopItems.find(item => item.id === itemId && item.type === 'theme'))
+        .filter(item => item);
+
+
+    ownedThemes.forEach(theme => {
+        const button = document.createElement('button');
+        button.className = 'btn btn-secondary';
+        button.innerText = theme.name;
+        button.dataset.themeId = theme.id;
+
+        if (state.activeTheme === theme.id) {
+            button.classList.add('active');
+        }
+        selectorList.appendChild(button);
+    });
 }
-  
-  function usePowerup(itemId) {
-      const item = shopItems.find(i => i.id === itemId);
-      if(!item) return;
-  
-  
-      state.inventory = state.inventory.filter(id => id !==
-          itemId);
-  
-          const expirationTime = new Date().getTime() +
-          item.duration * 60 * 1000;
-          state.activePowerups.push({
-              id: item.id,
-              expiresAt: expirationTime
-          });
-          showNotification(`Activated: ${item.name}`);
-  
-          saveState();
-          renderPowerups();
-          updatePowerupTimers();
-  }
   function updatePowerupTimers() {
       const container = document.getElementById('active-powerup-timers');
       if (!container) return;
