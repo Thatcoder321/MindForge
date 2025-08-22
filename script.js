@@ -417,7 +417,6 @@ class Particle {
     if (xpChart) xpChart.destroy();
     if (confidenceChart) confidenceChart.destroy();
 
-
     xpChart = new Chart(xpCtx, {
         type: 'bar',
         data: {
@@ -425,8 +424,7 @@ class Particle {
             datasets: [{
                 label: 'XP Earned',
                 data: Object.values(conceptData),
-               
-                backgroundColor: `hsl(var(--primary))`,
+                backgroundColor: `hsl(var(--primary))`, 
                 borderRadius: 4,
             }]
         },
@@ -434,12 +432,12 @@ class Particle {
             scales: {
                 y: { 
                     beginAtZero: true,
-                    ticks: { color: `hsl(var(--muted-foreground))` },
-                    grid: { color: `hsl(var(--border))` }
+                    ticks: { color: `hsl(var(--muted-foreground))` }, 
+                    grid: { color: `hsl(var(--border))` } 
                 },
                 x: {
                     ticks: { color: `hsl(var(--muted-foreground))` },
-                    grid: { display: false }
+                    grid: { display: false } 
                 }
             },
             plugins: { legend: { display: false } }
@@ -453,21 +451,23 @@ class Particle {
             labels: ['High', 'Medium', 'Low'],
             datasets: [{
                 data: [confidenceData.high, confidenceData.medium, confidenceData.low],
-              
                 backgroundColor: [
                     'hsl(142, 71%, 45%)', 
                     'hsl(48, 95%, 53%)',  
-                    'hsl(0, 84%, 60%)'  
+                    'hsl(0, 84%, 60%)'    
                 ],
-                borderColor: `hsl(var(--card))`,
-                borderWidth: 4,
+                borderColor: `hsl(var(--card))`, 
+                borderWidth: 5,
             }]
         },
         options: {
             plugins: {
                 legend: {
                     position: 'top',
-                    labels: { color: `hsl(var(--muted-foreground))` }
+                    labels: { 
+                        color: `hsl(var(--muted-foreground))`, // Light grey text for legend
+                        font: { size: 14 }
+                    }
                 }
             }
         }
