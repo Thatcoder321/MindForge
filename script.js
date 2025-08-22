@@ -423,11 +423,15 @@ class Particle {
             datasets: [{
                 label: 'XP Earned',
                 data: Object.values(conceptData),
-                backgroundColor: `hsl(${primaryColor})`, 
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                borderColor: 'rgba(255, 255, 255, 1)', 
+                borderWidth: 1,
                 borderRadius: 4,
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: { 
                     beginAtZero: true,
@@ -435,14 +439,20 @@ class Particle {
                         color: `hsl(${mutedForegroundColor})`,
                         font: { size: 12 }
                     }, 
-                    grid: { color: `hsl(${borderColor})` } 
+                    grid: { 
+                        color: `hsl(${borderColor})`,
+                        borderColor: `hsl(${mutedForegroundColor})`
+                    } 
                 },
                 x: {
                     ticks: { 
                         color: `hsl(${mutedForegroundColor})`,
                         font: { size: 12 }
                     },
-                    grid: { display: false } 
+                    grid: { 
+                        display: false 
+                    },
+                    borderColor: `hsl(${mutedForegroundColor})`
                 }
             },
             plugins: { 
