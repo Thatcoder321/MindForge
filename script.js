@@ -925,8 +925,7 @@ logList.addEventListener('click', (e) => {
                 alert('There was an error processing your image. Please try a different one.');
             }
         }
-    });
-    analyzeImageButton.addEventListener('click', async () => {
+    });analyzeImageButton.addEventListener('click', async () => {
         if (!uploadedImageBase64) {
             alert('Please select an image first.');
             return;
@@ -936,7 +935,7 @@ logList.addEventListener('click', (e) => {
     
         console.log("--- Starting Image Analysis ---");
         console.log("Sending request to /api/analyzeImage...");
-
+    
         analyzeImageButton.disabled = true;
         analyzeImageButton.innerText = "Analyzing...";
     
@@ -950,7 +949,6 @@ logList.addEventListener('click', (e) => {
             console.log("Received response from server.");
             console.log("Status Code:", response.status, response.statusText);
     
-           
             const rawText = await response.text();
             console.log("RAW RESPONSE TEXT FROM SERVER:", rawText);
            
@@ -958,15 +956,27 @@ logList.addEventListener('click', (e) => {
                 const data = JSON.parse(rawText);
                 console.log("SUCCESSFULLY PARSED JSON:", data);
                 
-                
                 if (data && typeof data.xp !== 'undefined') {
                     tempAiSuggestion = { ...data, sourceType: 'image' };
                     aiSuggestedXp.innerText = data.xp;
                     aiJustification.innerText = data.justification;
-                    imagePreviewContainer.classList.add('hidden'); 
-                    document.getElementById('image-preview-box').classList.add('hidden');
-                    document.getElementById('image-analysis-form').classList.add('hidden');
-                    aiResultsDiv.classList.remove('hidden');
+                    
+                    // Use safe element access with optional chaining or null checks
+                    const imagePreviewBox = document.getElementById('image-preview-box');
+                    const imageAnalysisForm = document.getElementById('image-analysis-form');
+                    
+                    if (imagePreviewBox) {
+                        imagePreviewBox.classList.add('hidden');
+                    }
+                    if (imageAnalysisForm) {
+                        imageAnalysisForm.classList.add('hidden');
+                    }
+                    
+                    // This element should exist based on your code
+                    if (aiResultsDiv) {
+                        aiResultsDiv.classList.remove('hidden');
+                    }
+                    
                 } else {
                     throw new Error("Parsed JSON, but it was missing the 'xp' key.");
                 }
@@ -980,7 +990,6 @@ logList.addEventListener('click', (e) => {
             console.error('A network error occurred during image analysis:', networkError);
             alert(`A network error occurred: ${networkError.message}`);
         } finally {
-
             analyzeImageButton.disabled = false;
             analyzeImageButton.innerText = "Analyze Image";
         }
