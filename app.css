@@ -1,4 +1,4 @@
-:root, .dark {
+:root {
   --radius: 0.7rem;
   
 
@@ -17,7 +17,20 @@
   --secondary-darker: hsl(240, 3.7%, 10%);
   --secondary-foreground: hsl(0, 0%, 98%); 
 }
-
+html, html.default_theme {
+  --radius: 0.7rem;
+  --background: 0 0% 0%;
+  --foreground: 220 15% 88%;
+  --card: 220 10% 14%;
+  --muted-foreground: 220 10% 55%;
+  --border: 220 10% 20%;
+  --primary: hsl(220, 15%, 96%); 
+  --primary-darker: hsl(220, 15%, 85%);
+  --primary-foreground: hsl(220, 10%, 15%);
+  --secondary: hsl(220, 10%, 22%);
+  --secondary-darker: hsl(220, 10%, 12%);
+  --secondary-foreground: hsl(220, 15%, 88%);
+}
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { line-height: 1.5; -webkit-text-size-adjust: 100%; font-family: 'Inter', sans-serif; }
