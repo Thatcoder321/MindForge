@@ -124,23 +124,32 @@
 const popover = document.getElementById('onboarding-popover');
 const overlay = document.getElementById('onboarding-overlay');
 const onboardingButton = document.getElementById('onboarding-button');
-
 function positionPopover(targetSelector) {
     const targetElement = document.querySelector(targetSelector);
-    if (!targetElement) {
-    
+    const overlay = document.getElementById('onboarding-overlay'); // Get the overlay element
+    if (!targetElement || !overlay) {
+        // Fallback for safety
         popover.style.top = '50%';
         popover.style.left = '50%';
         popover.style.transform = 'translate(-50%, -50%)';
+        overlay.style.opacity = '0'; // Hide the spotlight if no target
         return;
     }
 
+    overlay.style.opacity = '1'; // Make sure the spotlight is visible
+
     const rect = targetElement.getBoundingClientRect();
+
+
+    const highlightPadding = 10; // 10px of space around the element
+    overlay.style.width = `${rect.width + highlightPadding}px`;
+    overlay.style.height = `${rect.height + highlightPadding}px`;
+    overlay.style.top = `${rect.top - (highlightPadding / 2)}px`;
+    overlay.style.left = `${rect.left - (highlightPadding / 2)}px`;
+    
 
     popover.style.top = `${rect.bottom + 15}px`;
     popover.style.left = `${rect.left}px`;
-    
-
     popover.className = 'onboarding-popover visible arrow-top';
 }
 

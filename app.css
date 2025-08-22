@@ -466,9 +466,11 @@ header nav {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  backdrop-filter: blur(2px);
+  z-index: 998;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  transition: all 0.3s ease-in-out;
+  pointer-events: none; 
 }
 
 .onboarding-popover {
