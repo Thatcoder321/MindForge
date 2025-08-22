@@ -641,21 +641,21 @@ logList.addEventListener('click', (e) => {
   }
   
   
-    const shopListContainer = document.getElementById('shop-item-list');
-    if (shopListContainer) {
-        shopListContainer.addEventListener('click', (e) => {
-            const buyButton = e.target.closest('.shop-buy-button');
-            
-            if (buyButton && !buyButton.disabled) {
-                const itemId = buyButton.dataset.itemId;
-                if (itemId) {
-                    
-                    applyTheme(state.activeTheme); 
-                    buyItem(itemId);
-                }
-            }
-        });
-    }
+  const shopListContainer = document.getElementById('shop-item-list');
+  if (shopListContainer) {
+      shopListContainer.addEventListener('click', (e) => {
+         
+          const buyButton = e.target.closest('.btn[data-item-id]');
+          
+       
+          if (buyButton && !buyButton.disabled) {
+              const itemId = buyButton.dataset.itemId;
+              if (itemId) {
+                  buyItem(itemId);
+              }
+          }
+      });
+  }
   
   
     aiLogForm.addEventListener('submit', async (e) => {
