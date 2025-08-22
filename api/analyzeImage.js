@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     });
 
     const result = JSON.parse(response.choices[0].message.content);
-    return res.status(200).json(result);
+    res.status(200).json(result);
 
   } catch (error) {
     console.error('Error with OpenAI Vision API:', error);
