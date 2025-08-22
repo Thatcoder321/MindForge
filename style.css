@@ -258,7 +258,7 @@ main { margin-top: 2rem; }
 
 
 .btn.loading {
-  cursor: wait;
+
   filter: brightness(0.9);
   animation: pulse-subtle 1.5s infinite ease-in-out;
 }
