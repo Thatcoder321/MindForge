@@ -718,10 +718,9 @@ logList.addEventListener('click', (e) => {
         } finally {
             // --- End Loading Animation ---
             aiLogButton.disabled = false;
-            aiLogButton.classList.remove('loading'); // Remove the pulsing animation
-            buttonText.style.opacity = '1'; // Fade in the text
-            spinner.style.opacity = '0'; // Fade out the spinner
-            // Hide the spinner element after the fade out is complete
+            aiLogButton.classList.remove('loading'); 
+            buttonText.style.opacity = '1'; 
+            spinner.style.opacity = '0'; 
             setTimeout(() => spinner.classList.add('hidden'), 200); 
         }
     });

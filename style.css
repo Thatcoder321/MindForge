@@ -67,8 +67,9 @@ main { margin-top: 2rem; }
 .font-semibold { font-weight: 600; }
 .text-muted { color: hsl(var(--muted-foreground)); }
 
-/* 5. Our Custom "Bubbly" Buttons */
+
 .btn {
+  position: relative; 
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -78,7 +79,7 @@ main { margin-top: 2rem; }
   font-size: 0.9rem;
   border: 1px solid;
   cursor: pointer;
-  border-bottom-width: 4px; /* Creates the 3D edge */
+  border-bottom-width: 4px;
   transform: translateY(0);
   transition: all 0.1s ease-out;
 }
@@ -92,6 +93,7 @@ main { margin-top: 2rem; }
   border-bottom-width: 2px;
   filter: brightness(0.9);
 }
+
 .btn-primary {
   background-color: var(--primary);
   color: var(--primary-foreground);
@@ -281,7 +283,15 @@ main { margin-top: 2rem; }
   }
 }
 
+.btn .button-text {
+  
+  transition: opacity 0.2s ease-in-out;
+}
 
-.btn .button-text, .btn .spinner {
+.btn .spinner {
+  position: absolute; 
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); 
   transition: opacity 0.2s ease-in-out;
 }
