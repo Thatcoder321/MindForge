@@ -252,11 +252,13 @@ class Particle {
      
         modalBackdrop.classList.remove('hidden');
     }
-    function closeEditModal() { state.currentlyEditingLogId = null; modalBackdrop.classList.remove('visible'); modalContent.classList.remove('hidden'); }
-
+    function closeEditModal() { 
+        state.currentlyEditingLogId = null; 
+        modalBackdrop.classList.add('hidden'); 
+    }
 
     function handleNavClick(e) {
-       closeEditModal();
+       // closeEditModal();
         const targetButton = e.target.closest('.nav-button');
         if (!targetButton) return;
     
