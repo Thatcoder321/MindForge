@@ -669,31 +669,46 @@ function handleNavClick(e) {
     }
   
   
-  
     aiLogForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+       
+        e.preventDefault(); 
+        
         const description = document.getElementById('ai-log-description').value;
+        const buttonText = aiLogButton.querySelector('.button-text');
+        const spinner = aiLogButton.querySelector('.spinner');
+    
+        // --- Logic to show the loading state ---
         aiLogButton.disabled = true;
-        aiLogButton.querySelector('.button-text').style.display = 'none';
-        aiLogButton.querySelector('.spinner').style.display = 'inline-block';
+        buttonText.classList.add('hidden');
+        spinner.classList.remove('hidden');
+    
         try {
-            const response = await fetch('/api/generateXP', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ description }) });
-            if (!response.ok) { throw new Error('Network response was not ok'); }
+            const response = await fetch('/api/generateXP', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
             const data = await response.json();
             tempAiSuggestion = data;
-            console.log('AI response:', data); 
-  
-  const xpValue = data.xp ?? data.data?.xp;
-  const justificationValue = data.justification ?? data.data?.justification;
-  
-  aiSuggestedXp.innerText = xpValue;
-  aiJustification.innerText = justificationValue;
-            aiResultsDiv.style.display = 'block';
-        } catch (error) { console.error('Failed to fetch AI suggestion:', error); alert('Could not get an AI suggestion. Please try again.');
+    
+            // Display the results from the AI
+            aiSuggestedXp.innerText = data.xp;
+            aiJustification.innerText = data.justification;
+            aiResultsDiv.classList.remove('hidden');
+    
+        } catch (error) {
+            console.error('Failed to fetch AI suggestion:', error);
+            alert('Could not get an AI suggestion. Please try again.');
         } finally {
+            // --- Logic to hide the loading state ---
             aiLogButton.disabled = false;
-            aiLogButton.querySelector('.button-text').style.display = 'inline-block';
-            aiLogButton.querySelector('.spinner').style.display = 'none';
+            buttonText.classList.remove('hidden');
+            spinner.classList.add('hidden');
         }
     });
   
