@@ -373,3 +373,35 @@ header nav {
   justify-content: center;
   z-index: 1000; 
 }
+
+
+.powerup-button {
+  position: relative; 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid;
+  cursor: pointer;
+  border-bottom-width: 4px;
+  transform: translateY(0);
+  transition: all 0.1s ease-out;
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border-color: var(--secondary-darker);
+}
+
+.powerup-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  border-bottom-width: 6px;
+}
+
+.powerup-button:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
+  filter: brightness(0.9);
+}
