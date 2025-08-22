@@ -256,7 +256,7 @@ class Particle {
 
 
     function handleNavClick(e) {
-       
+       closeEditModal();
         const targetButton = e.target.closest('.nav-button');
         if (!targetButton) return;
     
@@ -307,14 +307,16 @@ class Particle {
           itemCard.className = 'shop-item-card';
   
           let buttonHtml;
-          if (isOwned) {
-              buttonHtml = `<button class="shop-buy-button" disabled>Owned</button>`;
-          } else if (!canAfford) {
-              buttonHtml = `<button class="shop-buy-button" disabled>Insufficient Coins</button>`;
-          } else {
-              buttonHtml = `<button class="shop-buy-button" data-item-id="${item.id}">Buy</button>`;
-          }
-         
+    if (isOwned) {
+
+        buttonHtml = `<button class="btn btn-secondary" disabled>Owned</button>`;
+    } else if (!canAfford) {
+
+        buttonHtml = `<button class="btn btn-secondary" disabled>Insufficient Coins</button>`;
+    } else {
+
+        buttonHtml = `<button class="btn btn-primary" data-item-id="${item.id}">Buy</button>`;
+    }
           itemCard.innerHTML = `
             <div class="item-details">
               <h3>${item.name}</h3>
