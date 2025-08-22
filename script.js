@@ -683,17 +683,18 @@ logList.addEventListener('click', (e) => {
   
   
     aiLogForm.addEventListener('submit', async (e) => {
-       
-        e.preventDefault(); 
+        e.preventDefault();
         
         const description = document.getElementById('ai-log-description').value;
         const buttonText = aiLogButton.querySelector('.button-text');
         const spinner = aiLogButton.querySelector('.spinner');
     
-        // --- Logic to show the loading state ---
+        // --- Start Loading Animation ---
         aiLogButton.disabled = true;
-        buttonText.classList.add('hidden');
+        aiLogButton.classList.add('loading'); // Add the pulsing animation class
+        buttonText.style.opacity = '0'; // Fade out the text
         spinner.classList.remove('hidden');
+        spinner.style.opacity = '1'; // Fade in the spinner
     
         try {
             const response = await fetch('/api/generateXP', {
@@ -702,14 +703,11 @@ logList.addEventListener('click', (e) => {
                 body: JSON.stringify({ description })
             });
     
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) { throw new Error('Network response was not ok'); }
     
             const data = await response.json();
             tempAiSuggestion = data;
     
-            // Display the results from the AI
             aiSuggestedXp.innerText = data.xp;
             aiJustification.innerText = data.justification;
             aiResultsDiv.classList.remove('hidden');
@@ -718,10 +716,13 @@ logList.addEventListener('click', (e) => {
             console.error('Failed to fetch AI suggestion:', error);
             alert('Could not get an AI suggestion. Please try again.');
         } finally {
-            // --- Logic to hide the loading state ---
+            // --- End Loading Animation ---
             aiLogButton.disabled = false;
-            buttonText.classList.remove('hidden');
-            spinner.classList.add('hidden');
+            aiLogButton.classList.remove('loading'); // Remove the pulsing animation
+            buttonText.style.opacity = '1'; // Fade in the text
+            spinner.style.opacity = '0'; // Fade out the spinner
+            // Hide the spinner element after the fade out is complete
+            setTimeout(() => spinner.classList.add('hidden'), 200); 
         }
     });
   
