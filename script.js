@@ -916,15 +916,16 @@ logList.addEventListener('click', (e) => {
                 const resizedBase64 = await resizeImage(file);
                 uploadedImageBase64 = resizedBase64;
                 imagePreview.src = uploadedImageBase64;
-                
-                imagePreviewContainer.classList.remove('hidden');
+            
+                document.getElementById('image-preview-box').classList.remove('hidden');
+                document.getElementById('image-analysis-form').classList.remove('hidden');
+            
             } catch (error) {
                 console.error('Image processing failed:', error);
                 alert('There was an error processing your image. Please try a different one.');
             }
         }
     });
-    
     analyzeImageButton.addEventListener('click', async () => {
         if (!uploadedImageBase64) {
             alert('Please select an image first.');
@@ -933,11 +934,11 @@ logList.addEventListener('click', (e) => {
     
         const contextText = document.getElementById('image-context-text').value;
     
-      
+        console.log("--- Starting Image Analysis ---");
+        console.log("Sending request to /api/analyzeImage...");
+
         analyzeImageButton.disabled = true;
-        analyzeImageButton.classList.add('loading');
-   
-        analyzeImageButton.innerHTML = `<span class="spinner"></span>`;
+        analyzeImageButton.innerText = "Analyzing...";
     
         try {
             const response = await fetch('/api/analyzeImage', {
@@ -946,40 +947,42 @@ logList.addEventListener('click', (e) => {
                 body: JSON.stringify({ image: uploadedImageBase64, text: contextText }),
             });
     
-          
-            if (!response.ok) {
-              
-                const errorBody = await response.json().catch(() => ({ error: "Server returned an invalid error format." }));
-                throw new Error(`Server error: ${response.statusText} - ${errorBody.error}`);
+            console.log("Received response from server.");
+            console.log("Status Code:", response.status, response.statusText);
+    
+           
+            const rawText = await response.text();
+            console.log("RAW RESPONSE TEXT FROM SERVER:", rawText);
+           
+            try {
+                const data = JSON.parse(rawText);
+                console.log("SUCCESSFULLY PARSED JSON:", data);
+                
+                
+                if (data && typeof data.xp !== 'undefined') {
+                    tempAiSuggestion = { ...data, sourceType: 'image' };
+                    aiSuggestedXp.innerText = data.xp;
+                    aiJustification.innerText = data.justification;
+                    imagePreviewContainer.classList.add('hidden'); 
+                    document.getElementById('image-preview-box').classList.add('hidden');
+                    document.getElementById('image-analysis-form').classList.add('hidden');
+                    aiResultsDiv.classList.remove('hidden');
+                } else {
+                    throw new Error("Parsed JSON, but it was missing the 'xp' key.");
+                }
+    
+            } catch (jsonError) {
+                console.error("FAILED TO PARSE RESPONSE AS JSON:", jsonError);
+                alert("The server sent back a response that wasn't valid JSON. Check the console to see the raw text.");
             }
     
-            const data = await response.json();
-
-            if (!data || typeof data.xp === 'undefined') {
-                console.error('Invalid data structure received from server:', data);
-                throw new Error('AI returned an unexpected response. Please try again.');
-            }
-    
-            tempAiSuggestion = { ...data, sourceType: 'image' };
-    
-
-            aiSuggestedXp.innerText = data.xp;
-            aiJustification.innerText = data.justification;
-            
-
-            imagePreviewContainer.classList.add('hidden');
-            aiResultsDiv.classList.remove('hidden');
-    
-        } catch (error) {
-            console.error('An error occurred during image analysis:', error);
-
-            alert(`An error occurred: ${error.message}`);
+        } catch (networkError) {
+            console.error('A network error occurred during image analysis:', networkError);
+            alert(`A network error occurred: ${networkError.message}`);
         } finally {
 
             analyzeImageButton.disabled = false;
-            analyzeImageButton.classList.remove('loading');
-
-            analyzeImageButton.innerHTML = `Analyze Image`;
+            analyzeImageButton.innerText = "Analyze Image";
         }
     });
     // --- Initialization ---

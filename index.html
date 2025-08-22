@@ -95,14 +95,18 @@
                 <label for="image-upload" class="btn btn-secondary w-full cursor-pointer">Select Image</label>
                 <input type="file" id="image-upload" accept="image/*" class="hidden">
               </div>
-              <div id="image-preview-container" class="hidden space-y-md">
-                <img id="image-preview" src="#" alt="Image Preview" class="rounded-lg border border-default"/>
+              
+              <div id="image-preview-box" class="hidden"> 
+                <img id="image-preview" src="#" alt="Image Preview"/>
+            </div>
+            
+            <div id="image-analysis-form" class="hidden space-y-md">
                 <div class="form-group">
-                  <label for="image-context-text" class="label">Add context (optional)</label>
-                  <textarea id="image-context-text" class="textarea" rows="2" placeholder="e.g., This was really hard..."></textarea>
+                    <label for="image-context-text" class="label">Add context (optional)</label>
+                    <textarea id="image-context-text" class="textarea" rows="2" placeholder="e.g., This was really hard..."></textarea>
                 </div>
                 <button id="analyze-image-button" class="btn btn-primary w-full">Analyze Image</button>
-              </div>
+            </div>
             </div>
           </div>
         </div>
