@@ -29,15 +29,29 @@ export default async function handler(req, res) {
     3.  **Calculate XP:** Based on BOTH the image and text, calculate a fair XP score. A dense worksheet is 50-80 XP. A few complex problems are 40 XP. Notes are 10 XP. Apply bonuses or reductions based on the text.
     4.  **Identify Concepts:** Determine the key math concepts shown in the image.
     5. **Group Concepts into Standardized Categories:** You must categorize all math concepts into broad, standardized categories. Choose from the following list ONLY:
-       - "Geometry Proofs"
-       - "Algebraic Manipulation"
-       - "Trigonometric Ratios"
-       - "Statistics & Data"
-       - "Calculus Techniques"
-       - "Mathematical Reasoning"
-       - "Functions & Relations"
-       - "Number Theory"
-       - "Other"
+       - "Geometry Proofs" (includes ALL proof techniques: AAA theorem, SAS theorem, SSS theorem, AAS theorem, congruent triangles, similar triangles, parallel lines, angle relationships, etc.)
+       - "Algebraic Manipulation" (includes solving equations, factoring, expanding, simplifying expressions, systems of equations, inequalities, etc.)
+       - "Trigonometric Ratios" (includes sine, cosine, tangent, unit circle, inverse trig functions, trig identities, etc.)
+       - "Statistics & Data" (includes mean, median, mode, probability, distributions, data analysis, graphs, etc.)
+       - "Calculus Techniques" (includes derivatives, integrals, limits, optimization, related rates, etc.)
+       - "Mathematical Reasoning" (includes logic, problem-solving strategies, mathematical communication, proof writing in general, etc.)
+       - "Functions & Relations" (includes function notation, domain/range, transformations, graphing functions, etc.)
+       - "Number Theory" (includes prime numbers, divisibility, modular arithmetic, sequences, series, etc.)
+       - "Other" (only use if the work truly doesn't fit any of the above categories)
+CRITICAL CONCEPT GROUPING RULES:
+- NEVER use specific theorem names like "AAA Theorem", "SAS Theorem", "SSS Theorem", "AAS Theorem", etc. - these ALL belong under "Geometry Proofs"
+- NEVER use specific technique names like "Quadratic Formula" or "Completing the Square" - these ALL belong under "Algebraic Manipulation"
+- NEVER use specific function names like "Sine Function" or "Cosine Function" - these ALL belong under "Trigonometric Ratios"
+- NEVER use specific rule names like "Chain Rule" or "Product Rule" - these ALL belong under "Calculus Techniques"
+- Always think: "What is the broader mathematical skill being practiced?" and choose the appropriate category
+- If you see triangle congruence work, angle proofs, parallel line theorems, or ANY geometric proof work → use "Geometry Proofs"
+- If you see equation solving, factoring, or algebraic work → use "Algebraic Manipulation"
+- Maximum 3 categories per response, minimum 1 category
+- YOU MUST ONLY USE THE EXACT CATEGORY NAMES FROM THE LIST ABOVE - no variations, no specific theorem names, no technique names
+Examples of Correct Categorization:
+- Student works on SSS triangle congruence → "Geometry Proofs"
+- Student solves quadratic equations using multiple methods → "Algebraic Manipulation"
+- Student practices both triangle proofs AND solving linear equations → ["Geometry Proofs", "Algebraic Manipulation"]
 
     ${userTextContext}
 
