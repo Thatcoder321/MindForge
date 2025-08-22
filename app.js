@@ -34,8 +34,29 @@
             type: 'theme'
         }
        
+      ];const onboardingSteps = [
+        {
+          title: "Welcome to MindForge!",
+          content: "This is your dashboard, the central hub for your progress. Let's take a quick tour.",
+          targetElement: '#dashboard h1' 
+        },
+        {
+          title: "Log Your Effort Here",
+          content: "Click on the 'Log' tab to open the activity logger. This is where you'll input your study sessions.",
+          targetElement: '[data-page="log"]' 
+        },
+        {
+          title: "Track Your Progress",
+          content: "The 'Stats' page contains charts and AI-powered insights to help you understand your learning patterns.",
+          targetElement: '[data-page="stats"]' 
+        },
+        {
+          title: "You're All Set!",
+          content: "Ready to start your journey? Log your first session now.",
+          targetElement: '#dashboard' 
+        }
+
       ];
-  
   
     // --- DOM Elements ---
     const canvas = document.getElementById('particles-canvas');
@@ -99,8 +120,63 @@
       }
     }
     function resizeImage(file, maxSize = 1024) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { let width = img.width; let height = img.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', 0.9)); }; img.onerror = reject; img.src = event.target.result; }; reader.onerror = reject; reader.readAsDataURL(file); }); }
-    // In script.js
-  
+    let currentOnboardingStep = 0;
+const popover = document.getElementById('onboarding-popover');
+const overlay = document.getElementById('onboarding-overlay');
+const onboardingButton = document.getElementById('onboarding-button');
+
+function positionPopover(targetSelector) {
+    const targetElement = document.querySelector(targetSelector);
+    if (!targetElement) {
+    
+        popover.style.top = '50%';
+        popover.style.left = '50%';
+        popover.style.transform = 'translate(-50%, -50%)';
+        return;
+    }
+
+    const rect = targetElement.getBoundingClientRect();
+
+    popover.style.top = `${rect.bottom + 15}px`;
+    popover.style.left = `${rect.left}px`;
+    
+
+    popover.className = 'onboarding-popover visible arrow-top';
+}
+
+function showOnboardingStep(stepIndex) {
+    const step = onboardingSteps[stepIndex];
+    
+    positionPopover(step.targetElement);
+    
+    document.getElementById('onboarding-content').innerText = step.content;
+
+    if (stepIndex === onboardingSteps.length - 1) {
+        onboardingButton.innerText = "Finish";
+    } else {
+        onboardingButton.innerText = "Next";
+    }
+}
+
+function startOnboarding() {
+    overlay.classList.remove('hidden');
+    popover.classList.add('visible');
+    
+    showOnboardingStep(0);
+
+    onboardingButton.addEventListener('click', function handleOnboardingClick() {
+        currentOnboardingStep++;
+        if (currentOnboardingStep < onboardingSteps.length) {
+            showOnboardingStep(currentOnboardingStep);
+        } else {
+            overlay.classList.add('hidden');
+            popover.classList.remove('visible');
+            localStorage.setItem('mindforge_onboarded', 'true');
+            onboardingButton.removeEventListener('click', handleOnboardingClick);
+        }
+    });
+}
+
   function addXP(data) {
       const isQuickAdd = typeof data === 'number';
       let xpAmount = isQuickAdd ? data : data.xp;
@@ -911,8 +987,13 @@ logList.addEventListener('click', (e) => {
         renderThemeSelector();
         renderPowerups();
         renderLog();
+        setInterval(updatePowerupTimers, 1000);
+
+        if (!localStorage.getItem('mindforge_onboarded')) {
+            startOnboarding();
 
     }
+}
     
     init();
   });

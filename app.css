@@ -458,3 +458,63 @@ header nav {
   background-color: hsl(48, 95%, 53%); 
   border: 1px solid hsl(48, 95%, 45%);
 }
+
+
+.onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+.onboarding-popover {
+  position: absolute; 
+  z-index: 1000;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  padding: 1.25rem;
+  max-width: 350px;
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.onboarding-popover.visible {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.onboarding-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+}
+
+.onboarding-nav {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+
+.onboarding-popover::after {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  background-color: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  border-right: 1px solid hsl(var(--border));
+  transform: rotate(45deg);
+}
+
+
+.onboarding-popover.arrow-top::after { top: -0.5rem; left: 2rem; }
+.onboarding-popover.arrow-bottom::after { bottom: -0.5rem; left: 2rem; }
+.onboarding-popover.arrow-left::after { left: -0.5rem; top: 2rem; }
+
