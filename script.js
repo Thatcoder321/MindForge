@@ -263,35 +263,32 @@ class Particle {
     function closeEditModal() { state.currentlyEditingLogId = null; modalBackdrop.classList.remove('visible'); modalContent.classList.remove('hidden'); }
 
 
-function handleNavClick(e) {
-    const targetButton = e.target.closest('.nav-button');
-    if (!targetButton) return;
-  
-    const targetPageId = targetButton.dataset.page;
-  
-    // Remove 'active' class from all nav buttons
-    navButtons.forEach(button => button.classList.remove('active'));
-    // Add 'active' class to the one that was clicked
-    targetButton.classList.add('active');
-  
-    // Hide all pages
-    pages.forEach(page => {
-      page.classList.remove('active');
-    });
-    // Show only the target page
-    document.getElementById(targetPageId).classList.add('active');
-  
-    // --- This part is new, but it's important to keep ---
-    // It makes sure the right content is rendered when you switch pages
-    if (targetPageId === 'stats') {
-      updateStatsPage();
-    } else if (targetPageId === 'shop') {
-      renderShop();
-    } else if (targetPageId === 'dashboard') {
-      renderThemeSelector();
-      renderPowerups();
+    function handleNavClick(e) {
+       
+        const targetButton = e.target.closest('.nav-button');
+        if (!targetButton) return;
+    
+        const targetPageId = targetButton.dataset.page;
+    
+      
+        navButtons.forEach(button => button.classList.remove('active'));
+
+        targetButton.classList.add('active');
+    
+       
+        pages.forEach(page => page.classList.remove('active'));
+
+        document.getElementById(targetPageId).classList.add('active');
+    
+        if (targetPageId === 'stats') {
+            updateStatsPage();
+        } else if (targetPageId === 'shop') {
+            renderShop();
+        } else if (targetPageId === 'dashboard') {
+            renderThemeSelector();
+            renderPowerups();
+        }
     }
-  }
   
     
     function createParticleExplosion(buttonElement, xpAmount) { const rect = buttonElement.getBoundingClientRect(); const centerX = rect.left + rect.width / 2; const centerY = rect.top + rect.height / 2; const intensity = xpAmount / 25; particleSystem.createRipple(centerX, centerY, intensity); }
@@ -523,6 +520,7 @@ function handleNavClick(e) {
     }
 });
     // --- Event Listeners ---
+    document.querySelector('nav').addEventListener('click', handleNavClick);
     document.querySelectorAll('.tabs-trigger').forEach(trigger => {
         trigger.addEventListener('click', function() {
           // Remove active from all triggers

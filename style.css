@@ -322,3 +322,42 @@ main { margin-top: 2rem; }
   height: 100%;
   object-fit: contain; 
 }
+
+#shop .space-y-lg,
+#stats .space-y-lg {
+  max-width: 768px; 
+  margin-left: auto;
+  margin-right: auto;
+}
+
+header nav {
+  display: flex;
+  gap: 0.5rem; 
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.nav-button {
+
+  background: transparent;
+  border: none;
+  
+
+  padding: 0.75rem 1rem;
+  margin-bottom: -1px; 
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-button:hover {
+  color: hsl(var(--foreground));
+}
+
+.nav-button.active {
+  color: hsl(var(--foreground));
+  border-bottom-color: hsl(var(--primary)); 
+}
