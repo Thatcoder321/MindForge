@@ -527,21 +527,9 @@ class Particle {
     }
 });
     // --- Event Listeners ---
-    document.querySelector('nav').addEventListener('click', handleNavClick);
-    document.querySelectorAll('.tabs-trigger').forEach(trigger => {
-        trigger.addEventListener('click', function() {
-          // Remove active from all triggers
-          document.querySelectorAll('.tabs-trigger').forEach(t => t.removeAttribute('data-state'));
-          // Add active to clicked trigger
-          this.setAttribute('data-state', 'active');
-          
-          // Hide all pages
-          document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-          // Show target page
-          const targetPage = this.getAttribute('data-page');
-          document.getElementById(targetPage).classList.add('active');
-        });
-      });
+    document.querySelectorAll('.nav-button').forEach(button => {
+        button.addEventListener('click', handleNavClick);
+    });
     const dashboardPage = document.getElementById('dashboard');
   if (dashboardPage) {
     dashboardPage.addEventListener('click', (e) => {
@@ -553,7 +541,7 @@ class Particle {
         }
     });
   }
-    // In script.js
+ 
 
 logList.addEventListener('click', (e) => {
    
