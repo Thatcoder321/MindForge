@@ -481,10 +481,7 @@ class Particle {
         }
     });
 }
-
-  getAiInsightsButton.addEventListener('click', async (e) => {
-   
-    
+getAiInsightsButton.addEventListener('click', async (e) => {
     if (state.log.length < 3) {
         alert('You need to log at least 3 study sessions to get a useful analysis.');
         return;
@@ -493,12 +490,10 @@ class Particle {
     const buttonText = getAiInsightsButton.querySelector('.button-text');
     const spinner = getAiInsightsButton.querySelector('.spinner');
 
-    // --- Start Loading Animation ---
     getAiInsightsButton.disabled = true;
-    getAiInsightsButton.classList.add('loading');
-    buttonText.style.opacity = '0';
-    spinner.classList.remove('hidden');
-    spinner.style.opacity = '1';
+    buttonText.textContent = 'Analyzing...'; 
+
+    spinner.classList.add('hidden');
 
     try {
         const response = await fetch('/api/generateInsights', {
@@ -520,12 +515,9 @@ class Particle {
         aiInsightsResultDiv.innerHTML = `<p style="color: red;">${error.message}</p>`;
         aiInsightsResultDiv.classList.remove('hidden');
     } finally {
-
+      
         getAiInsightsButton.disabled = false;
-        getAiInsightsButton.classList.remove('loading');
-        buttonText.style.opacity = '1';
-        spinner.style.opacity = '0';
-        setTimeout(() => spinner.classList.add('hidden'), 200);
+        buttonText.textContent = 'Analyze My Progress'; 
     }
 });
     // --- Event Listeners ---
@@ -598,12 +590,11 @@ logList.addEventListener('click', (e) => {
         const buttonText = aiLogButton.querySelector('.button-text');
         const spinner = aiLogButton.querySelector('.spinner');
     
-        // --- Start Loading Animation ---
+
         aiLogButton.disabled = true;
-        aiLogButton.classList.add('loading'); // Add the pulsing animation class
-        buttonText.style.opacity = '0'; // Fade out the text
-        spinner.classList.remove('hidden');
-        spinner.style.opacity = '1'; // Fade in the spinner
+        buttonText.textContent = 'Analyzing...'; 
+
+        spinner.classList.add('hidden');
     
         try {
             const response = await fetch('/api/generateXP', {
@@ -625,12 +616,9 @@ logList.addEventListener('click', (e) => {
             console.error('Failed to fetch AI suggestion:', error);
             alert('Could not get an AI suggestion. Please try again.');
         } finally {
-            // --- End Loading Animation ---
+ 
             aiLogButton.disabled = false;
-            aiLogButton.classList.remove('loading'); 
-            buttonText.style.opacity = '1'; 
-            spinner.style.opacity = '0'; 
-            setTimeout(() => spinner.classList.add('hidden'), 200); 
+            buttonText.textContent = 'Analyze & Generate XP'; 
         }
     });
   
@@ -827,7 +815,9 @@ logList.addEventListener('click', (e) => {
                 alert('There was an error processing your image. Please try a different one.');
             }
         }
-    });analyzeImageButton.addEventListener('click', async () => {
+    });
+    
+    analyzeImageButton.addEventListener('click', async () => {
         if (!uploadedImageBase64) {
             alert('Please select an image first.');
             return;
@@ -839,7 +829,7 @@ logList.addEventListener('click', (e) => {
         console.log("Sending request to /api/analyzeImage...");
     
         analyzeImageButton.disabled = true;
-        analyzeImageButton.innerText = "Analyzing...";
+        analyzeImageButton.innerText = "Analyzing..."; 
     
         try {
             const response = await fetch('/api/analyzeImage', {
@@ -863,7 +853,6 @@ logList.addEventListener('click', (e) => {
                     aiSuggestedXp.innerText = data.xp;
                     aiJustification.innerText = data.justification;
                     
-                  
                     const imagePreviewBox = document.getElementById('image-preview-box');
                     const imageAnalysisForm = document.getElementById('image-analysis-form');
                     
@@ -874,7 +863,6 @@ logList.addEventListener('click', (e) => {
                         imageAnalysisForm.classList.add('hidden');
                     }
                     
-                  
                     if (aiResultsDiv) {
                         aiResultsDiv.classList.remove('hidden');
                     }
@@ -893,7 +881,7 @@ logList.addEventListener('click', (e) => {
             alert(`A network error occurred: ${networkError.message}`);
         } finally {
             analyzeImageButton.disabled = false;
-            analyzeImageButton.innerText = "Analyze Image";
+            analyzeImageButton.innerText = "Analyze Image"; // Reset to original text
         }
     });
     // --- Initialization ---
