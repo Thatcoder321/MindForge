@@ -27,10 +27,9 @@
               MindForge reshapes math learning into a rewarding game. Log your work with text or images, rack up XP for every step, get smart insights, and see your progress grow like never before.
             </p>
             <a href="app.html" 
-               class="cta-button" 
-               onmouseover="particleSystem.createRipple(event.clientX, event.clientY, 0.5); createFlyingXP(event);" 
-               onclick="triggerPageTransition(event)">
-               Launch App
+            class="cta-button" 
+            onmouseover="particleSystem.createRipple(event.clientX, event.clientY, 0.5); createFlyingXP(event);">
+            Launch App
             </a>
         </main>
 
@@ -39,15 +38,14 @@
         </footer>
     </div>
 
-    <!-- This is the overlay for the page transition effect -->
-    <div id="transition-overlay"></div>
 
-    <!-- Scripts for the landing page -->
+
+
     <script src="particles.js"></script>
     <script src="globals.js"></script>
     <script src="init-particles.js"></script>
 
-    <!-- Script block with landing page specific logic -->
+
     <script>
       function createFlyingXP(event) {
         const xpValues = ['+10 XP', '+25 XP', '+50 XP'];
@@ -61,34 +59,7 @@
         setTimeout(() => { flyer.remove(); }, 1500);
       }
 
-      function triggerPageTransition(event) {
-        event.preventDefault();
-        const destination = event.currentTarget.href;
-        const overlay = document.getElementById('transition-overlay');
-        if (!overlay) return;
-
-        overlay.style.zIndex = "100"; // Bring the overlay to the front
-
-        for (let i = 0; i < 200; i++) {
-            const tile = document.createElement('div');
-            tile.className = 'transition-tile';
-            overlay.appendChild(tile);
-        }
-
-        const tiles = document.querySelectorAll('.transition-tile');
-        tiles.forEach(tile => {
-            setTimeout(() => {
-                const x = (Math.random() - 0.5) * 2000;
-                const y = (Math.random() - 0.5) * 2000;
-                const rot = (Math.random() - 0.5) * 720;
-                tile.style.transform = `translateX(${x}px) translateY(${y}px) rotate(${rot}deg)`;
-            }, Math.random() * 200);
-        });
-        
-        setTimeout(() => {
-            window.location.href = destination;
-        }, 1200);
-      }
+      
     </script>
 </body>
 </html>

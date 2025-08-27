@@ -124,21 +124,3 @@
     100% { transform: translateY(200px) scale(0.5); opacity: 0; }
   }
   
-  /* Shatter Transition */
-  #transition-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1; /* Start behind the content */
-    display: grid;
-    grid-template-columns: repeat(20, 1fr);
-    grid-template-rows: repeat(10, 1fr);
-    pointer-events: none;
-  }
-  
-  .transition-tile {
-    background-color: hsl(220, 10%, 14%); /* Visible color */
-    transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1);
-  }
