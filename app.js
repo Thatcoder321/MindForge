@@ -782,28 +782,6 @@ function updateStatsPage() {
   const conceptData = {};
   const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 }; // Keep not_picked for now
 
-  const conceptMap = {
-      "geometry proofs": "Geometry Proofs", "congruence proofs": "Geometry Proofs", "proofs": "Geometry Proofs", "aaa theorem": "Geometry Proofs", "saa theorem": "Geometry Proofs", "sas theorem": "Geometry Proofs", "sss theorem": "Geometry Proofs", "aas theorem": "Geometry Proofs", "asa theorem": "Geometry Proofs", "triangle congruence": "Geometry Proofs", "triangle similarity": "Geometry Proofs", "triangle similarity proofs": "Geometry Proofs", "congruent triangles": "Geometry Proofs", "similar triangles": "Geometry Proofs", "congruent angles": "Geometry Proofs", "congruence theorems": "Geometry Proofs", "parallel lines": "Geometry Proofs", "angle relationships": "Geometry Proofs", "corresponding angles": "Geometry Proofs", "alternate interior angles": "Geometry Proofs",
-      "algebraic manipulation": "Algebraic Manipulation", "quadratic formula": "Algebraic Manipulation", "completing the square": "Algebraic Manipulation", "factoring": "Algebraic Manipulation", "factoring polynomials": "Algebraic Manipulation", "solving equations": "Algebraic Manipulation", "linear equations": "Algebraic Manipulation", "quadratic equations": "Algebraic Manipulation", "systems of equations": "Algebraic Manipulation", "inequalities": "Algebraic Manipulation", "algebraic expressions": "Algebraic Manipulation",
-      "trigonometric ratios": "Trigonometric Ratios", "sine function": "Trigonometric Ratios", "cosine function": "Trigonometric Ratios", "tangent function": "Trigonometric Ratios", "sin": "Trigonometric Ratios", "cos": "Trigonometric Ratios", "tan": "Trigonometric Ratios", "unit circle": "Trigonometric Ratios", "trig identities": "Trigonometric Ratios", "inverse trig functions": "Trigonometric Ratios",
-      "functions & relations": "Functions & Relations", "function notation": "Functions & Relations", "domain and range": "Functions & Relations", "function transformations": "Functions & Relations", "graphing functions": "Functions & Relations", "logarithmic functions": "Functions & Relations", "exponential functions": "Functions & Relations",
-      "calculus techniques": "Calculus Techniques", "derivatives": "Calculus Techniques", "integrals": "Calculus Techniques", "limits": "Calculus Techniques", "chain rule": "Calculus Techniques", "product rule": "Calculus Techniques", "quotient rule": "Calculus Techniques", "optimization": "Calculus Techniques", "related rates": "Calculus Techniques",
-      "mathematical reasoning": "Mathematical Reasoning", "logic": "Mathematical Reasoning", "problem solving": "Mathematical Reasoning", "proof writing": "Mathematical Reasoning",
-      "statistics & data": "Statistics & Data", "mean": "Statistics & Data", "median": "Statistics & Data", "mode": "Statistics & Data", "probability": "Statistics & Data", "data analysis": "Statistics & Data",
-      "number theory": "Number Theory", "prime numbers": "Number Theory", "sequences": "Number Theory", "series": "Number Theory",
-  };
-
-  function normalizeConcept(concept) {
-      if (!concept || typeof concept !== 'string') return "Other";
-      const key = concept.toLowerCase().trim();
-      const normalized = conceptMap[key];
-      if (normalized) { return normalized; }
-      const standardizedCategories = ["Geometry Proofs", "Algebraic Manipulation", "Trigonometric Ratios", "Statistics & Data", "Calculus Techniques", "Mathematical Reasoning", "Functions & Relations", "Number Theory", "Other"];
-      for (const category of standardizedCategories) {
-          if (category.toLowerCase() === key) { return category; }
-      }
-      return "Other";
-  }
 
   state.log.forEach(entry => {
       if (entry.confidence && confidenceData.hasOwnProperty(entry.confidence)) {
@@ -820,6 +798,28 @@ function updateStatsPage() {
       }
   });
 
+  const conceptMap = {
+    "geometry proofs": "Geometry Proofs", "congruence proofs": "Geometry Proofs", "proofs": "Geometry Proofs", "aaa theorem": "Geometry Proofs", "saa theorem": "Geometry Proofs", "sas theorem": "Geometry Proofs", "sss theorem": "Geometry Proofs", "aas theorem": "Geometry Proofs", "asa theorem": "Geometry Proofs", "triangle congruence": "Geometry Proofs", "triangle similarity": "Geometry Proofs", "triangle similarity proofs": "Geometry Proofs", "congruent triangles": "Geometry Proofs", "similar triangles": "Geometry Proofs", "congruent angles": "Geometry Proofs", "congruence theorems": "Geometry Proofs", "parallel lines": "Geometry Proofs", "angle relationships": "Geometry Proofs", "corresponding angles": "Geometry Proofs", "alternate interior angles": "Geometry Proofs",
+    "algebraic manipulation": "Algebraic Manipulation", "quadratic formula": "Algebraic Manipulation", "completing the square": "Algebraic Manipulation", "factoring": "Algebraic Manipulation", "factoring polynomials": "Algebraic Manipulation", "solving equations": "Algebraic Manipulation", "linear equations": "Algebraic Manipulation", "quadratic equations": "Algebraic Manipulation", "systems of equations": "Algebraic Manipulation", "inequalities": "Algebraic Manipulation", "algebraic expressions": "Algebraic Manipulation",
+    "trigonometric ratios": "Trigonometric Ratios", "sine function": "Trigonometric Ratios", "cosine function": "Trigonometric Ratios", "tangent function": "Trigonometric Ratios", "sin": "Trigonometric Ratios", "cos": "Trigonometric Ratios", "tan": "Trigonometric Ratios", "unit circle": "Trigonometric Ratios", "trig identities": "Trigonometric Ratios", "inverse trig functions": "Trigonometric Ratios",
+    "functions & relations": "Functions & Relations", "function notation": "Functions & Relations", "domain and range": "Functions & Relations", "function transformations": "Functions & Relations", "graphing functions": "Functions & Relations", "logarithmic functions": "Functions & Relations", "exponential functions": "Functions & Relations",
+    "calculus techniques": "Calculus Techniques", "derivatives": "Calculus Techniques", "integrals": "Calculus Techniques", "limits": "Calculus Techniques", "chain rule": "Calculus Techniques", "product rule": "Calculus Techniques", "quotient rule": "Calculus Techniques", "optimization": "Calculus Techniques", "related rates": "Calculus Techniques",
+    "mathematical reasoning": "Mathematical Reasoning", "logic": "Mathematical Reasoning", "problem solving": "Mathematical Reasoning", "proof writing": "Mathematical Reasoning",
+    "statistics & data": "Statistics & Data", "mean": "Statistics & Data", "median": "Statistics & Data", "mode": "Statistics & Data", "probability": "Statistics & Data", "data analysis": "Statistics & Data",
+    "number theory": "Number Theory", "prime numbers": "Number Theory", "sequences": "Number Theory", "series": "Number Theory",
+};
+
+function normalizeConcept(concept) {
+  if (!concept || typeof concept !== 'string') return "Other";
+  const key = concept.toLowerCase().trim();
+  const normalized = conceptMap[key];
+  if (normalized) { return normalized; }
+  const standardizedCategories = ["Geometry Proofs", "Algebraic Manipulation", "Trigonometric Ratios", "Statistics & Data", "Calculus Techniques", "Mathematical Reasoning", "Functions & Relations", "Number Theory", "Other"];
+  for (const category of standardizedCategories) {
+      if (category.toLowerCase() === key) { return category; }
+  }
+  return "Other";
+}
   totalSessionsEl.innerText = state.log.length;
   const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
   avgXpEl.innerText = avgXp;
@@ -1407,7 +1407,7 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
                   if (aiResultsDiv) {
                       aiResultsDiv.classList.remove('hidden');
                   }
-                  updateQuestProgress('log_image', 1);
+                 
 
                   updateProgress('log_image', 1, { concepts: data.concepts || [] });
               } else {
