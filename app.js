@@ -1113,7 +1113,6 @@ if (shopListContainer) {
           }
       });
   }
-  
   acceptAiSuggestionButton.addEventListener('click', () => {
     if (!tempAiSuggestion) {
         console.error("Accept button clicked, but tempAiSuggestion state is missing.");
@@ -1136,16 +1135,23 @@ if (shopListContainer) {
         return;
     }
 
+    try {
 
-    addXP(logData);
-    
+        addXP(logData);
+        
 
-    clearAiSuggestion();
-    
-
-    showNotification(`Successfully logged: ${description}`);
-    
-    console.log('AI suggestion accepted and UI cleared.');
+        clearAiSuggestion();
+        
+     
+        showNotification(`Successfully logged: ${description}`);
+        
+        console.log('AI suggestion accepted and UI cleared.');
+    } catch (error) {
+        console.error('Error processing AI suggestion:', error);
+      
+        clearAiSuggestion();
+        showNotification(`Logged with warning: ${description}`);
+    }
 });
 const themeToggleButton = document.getElementById('theme-toggle-button');
 
