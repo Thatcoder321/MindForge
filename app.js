@@ -323,11 +323,17 @@ function updateProgress(typeOfAction, amount, data = {}) {
         }
 
         else if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && data.concepts) {
-            
-            const normalizedConcepts = data.concepts.map(c => normalizeConcept(c));
-            if (normalizedConcepts.includes(bountyInfo.goal.target)) {
-                bounty.progress += 1; 
-                progressMade = true;
+            try {
+                // Ensure concepts is an array before processing
+                const conceptsArray = Array.isArray(data.concepts) ? data.concepts : [];
+                const normalizedConcepts = conceptsArray.map(c => normalizeConcept(c));
+                if (normalizedConcepts.includes(bountyInfo.goal.target)) {
+                    bounty.progress += 1; 
+                    progressMade = true;
+                }
+            } catch (error) {
+                console.error('Error processing concept bounty:', error, 'Concepts:', data.concepts);
+                // Continue processing other bounties even if this one fails
             }
         }
         
@@ -811,14 +817,19 @@ function updateStatsPage() {
 
 function normalizeConcept(concept) {
   if (!concept || typeof concept !== 'string') return "Other";
-  const key = concept.toLowerCase().trim();
-  const normalized = conceptMap[key];
-  if (normalized) { return normalized; }
-  const standardizedCategories = ["Geometry Proofs", "Algebraic Manipulation", "Trigonometric Ratios", "Statistics & Data", "Calculus Techniques", "Mathematical Reasoning", "Functions & Relations", "Number Theory", "Other"];
-  for (const category of standardizedCategories) {
-      if (category.toLowerCase() === key) { return category; }
+  try {
+    const key = concept.toLowerCase().trim();
+    const normalized = conceptMap[key];
+    if (normalized) { return normalized; }
+    const standardizedCategories = ["Geometry Proofs", "Algebraic Manipulation", "Trigonometric Ratios", "Statistics & Data", "Calculus Techniques", "Mathematical Reasoning", "Functions & Relations", "Number Theory", "Other"];
+    for (const category of standardizedCategories) {
+        if (category.toLowerCase() === key) { return category; }
+    }
+    return "Other";
+  } catch (error) {
+    console.error('Error normalizing concept:', error, 'Input:', concept);
+    return "Other";
   }
-  return "Other";
 }
   totalSessionsEl.innerText = state.log.length;
   const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
