@@ -3,41 +3,21 @@
   document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateActiveTimers, 1000);
   let state = {xp:0,coins:0,log:[],inventory: [],
-    activeTheme: 'theme_dark', activePowerups: [], currentlyEditingLogId: null,
+    activeTheme: 'dark', activePowerups: [], currentlyEditingLogId: null,
 
     activeQuests: [],
     questProgress: {},
     questsLastUpdated: null,
 
     activeBounties: [],
+    avaliableBounties: [],
+    bountyRefreshCooldown: null
   };
   
   const XP_TO_COIN_RATE = 10;
 
   const shopItems = [
-    {
-        id: 'bounty_rapid_review',
-        type: 'bounty',
-        name: 'Bounty: Rapid Review',
-        description: 'Challenge: Log 3 Seperate sessions. High risk, high reward!',
-        cost: 15,
-        timeLimit: 60,
-
-        goal: { type: 'log_session', target: 3 },
-        successReward: { xp: 100, coins: 30 }, 
-        failureReward: { xp: 20, coins: 5 }  
-    },
-    {
-        id: 'bounty_xp_sprint',
-        type: 'bounty',
-        name: 'Bounty: XP Sprint',
-        description: 'Challenge: Earn 150 XP. Could you do it?',
-        cost: 20,
-        timeLimit: 90,
-        goal: { type: 'earn_xp', target: 150 },
-        successReward: { xp: 150, coins: 45 }, 
-        failureReward: { xp: 30, coins: 10 }   
-    },
+    
       {
           id: 'potion_double_xp',
           name: 'Elixir of Focus (2x XP)',
@@ -106,7 +86,25 @@
             reward: {xp:50, coins: 5}
         }
     ];
+    const bountyMasterList = [
 
+        { id: 'bounty_log_3', name: 'Bounty: Quick Sprint', description: 'Challenge: Log 3 separate sessions.', cost: 5, timeLimit: 30, goal: { type: 'log_session', target: 3 }, successReward: { xp: 50, coins: 10 }, failureReward: { xp: 10, coins: 2 } },
+        { id: 'bounty_log_5', name: 'Bounty: Focused Effort', description: 'Challenge: Log 5 separate sessions.', cost: 10, timeLimit: 60, goal: { type: 'log_session', target: 5 }, successReward: { xp: 120, coins: 25 }, failureReward: { xp: 25, coins: 5 } },
+        { id: 'bounty_log_image_1', name: 'Bounty: Visual Proof', description: 'Challenge: Log a session with an image upload.', cost: 8, timeLimit: 20, goal: { type: 'log_image', target: 1 }, successReward: { xp: 75, coins: 15 }, failureReward: { xp: 15, coins: 3 } },
+    
+
+        { id: 'bounty_xp_100', name: 'Bounty: XP Dash', description: 'Challenge: Earn 100 XP.', cost: 10, timeLimit: 45, goal: { type: 'earn_xp', target: 100 }, successReward: { xp: 100, coins: 20 }, failureReward: { xp: 20, coins: 4 } },
+        { id: 'bounty_xp_250', name: 'Bounty: XP Marathon', description: 'Challenge: Earn 250 XP.', cost: 25, timeLimit: 90, goal: { type: 'earn_xp', target: 250 }, successReward: { xp: 250, coins: 50 }, failureReward: { xp: 50, coins: 10 } },
+        { id: 'bounty_xp_75_fast', name: 'Bounty: High-Speed XP', description: 'Challenge: Earn 75 XP in under 15 minutes.', cost: 15, timeLimit: 15, goal: { type: 'earn_xp', target: 75 }, successReward: { xp: 150, coins: 30 }, failureReward: { xp: 30, coins: 6 } },
+    
+       
+        { id: 'bounty_log_geometry', name: 'Bounty: Angle Ace', description: 'Challenge: Log a session with "Geometry" concepts.', cost: 10, timeLimit: 30, goal: { type: 'log_concept', target: 'Geometry Proofs' }, successReward: { xp: 80, coins: 18 }, failureReward: { xp: 15, coins: 3 } },
+        { id: 'bounty_log_algebra', name: 'Bounty: Equation Expert', description: 'Challenge: Log a session with "Algebra" concepts.', cost: 10, timeLimit: 30, goal: { type: 'log_concept', target: 'Algebraic Manipulation' }, successReward: { xp: 80, coins: 18 }, failureReward: { xp: 15, coins: 3 } },
+    
+
+        { id: 'bounty_log_10', name: 'Bounty: The Gauntlet', description: 'Challenge: Log 10 separate sessions. Not for the faint of heart!', cost: 30, timeLimit: 180, goal: { type: 'log_session', target: 10 }, successReward: { xp: 500, coins: 100 }, failureReward: { xp: 100, coins: 20 } },
+        { id: 'bounty_xp_500', name: 'Bounty: Legendary Learner', description: 'Challenge: Earn a massive 500 XP.', cost: 50, timeLimit: 240, goal: { type: 'earn_xp', target: 500 }, successReward: { xp: 600, coins: 150 }, failureReward: { xp: 120, coins: 30 } },
+    ];
     
   // --- DOM Elements ---
   const canvas = document.getElementById('particles-canvas');
@@ -171,7 +169,39 @@
     }
 }
 
-   
+function refreshBounties() {
+    console.log("Refreshing bounties...");
+    const shuffled = bountyMasterList.sort(() => 0.5 - Math.random());
+    
+
+    const activeBountyIds = new Set(state.activeBounties.map(b => b.id));
+    const newBounties = [];
+    for (const bounty of shuffled) {
+        if (!activeBountyIds.has(bounty.id) && newBounties.length < 2) {
+            newBounties.push(bounty);
+        }
+    }
+
+    state.availableBounties = newBounties;
+
+    state.bountyRefreshCooldown = new Date().getTime() + (60 * 60 * 1000); 
+    
+    saveState();
+    renderShop();
+}
+
+function payToRefreshBounties() {
+    if (state.coins < 10) {
+        showNotification("You need 10 🪙 to refresh bounties early.");
+        return;
+    }
+    
+    state.coins -= 10;
+    coinsDisplay.innerText = state.coins.toLocaleString();
+    showNotification("-10 🪙 for an early bounty refresh!");
+    
+    refreshBounties(); 
+}
 
   function resizeImage(file, maxSize = 1024) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { let width = img.width; let height = img.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', 0.9)); }; img.onerror = reject; img.src = event.target.result; }; reader.onerror = reject; reader.readAsDataURL(file); }); }
   let currentOnboardingStep = 0;
@@ -254,7 +284,8 @@ function refreshDailyQuests() {
     state.questsLastUpdated = today;
     saveState();
 }
-function updateProgress(typeOfAction, amount) {
+
+function updateProgress(typeOfAction, amount, data = {}) {
     let needsUiUpdate = false;
 
 
@@ -263,33 +294,63 @@ function updateProgress(typeOfAction, amount) {
             state.questProgress[quest.id] += amount;
             needsUiUpdate = true;
         }
+
+        else if (quest.type === 'log_image' && typeOfAction === 'log_image') {
+             state.questProgress[quest.id] += amount;
+             needsUiUpdate = true;
+        }
     });
 
+
     state.activeBounties.forEach(bounty => {
-        if (bounty.goal.type === typeOfAction) {
+        const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
+        if (!bountyInfo) return; 
+
+        let progressMade = false;
+        
+      
+        if (bountyInfo.goal.type === typeOfAction) {
             bounty.progress += amount;
-            console.log(`Bounty progress for ${bounty.id}: ${bounty.progress}/${bounty.goal.target}`);
+            progressMade = true;
+        } 
+       
+        else if (bountyInfo.goal.type === 'log_image' && typeOfAction === 'log_image') {
+             bounty.progress += amount;
+             progressMade = true;
+        }
 
+        else if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && data.concepts) {
+            
+            const normalizedConcepts = data.concepts.map(c => normalizeConcept(c));
+            if (normalizedConcepts.includes(bountyInfo.goal.target)) {
+                bounty.progress += 1; 
+                progressMade = true;
+            }
+        }
+        
+        if (progressMade) {
+             console.log(`Bounty progress for ${bounty.id}: ${bounty.progress}/${bountyInfo.goal.target}`);
 
-            if (bounty.progress >= bounty.goal.target) {
-                const bountyInfo = shopItems.find(i => i.id === bounty.id);
-
+         
+             if (bounty.progress >= bountyInfo.goal.target) {
+   
                 state.xp += bountyInfo.successReward.xp; 
                 state.coins += bountyInfo.successReward.coins; 
                 
                 showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
                 
-          
+               
                 state.activeBounties = state.activeBounties.filter(b => b.id !== bounty.id);
                 
-      
+               
                 xpDisplay.innerText = state.xp.toLocaleString();
                 coinsDisplay.innerText = state.coins.toLocaleString();
-            }
-            needsUiUpdate = true;
+             }
+             needsUiUpdate = true;
         }
     });
 
+   
     if (needsUiUpdate) {
         saveState();
         renderQuests(); 
@@ -378,6 +439,9 @@ function addXP(data) {
     animateValue(coinsDisplay, previousCoins, state.coins, 800);
     updateProgress('log_session', 1);
     updateProgress('earn_xp', xpAmount);
+    updateProgress('log_session', 1, logEntry); 
+
+
     renderLog();
 }
 
@@ -419,11 +483,10 @@ function addXP(data) {
     
     renderPowerups();
   }
-
-function buyBounty(bountyId) {
-    const bounty = shopItems.find(i => i.id === bountyId);
-    if(!bounty || bounty.type !== 'bounty') {
-        console.error("Attempted to buy a non-bounty item as a bounty:", bountyId);
+  function buyBounty(bountyId) {
+    const bounty = bountyMasterList.find(i => i.id === bountyId);
+    if (!bounty) {
+        console.error("Attempted to buy a non-existent bounty:", bountyId);
         return;
     }
     if (state.coins < bounty.cost) {
@@ -435,21 +498,19 @@ function buyBounty(bountyId) {
         return;
     }
 
-
     state.coins -= bounty.cost;
-
 
     const expirationTime = new Date().getTime() + bounty.timeLimit * 60 * 1000;
     state.activeBounties.push({
         id: bountyId,
         expiresAt: expirationTime,
-        progress: 0, 
-        goal: bounty.goal 
+        progress: 0,
+        goal: bounty.goal
     });
 
+    state.availableBounties = state.availableBounties.filter(b => b.id !== bountyId);
+
     showNotification(`Bounty Accepted: ${bounty.name}`);
-    
- 
     saveState();
     renderShop();
     updateActiveTimers();
@@ -554,8 +615,10 @@ function renderLog() {
       } else if (targetPageId === 'dashboard') {
           renderThemeSelector();
           renderPowerups();
-      }
+      } else if (targetPageId === 'log') { 
+        renderLog();
   }
+}
 
   
   function createParticleExplosion(buttonElement, xpAmount) { const rect = buttonElement.getBoundingClientRect(); const centerX = rect.left + rect.width / 2; const centerY = rect.top + rect.height / 2; const intensity = xpAmount / 25; particleSystem.createRipple(centerX, centerY, intensity); }
@@ -570,53 +633,100 @@ function renderLog() {
 
     shopList.innerHTML = ''; 
 
-    const categories = ['Bounty', 'Power-up'];
 
-    categories.forEach(category => {
+    const bountyTitle = document.createElement('h3');
+    bountyTitle.className = 'shop-category-title';
+    bountyTitle.innerText = 'Bounties';
+    shopList.appendChild(bountyTitle);
 
-        const itemsInCategory = shopItems.filter(item => item.type.toLowerCase() === category.toLowerCase());
+    if (state.availableBounties.length > 0) {
+        state.availableBounties.forEach(bounty => {
+            const isActive = state.activeBounties.some(ab => ab.id === bounty.id);
+            const canAfford = state.coins >= bounty.cost;
+
+            const itemCard = document.createElement('div');
+            itemCard.className = 'card flex justify-between items-center';
+
+            let buttonHtml;
+            if (isActive) {
+                buttonHtml = `<button class="btn btn-secondary" disabled>Active</button>`;
+            } else if (!canAfford) {
+                buttonHtml = `<button class="btn btn-secondary" disabled>Cost: ${bounty.cost} 🪙</button>`;
+            } else {
+                buttonHtml = `<button class="btn btn-primary" data-bounty-id="${bounty.id}">Accept (${bounty.cost} 🪙)</button>`;
+            }
+
+            itemCard.innerHTML = `
+                <div>
+                    <h3 class="font-semibold">${bounty.name}</h3>
+                    <p class="text-sm text-muted">${bounty.description}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold mb-sm">Reward: ${bounty.successReward.coins} 🪙</p>
+                    ${buttonHtml}
+                </div>`;
+            shopList.appendChild(itemCard);
+        });
+    } else {
+
+        const cooldownCard = document.createElement('div');
+        cooldownCard.className = 'card text-center';
+        cooldownCard.id = 'bounty-cooldown-card';
         
-       
-        if (itemsInCategory.length > 0) {
-          
-            const categoryTitle = document.createElement('h3');
-            categoryTitle.className = 'shop-category-title';
-            categoryTitle.innerText = `${category}s`; 
-            shopList.appendChild(categoryTitle);
+        const now = new Date().getTime();
+        const timeLeft = state.bountyRefreshCooldown ? state.bountyRefreshCooldown - now : 0;
 
-            
-            itemsInCategory.forEach(item => {
-                const isOwned = state.inventory.includes(item.id);
-                
-                const isActiveBounty = item.type === 'bounty' && state.activeBounties.some(b => b.id === item.id);
-                const canAfford = state.coins >= item.cost;
-                
-                const itemCard = document.createElement('div');
-                itemCard.className = 'card flex justify-between items-center';
-
-                let buttonHtml;
-                if (isOwned || isActiveBounty) {
-                    buttonHtml = `<button class="btn btn-secondary" disabled>${isActiveBounty ? 'Active' : 'Owned'}</button>`;
-                } else if (!canAfford) {
-                    buttonHtml = `<button class="btn btn-secondary" disabled>Insufficient Coins</button>`;
-                } else {
-                  
-                    const dataType = item.type === 'bounty' ? 'data-bounty-id' : 'data-item-id';
-                    buttonHtml = `<button class="btn btn-primary" ${dataType}="${item.id}">Buy</button>`;
-                }
-
-                itemCard.innerHTML = `
-                    <div>
-                        <h3 class="font-semibold">${item.name}</h3>
-                        <p class="text-sm text-muted">${item.description}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold mb-sm">${item.cost} 🪙</p>
-                        ${buttonHtml}
-                    </div>`;
-                shopList.appendChild(itemCard);
-            });
+        if (timeLeft > 0) {
+            const minutes = Math.floor(timeLeft / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            cooldownCard.innerHTML = `
+                <div class="card-body space-y-md">
+                    <p class="text-muted">New bounties will be available in:</p>
+                    <p class="text-3xl font-bold" id="bounty-cooldown-timer">${minutes}:${seconds.toString().padStart(2, '0')}</p>
+                    <button id="pay-to-refresh-btn" class="btn btn-secondary">Pay 10 🪙 to Refresh Now</button>
+                </div>`;
+        } else {
+             cooldownCard.innerHTML = `
+                <div class="card-body space-y-md">
+                     <p class="text-muted">All bounties completed!</p>
+                     <button id="free-refresh-btn" class="btn btn-primary">Get New Bounties</button>
+                </div>`;
         }
+        shopList.appendChild(cooldownCard);
+    }
+
+
+    const powerupTitle = document.createElement('h3');
+    powerupTitle.className = 'shop-category-title';
+    powerupTitle.innerText = 'Power-ups';
+    shopList.appendChild(powerupTitle);
+
+    shopItems.forEach(item => {
+        if(item.type !== 'powerup') return;
+        const isOwned = state.inventory.includes(item.id);
+        const canAfford = state.coins >= item.cost;
+        const itemCard = document.createElement('div');
+        itemCard.className = 'card flex justify-between items-center';
+
+        let buttonHtml;
+        if(isOwned) {
+            buttonHtml = `<button class="btn btn-secondary" disabled>Owned</button>`;
+        } else if (!canAfford) {
+            buttonHtml = `<button class="btn btn-secondary" disabled>Insufficient Coins</button>`;
+        } else {
+            buttonHtml = `<button class="btn btn-primary" data-item-id="${item.id}">Buy</button>`;
+        }
+
+        itemCard.innerHTML = `
+            <div>
+                <h3 class="font-semibold">${item.name}</h3>
+                <p class="text-sm text-muted">${item.description}</p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold mb-sm">${item.cost} 🪙</p>
+                ${buttonHtml}
+            </div>`;
+        shopList.appendChild(itemCard);
     });
 }
 function updateStatsPage() {
@@ -887,19 +997,25 @@ if (shopListContainer) {
         const buyButton = e.target.closest('.btn'); 
         if (!buyButton || buyButton.disabled) return;
 
+
         const bountyId = buyButton.dataset.bountyId;
         const itemId = buyButton.dataset.itemId;
+        
+
+        const isPayToRefresh = buyButton.id === 'pay-to-refresh-btn';
+        const isFreeRefresh = buyButton.id === 'free-refresh-btn';
 
         if (bountyId) {
-
             buyBounty(bountyId);
         } else if (itemId) {
-
             buyItem(itemId);
+        } else if (isPayToRefresh) { 
+            payToRefreshBounties();
+        } else if (isFreeRefresh) { 
+            refreshBounties();
         }
     });
 }
-
 
   aiLogForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -981,49 +1097,34 @@ if (shopListContainer) {
 
     addXP(logData);
     
-    // Call the reject/cancel function to clean up the UI
+
     rejectAiSuggestion();
 });
 
-function applyTheme(theme) { 
-  if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-  } else {
-      document.documentElement.classList.remove('dark');
-  }
-  state.activeTheme = theme;
-  saveState();
+const themeToggleButton = document.getElementById('theme-toggle-button');
+
+
+const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.documentElement.classList.add('light-theme');
+        themeToggleButton.innerHTML = moonIcon;
+    } else {
+        document.documentElement.classList.remove('light-theme');
+        themeToggleButton.innerHTML = sunIcon;
+    }
+    state.activeTheme = theme; 
+    saveState();
 }
-function renderThemeSelector() {
-    const selectorList = document.getElementById('theme-selector-list');
-    if (!selectorList) return;
-  
-    selectorList.innerHTML = ''; 
-  
-    const defaultButton = document.createElement('button');
-    defaultButton.className = 'btn btn-secondary active'; 
-    defaultButton.innerText = 'Default';
-    defaultButton.disabled = true;
-    selectorList.appendChild(defaultButton);
-  }
 
-
-  const ownedThemes = state.inventory
-      .map(itemId => shopItems.find(item => item.id === itemId && item.type === 'theme'))
-      .filter(item => item);
-
-
-  ownedThemes.forEach(theme => {
-      const button = document.createElement('button');
-      button.className = 'btn btn-secondary';
-      button.innerText = theme.name;
-      button.dataset.themeId = theme.id;
-
-      if (state.activeTheme === theme.id) {
-          button.classList.add('active');
-      }
-      selectorList.appendChild(button);
-  });
+if (themeToggleButton) {
+    themeToggleButton.addEventListener('click', () => {
+        const newTheme = state.activeTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+    });
+}
 
 
 function updateActiveTimers() {
@@ -1031,81 +1132,112 @@ function updateActiveTimers() {
     if (!container) return;
 
     const now = new Date().getTime();
-
-
     let bountyFailed = false;
+
+
     state.activeBounties.forEach(bounty => {
         if (now > bounty.expiresAt) {
             bountyFailed = true;
-            const bountyInfo = shopItems.find(i => i.id === bounty.id);
-            state.xp += bountyInfo.failureReward.xp;
-            state.coins += bountyInfo.failureReward.coins; 
-            showNotification(`Bounty Failed: +${bountyInfo.failureReward.xp} XP & ${bountyInfo.failureReward.coins} 🪙`);
-            xpDisplay.innerText = state.xp.toLocaleString();
-            coinsDisplay.innerText = state.coins.toLocaleString();
+           
+            const bountyInfo = bountyMasterList.find(i => i.id === bounty.id); 
+            if (bountyInfo) {
+                state.xp += bountyInfo.failureReward.xp;
+                state.coins += bountyInfo.failureReward.coins;
+                showNotification(`Bounty Failed: +${bountyInfo.failureReward.xp} XP & ${bountyInfo.failureReward.coins} 🪙`);
+                xpDisplay.innerText = state.xp.toLocaleString();
+                coinsDisplay.innerText = state.coins.toLocaleString();
+            }
         }
     });
-    
+
     if (bountyFailed) {
         state.activeBounties = state.activeBounties.filter(b => b.expiresAt > now);
         saveState();
     }
-
-    let activeTimers = [];
-
-
-    state.activePowerups.forEach(p => activeTimers.push({ ...p, type: 'powerup' }));
     
 
-    state.activeBounties.forEach(b => {
-        const bountyInfo = shopItems.find(i => i.id === b.id);
-        activeTimers.push({ 
-            ...b, 
-            type: 'bounty',
-            displayName: bountyInfo?.name || 'Unknown Bounty',
-            progress: b.progress,
-            target: b.goal.target
-        });
+    const activeTimers = [
+        ...state.activePowerups,
+        ...state.activeBounties
+    ].filter(timer => timer.expiresAt > now);
+
+  
+    const displayedTimerIds = new Set([...container.children].map(el => el.dataset.timerId));
+    const activeTimerIds = new Set(activeTimers.map(t => t.id));
+
+
+    displayedTimerIds.forEach(id => {
+        if (!activeTimerIds.has(id)) {
+            const elToRemove = container.querySelector(`[data-timer-id="${id}"]`);
+            if (elToRemove) elToRemove.remove();
+        }
     });
 
-    container.innerHTML = ''; 
-
+   
     activeTimers.forEach(timerItem => {
         const timeLeft = timerItem.expiresAt - now;
+        const minutes = Math.floor(timeLeft / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
+        let timerEl = container.querySelector(`[data-timer-id="${timerItem.id}"]`);
+        
+       
+        const itemInfo = bountyMasterList.find(i => i.id === timerItem.id) || shopItems.find(i => i.id === timerItem.id);
+        if (!itemInfo) return; 
+
+        if (!timerEl) { 
+            timerEl = document.createElement('div');
+            timerEl.className = 'timer-capsule';
+            timerEl.dataset.timerId = timerItem.id;
+            
+            let displayContent;
+           
+            if (itemInfo.goal) { 
+                displayContent = `
+                    <div class="bounty-timer-content">
+                        <span>${itemInfo.name}</span>
+                        <span class="bounty-progress" data-role="progress">${timerItem.progress}/${itemInfo.goal.target}</span>
+                        <span class="timer-display" data-role="time">${timeString}</span>
+                    </div>`;
+            } else { 
+                displayContent = `
+                    <span>${itemInfo.name}</span>
+                    <span data-role="time">${timeString}</span>`;
+            }
+            timerEl.innerHTML = displayContent;
+            container.appendChild(timerEl);
+        } else { 
+            const timeDisplay = timerEl.querySelector('[data-role="time"]');
+            if (timeDisplay) timeDisplay.innerText = timeString;
+
+       
+            if (timerItem.progress !== undefined && itemInfo.goal) {
+                 const progressDisplay = timerEl.querySelector('[data-role="progress"]');
+                 if(progressDisplay) progressDisplay.innerText = `${timerItem.progress}/${itemInfo.goal.target}`;
+            }
+        }
+
+        if (timeLeft < 10000) {
+            timerEl.classList.add('expiring');
+        } else {
+            timerEl.classList.remove('expiring');
+        }
+    });
+
+
+    const cooldownTimerEl = document.getElementById('bounty-cooldown-timer');
+    if (cooldownTimerEl) {
+        const now = new Date().getTime();
+        const timeLeft = state.bountyRefreshCooldown ? state.bountyRefreshCooldown - now : 0;
         if (timeLeft > 0) {
             const minutes = Math.floor(timeLeft / (1000 * 60));
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-            const timerEl = document.createElement('div');
-            timerEl.className = 'timer-capsule';
-
-            let displayContent;
-            if (timerItem.type === 'bounty') {
-                displayContent = `
-                    <div class="bounty-timer-content">
-                        <span>${timerItem.displayName}</span>
-                        <span class="bounty-progress">${timerItem.progress}/${timerItem.target}</span>
-                        <span class="timer-display">${minutes}:${seconds.toString().padStart(2, '0')}</span>
-                    </div>
-                `;
-            } else {
-                const itemName = shopItems.find(i => i.id === timerItem.id)?.name || 'Unknown Item';
-                displayContent = `
-                    <span>${itemName}</span>
-                    <span>${minutes}:${seconds.toString().padStart(2, '0')}</span>
-                `;
-            }
-
-            timerEl.innerHTML = displayContent;
-            
-            if (timeLeft < 10000) {
-                timerEl.classList.add('expiring');
-            }
-            
-            container.appendChild(timerEl);
+            cooldownTimerEl.innerText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        } else {
+            renderShop();
         }
-    });
+    }
 }
 function renderPowerups() {
     const powerupList = document.getElementById('powerup-list');
@@ -1221,7 +1353,8 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
                 
                   const imagePreviewBox = document.getElementById('image-preview-box');
                   const imageAnalysisForm = document.getElementById('image-analysis-form');
-                  
+                  const imageDataForQuest = { concepts: data.concepts || [] };
+                  updateProgress('log_image', 1, imageDataForQuest);
                   if (imagePreviewBox) {
                       imagePreviewBox.classList.add('hidden');
                   }
@@ -1260,11 +1393,16 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
           logPage.appendChild(ul);
       }
       loadState();
+      if (!state.availableBounties || state.availableBounties.length === 0) {
+        if (!state.activeBounties || state.activeBounties.length === 0) {
+            refreshBounties();
+        }
+    }
       refreshDailyQuests();
       xpDisplay.innerText = state.xp;
       coinsDisplay.innerText = state.coins;
       applyTheme(state.activeTheme || 'dark');
-      renderThemeSelector();
+
       renderPowerups();
       renderQuests();
       renderLog();
