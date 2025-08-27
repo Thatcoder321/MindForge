@@ -146,7 +146,7 @@
     if (savedState) {
         const loadedState = JSON.parse(savedState); 
         state = { ...state, ...loadedState };
-        state.bounties = parsed.bounties || [];
+
         state.activeBounties = state.activeBounties || [];
         
         state.xp = state.xp || 0;
@@ -168,11 +168,6 @@
     if (!state.inventory.includes('theme_dark')) {
         state.inventory.push('theme_dark');
     }
-    if (!Array.isArray(state.bounties)) {
-        state.bounties = [];
-    }
-
-    
 }
 
 const conceptMap = {
@@ -396,18 +391,10 @@ function updateProgress(typeOfAction, data = {}) {
     console.log("=== BOUNTY DEBUG ===");
     console.log("Action type:", typeOfAction);
     console.log("Data:", data);
-    console.log("Current state.bounties:", state.bounties);
-    
-    // Safety check - initialize bounties if undefined
-    if (!state.bounties || !Array.isArray(state.bounties)) {
-        console.log("Bounties not initialized, creating empty array");
-        state.bounties = [];
-        return;
-    }
     
     let progressMade = false;
     state.bounties.forEach(bounty => {
-        if (bounty.progress >= bounty.goal.target) return; // Already completed
+        if (bounty.progress >= bounty.goal.target) return; 
         
         const bountyInfo = bountyItems.find(b => b.id === bounty.id);
         if (!bountyInfo) return;
@@ -433,31 +420,34 @@ function updateProgress(typeOfAction, data = {}) {
             }
         }
         
-        // Handle other bounty types
-        if (bountyInfo.goal.type === 'earn_xp' && typeOfAction === 'earn_xp') {
-            console.log("XP bounty - adding:", data);
-            bounty.progress += data || 0;
-            progressMade = true;
-        }
-        
-        if (bountyInfo.goal.type === 'log_session' && typeOfAction === 'log_session') {
-            console.log("Session bounty - adding 1");
-            bounty.progress += 1;
-            progressMade = true;
-        }
-        
-        if (bountyInfo.goal.type === 'log_image' && typeOfAction === 'log_image') {
-            console.log("Image bounty - adding 1");
-            bounty.progress += 1;
-            progressMade = true;
+        if (progressMade) {
+             console.log(`Bounty progress for ${bounty.id}: ${bounty.progress}/${bountyInfo.goal.target}`);
+             console.log("Progress was made, saving state");
+             saveState();
+             updateBountyPage();
+             if (bounty.progress >= bountyInfo.goal.target) {
+   
+                state.xp += bountyInfo.successReward.xp; 
+                state.coins += bountyInfo.successReward.coins; 
+                
+                showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
+                
+               
+                state.activeBounties = state.activeBounties.filter(b => b.id !== bounty.id);
+                
+               
+                xpDisplay.innerText = state.xp.toLocaleString();
+                coinsDisplay.innerText = state.coins.toLocaleString();
+             }
+             needsUiUpdate = true;
         }
     });
 
-    if (progressMade) {
-        console.log("Progress was made, saving state");
+   
+    if (needsUiUpdate) {
         saveState();
-        updateBountyPage();
-        updateActiveTimers();
+        renderQuests(); 
+        updateActiveTimers(); 
     }
 }
 function renderQuests() {
