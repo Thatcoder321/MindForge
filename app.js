@@ -47,22 +47,11 @@
           duration: 30
       },
 
-      {
-          id: 'theme_ocean',
-          name: 'Oceanic Theme',
-          description: 'A calming, deep-blue color scheme to help you focus.',
-          cost: 150,
-          type: 'theme'
-      },
-      {
-          id: 'theme_sunset',
-          name: 'Sunset Theme',
-          description: 'Warm orange and purple tones to inspire creativity.',
-          cost: 200,
-          type: 'theme'
-      }
+        
      
-    ];const onboardingSteps = [
+    ];
+    
+    const onboardingSteps = [
       {
         title: "Welcome to MindForge!",
         content: "This is your dashboard, the central hub for your progress. Let's take a quick tour.",
@@ -386,8 +375,8 @@ function addXP(data) {
     const previousCoins = state.coins - coinsEarned;
     animateValue(xpDisplay, previousXP, state.xp, 800);
     animateValue(coinsDisplay, previousCoins, state.coins, 800);
-    updateQuestProgress('log_session', 1);
-updateQuestProgress('earn_xp', xpAmount);
+    updateProgress('log_session', 1);
+    updateProgress('earn_xp', xpAmount);
     renderLog();
 }
 
@@ -580,7 +569,7 @@ function renderLog() {
 
     shopList.innerHTML = ''; 
 
-    const categories = ['Bounty', 'Power-up', 'Theme'];
+    const categories = ['Bounty', 'Power-up'];
 
     categories.forEach(category => {
 
@@ -993,20 +982,19 @@ function applyTheme(theme) {
   }
   state.activeTheme = theme;
   saveState();
-}function renderThemeSelector() {
-  const selectorList = document.getElementById('theme-selector-list');
-  if (!selectorList) return;
-
-  selectorList.innerHTML = ''; 
-
-  const defaultButton = document.createElement('button');
-  defaultButton.className = 'btn btn-secondary';
-  defaultButton.innerText = 'Default';
-  defaultButton.dataset.themeId = 'default_theme'; 
-  if (state.activeTheme === 'default_theme') {
-      defaultButton.classList.add('active');
+}
+function renderThemeSelector() {
+    const selectorList = document.getElementById('theme-selector-list');
+    if (!selectorList) return;
+  
+    selectorList.innerHTML = ''; 
+  
+    const defaultButton = document.createElement('button');
+    defaultButton.className = 'btn btn-secondary active'; 
+    defaultButton.innerText = 'Default';
+    defaultButton.disabled = true;
+    selectorList.appendChild(defaultButton);
   }
-  selectorList.appendChild(defaultButton);
 
 
   const ownedThemes = state.inventory
@@ -1025,7 +1013,7 @@ function applyTheme(theme) {
       }
       selectorList.appendChild(button);
   });
-}
+
 
 function updateActiveTimers() {
     const container = document.getElementById('active-powerup-timers');
