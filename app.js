@@ -10,7 +10,7 @@
     questsLastUpdated: null,
 
     activeBounties: [],
-    avaliableBounties: [],
+    availableBounties: [],
     bountyRefreshCooldown: null
   };
   
@@ -437,7 +437,7 @@ function addXP(data) {
     const previousCoins = state.coins - coinsEarned;
     animateValue(xpDisplay, previousXP, state.xp, 800);
     animateValue(coinsDisplay, previousCoins, state.coins, 800);
-    updateProgress('log_session', 1);
+
     updateProgress('earn_xp', xpAmount);
     updateProgress('log_session', 1, logEntry); 
 
@@ -479,7 +479,7 @@ function addXP(data) {
 
     renderShop();
 
-    renderThemeSelector();
+
     
     renderPowerups();
   }
@@ -613,7 +613,7 @@ function renderLog() {
       } else if (targetPageId === 'shop') {
           renderShop();
       } else if (targetPageId === 'dashboard') {
-          renderThemeSelector();
+          
           renderPowerups();
       } else if (targetPageId === 'log') { 
         renderLog();
