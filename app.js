@@ -397,12 +397,10 @@ function renderQuests() {
         questList.appendChild(questCard);
     });
 }
-
 function addXP(data) {
     const isQuickAdd = typeof data === 'number';
     let xpAmount = isQuickAdd ? data : data.xp;
     let description = isQuickAdd ? 'Logged quick effort' : data.description;
-
 
     const now = new Date().getTime();
     state.activePowerups = state.activePowerups.filter(p => p.expiresAt > now);
@@ -410,17 +408,13 @@ function addXP(data) {
     const doubleXpPotion = state.activePowerups.find(p => p.id === 'potion_double_xp');
     if (doubleXpPotion) {
         xpAmount *= 2;
-
         description += " (x2 Bonus!)"; 
-        console.log("Double XP active! Awarding", xpAmount, "XP.");
     }
-
 
     const coinsEarned = Math.floor(xpAmount / XP_TO_COIN_RATE);
     state.xp += xpAmount;
     state.coins += coinsEarned;
     
-
     const logEntry = {
         id: new Date().toISOString() + Math.random(),
         description: description,
@@ -437,10 +431,10 @@ function addXP(data) {
     const previousCoins = state.coins - coinsEarned;
     animateValue(xpDisplay, previousXP, state.xp, 800);
     animateValue(coinsDisplay, previousCoins, state.coins, 800);
+    
 
     updateProgress('earn_xp', xpAmount);
     updateProgress('log_session', 1, logEntry); 
-
 
     renderLog();
 }
@@ -1079,11 +1073,9 @@ if (shopListContainer) {
         return;
     }
 
-   
     const description = tempAiSuggestion.sourceType === 'image'
         ? `Analyzed work from uploaded image.`
-        : tempAiSuggestion.originalDescription; 
-
+        : tempAiSuggestion.originalDescription;
 
     const logData = {
         description: description,
@@ -1092,7 +1084,6 @@ if (shopListContainer) {
         concepts: tempAiSuggestion.concepts || []
     };
     
-
     if (typeof logData.xp === 'undefined' || !logData.description) {
         alert("Error: Suggestion data is incomplete. Cannot log.");
         return;
@@ -1100,7 +1091,6 @@ if (shopListContainer) {
 
     addXP(logData);
     
-
     rejectAiSuggestion();
   });
 
@@ -1370,6 +1360,8 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
                       aiResultsDiv.classList.remove('hidden');
                   }
                   updateQuestProgress('log_image', 1);
+
+                  updateProgress('log_image', 1, { concepts: data.concepts || [] });
               } else {
                   throw new Error("Parsed JSON, but it was missing the 'xp' key.");
               }
