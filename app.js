@@ -1041,7 +1041,8 @@ if (shopListContainer) {
           if (!response.ok) { throw new Error('Network response was not ok'); }
   
           const data = await response.json();
-          tempAiSuggestion = data;
+          tempAiSuggestion = { ...data, originalDescription: description, sourceType: 'text' }; 
+
   
           aiSuggestedXp.innerText = data.xp;
           aiJustification.innerText = data.justification;
@@ -1072,34 +1073,36 @@ if (shopListContainer) {
       });
   }
   
-
   acceptAiSuggestionButton.addEventListener('click', () => {
-    console.log('Accept button clicked');
-    console.log('tempAiSuggestion:', tempAiSuggestion);
-    
     if (!tempAiSuggestion) {
-        console.log('tempAiSuggestion is null/undefined - returning early');
+        console.error("Accept button clicked, but tempAiSuggestion state is missing.");
         return;
     }
-    if (!tempAiSuggestion) return;
-    
-    // Determine the description based on the source type we stored
+
+   
     const description = tempAiSuggestion.sourceType === 'image'
-        ? `Analyzed work from uploaded image.` 
-        : document.getElementById('ai-log-description').value;
+        ? `Analyzed work from uploaded image.`
+        : tempAiSuggestion.originalDescription; 
+
 
     const logData = {
         description: description,
-        xp: tempAiSuggestion.xp ?? tempAiSuggestion.data?.xp,
+        xp: tempAiSuggestion.xp,
         confidence: 'medium',
-        concepts: tempAiSuggestion.concepts ?? tempAiSuggestion.data?.concepts ?? []
+        concepts: tempAiSuggestion.concepts || []
     };
+    
+
+    if (typeof logData.xp === 'undefined' || !logData.description) {
+        alert("Error: Suggestion data is incomplete. Cannot log.");
+        return;
+    }
 
     addXP(logData);
     
 
     rejectAiSuggestion();
-});
+  });
 
 const themeToggleButton = document.getElementById('theme-toggle-button');
 
@@ -1354,7 +1357,7 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
                   const imagePreviewBox = document.getElementById('image-preview-box');
                   const imageAnalysisForm = document.getElementById('image-analysis-form');
                   const imageDataForQuest = { concepts: data.concepts || [] };
-                  updateProgress('log_image', 1, imageDataForQuest);
+                  updateProgress('log_image', 1, { concepts: data.concepts || [] });
                   if (imagePreviewBox) {
                       imagePreviewBox.classList.add('hidden');
                   }
