@@ -1,4 +1,4 @@
-:root {
+:root, .dark {
   --radius: 0.7rem;
   
 
@@ -17,20 +17,7 @@
   --secondary-darker: hsl(240, 3.7%, 10%);
   --secondary-foreground: hsl(0, 0%, 98%); 
 }
-html, html.default_theme {
-  --radius: 0.7rem;
-  --background: 0 0% 0%;
-  --foreground: 220 15% 88%;
-  --card: 220 10% 14%;
-  --muted-foreground: 220 10% 55%;
-  --border: 220 10% 20%;
-  --primary: hsl(220, 15%, 96%); 
-  --primary-darker: hsl(220, 15%, 85%);
-  --primary-foreground: hsl(220, 10%, 15%);
-  --secondary: hsl(220, 10%, 22%);
-  --secondary-darker: hsl(220, 10%, 12%);
-  --secondary-foreground: hsl(220, 15%, 88%);
-}
+
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { line-height: 1.5; -webkit-text-size-adjust: 100%; font-family: 'Inter', sans-serif; }
@@ -479,11 +466,9 @@ header nav {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 998;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
-  border-radius: 50%;
-  transition: all 0.3s ease-in-out;
-  pointer-events: none; 
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
 }
 
 .onboarding-popover {
@@ -534,58 +519,110 @@ header nav {
 .onboarding-popover.arrow-left::after { left: -0.5rem; top: 2rem; }
 
 
-
-
-html.default_theme {
-  --background: 220 10% 10%;
-  --foreground: 220 15% 88%;
-  --card: 220 10% 14%;
-  --muted-foreground: 220 10% 55%;
-  --border: 220 10% 20%;
-  --primary: hsl(220, 15%, 96%);
-  --primary-darker: hsl(220, 15%, 85%);
-  --primary-foreground: hsl(220, 10%, 15%);
-  --secondary: hsl(220, 10%, 22%);
-  --secondary-darker: hsl(220, 15%, 88%);
+.quest-card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-html.theme_ocean {
-  --background: 210 30% 12%; 
-  --foreground: 190 40% 90%; 
-  --card: 210 30% 18%;       
-  --muted-foreground: 200 25% 60%;
-  --border: 210 30% 25%;
+.quest-details {
+  flex-grow: 1;
+}
+
+.quest-description {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.quest-reward {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: hsl(48, 95%, 53%);
+  margin-top: 0.25rem;
+}
+
+.quest-progress-bar {
+  background-color: hsl(var(--background));
+  border-radius: 99px;
+  height: 8px;
+  width: 100%;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.quest-progress-fill {
+  background-color: hsl(var(--primary));
+  height: 100%;
+  width: 0%;
+  border-radius: 99px;
+  transition: width 0.3s ease-out;
+}
+
+.quest-claim-button {
+  flex-shrink: 0;
+  min-width: 100px; 
+}
+#notification-container {
+  position: fixed;
+  top: 20px; /* Distance from the top */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000; /* Highest z-index to be on top of everything */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  pointer-events: none; /* Allows clicks to pass through the empty space */
+}
+.notification-banner {
+  pointer-events: all;
   
-  --primary: hsl(180, 60%, 85%);
-  --primary-darker: hsl(180, 60%, 70%);
-  --primary-foreground: hsl(210, 30%, 12%);
-
-  --secondary: hsl(200, 20%, 25%);
-  --secondary-darker: hsl(200, 20%, 15%);
-  --secondary-foreground: hsl(190, 40%, 90%);
-}
-
-
-html.theme_sunset {
-  --background: 260 30% 10%; 
-  --foreground: 35 80% 92%;  
-  --card: 260 30% 16%;
-  --muted-foreground: 30 40% 65%;
-  --border: 260 30% 22%;
+  background-color: hsl(220, 15%, 96%); 
+  color: hsl(220, 10%, 15%);           
+  border: 1px solid hsl(220, 15%, 85%); 
   
-  --primary: hsl(25, 90%, 65%); 
-  --primary-darker: hsl(25, 90%, 50%);
-  --primary-foreground: hsl(0, 0%, 100%);
-
-  --secondary: hsl(300, 15%, 25%);
-  --secondary-darker: hsl(300, 15%, 15%);
-  --secondary-foreground: hsl(35, 80% L92%);
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px; 
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  
+  /* Animation */
+  opacity: 0;
+  transform: translateY(-30px) scale(0.95);
+  animation: slideInAndOut 4s forwards ease-in-out;
+}
+@keyframes slideInAndOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  15%, 85% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
 }
 
+.shop-category-title {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border));
+  padding-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
 
-.theme-button.active {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-  border-color: var(--primary-darker);
-  border-bottom-width: 4px; 
+.shop-category-title:first-child {
+  margin-top: 0;
 }
