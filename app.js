@@ -1269,7 +1269,7 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
       renderQuests();
       renderLog();
       updateProgress();
-      setInterval(updatePowerupTimers, 1000);
+      setInterval(updateActiveTimers, 1000);
 
       if (!localStorage.getItem('mindforge_onboarded')) {
           startOnboarding();
