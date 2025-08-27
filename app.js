@@ -391,12 +391,23 @@ function updateProgress(typeOfAction, data = {}) {
     console.log("=== BOUNTY DEBUG ===");
     console.log("Action type:", typeOfAction);
     console.log("Data:", data);
+    console.log("Current state.activeBounties:", state.activeBounties);
+    
+    // Safety check - initialize activeBounties if undefined
+    if (!state.activeBounties || !Array.isArray(state.activeBounties)) {
+        console.log("activeBounties not initialized, creating empty array");
+        state.activeBounties = [];
+        return;
+    }
     
     let progressMade = false;
-    state.bounties.forEach(bounty => {
-        if (bounty.progress >= bounty.goal.target) return; 
+    let needsUiUpdate = false;
+    
+    // Update bounty progress
+    state.activeBounties.forEach(bounty => {
+        if (bounty.progress >= bounty.goal.target) return; // Already completed
         
-        const bountyInfo = bountyItems.find(b => b.id === bounty.id);
+        const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
         if (!bountyInfo) return;
 
         console.log("Checking bounty:", bountyInfo.name);
@@ -420,34 +431,82 @@ function updateProgress(typeOfAction, data = {}) {
             }
         }
         
-        if (progressMade) {
-             console.log(`Bounty progress for ${bounty.id}: ${bounty.progress}/${bountyInfo.goal.target}`);
-             console.log("Progress was made, saving state");
-             saveState();
-             updateBountyPage();
-             if (bounty.progress >= bountyInfo.goal.target) {
-   
-                state.xp += bountyInfo.successReward.xp; 
-                state.coins += bountyInfo.successReward.coins; 
-                
-                showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
-                
-               
-                state.activeBounties = state.activeBounties.filter(b => b.id !== bounty.id);
-                
-               
+        // Handle other bounty types
+        if (bountyInfo.goal.type === 'earn_xp' && typeOfAction === 'earn_xp') {
+            console.log("XP bounty - adding:", data);
+            bounty.progress += data || 0;
+            progressMade = true;
+        }
+        
+        if (bountyInfo.goal.type === 'log_session' && typeOfAction === 'log_session') {
+            console.log("Session bounty - adding 1");
+            bounty.progress += 1;
+            progressMade = true;
+        }
+        
+        if (bountyInfo.goal.type === 'log_image' && typeOfAction === 'log_image') {
+            console.log("Image bounty - adding 1");
+            bounty.progress += 1;
+            progressMade = true;
+        }
+        
+        // Check if bounty is completed
+        if (progressMade && bounty.progress >= bountyInfo.goal.target) {
+            console.log(`Bounty completed: ${bountyInfo.name}`);
+            state.xp += bountyInfo.successReward.xp; 
+            state.coins += bountyInfo.successReward.coins; 
+            
+            showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
+            
+            // Remove completed bounty from active bounties
+            state.activeBounties = state.activeBounties.filter(b => b.id !== bounty.id);
+            
+            // Update displays
+            if (xpDisplay && coinsDisplay) {
                 xpDisplay.innerText = state.xp.toLocaleString();
                 coinsDisplay.innerText = state.coins.toLocaleString();
-             }
-             needsUiUpdate = true;
+            }
+            needsUiUpdate = true;
         }
     });
 
-   
-    if (needsUiUpdate) {
+    // Update quest progress
+    if (state.activeQuests && Array.isArray(state.activeQuests)) {
+        state.activeQuests.forEach(quest => {
+            if (quest.claimed) return;
+            
+            let questProgressUpdated = false;
+            
+            if (quest.type === 'log_session' && typeOfAction === 'log_session') {
+                state.questProgress[quest.id] = (state.questProgress[quest.id] || 0) + 1;
+                questProgressUpdated = true;
+            }
+            
+            if (quest.type === 'earn_xp' && typeOfAction === 'earn_xp') {
+                state.questProgress[quest.id] = (state.questProgress[quest.id] || 0) + (data || 0);
+                questProgressUpdated = true;
+            }
+            
+            if (quest.type === 'log_image' && typeOfAction === 'log_image') {
+                state.questProgress[quest.id] = (state.questProgress[quest.id] || 0) + 1;
+                questProgressUpdated = true;
+            }
+            
+            if (questProgressUpdated) {
+                progressMade = true;
+                needsUiUpdate = true;
+            }
+        });
+    }
+
+    if (progressMade) {
+        console.log("Progress was made, saving state");
         saveState();
-        renderQuests(); 
-        updateActiveTimers(); 
+    }
+    
+    if (needsUiUpdate) {
+        renderQuests();
+        updateActiveTimers();
     }
 }
 function renderQuests() {
