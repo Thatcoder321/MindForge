@@ -387,157 +387,68 @@ function refreshDailyQuests() {
     state.questsLastUpdated = today;
     saveState();
 }
-function updateProgress(typeOfAction, data = {}) {
-    console.log("=== BOUNTY DEBUG ===");
-    console.log("Action type:", typeOfAction);
-    console.log("Data:", data);
-    console.log("Current state.activeBounties:", state.activeBounties);
-    
-    // Safety check - initialize activeBounties if undefined
-    if (!state.activeBounties || !Array.isArray(state.activeBounties)) {
-        console.log("activeBounties not initialized, creating empty array");
-        state.activeBounties = [];
-        return;
-    }
-    
-    let progressMade = false;
+function updateProgress(typeOfAction, details = {}) {
     let needsUiUpdate = false;
-    
-    // Update bounty progress
-// Fixed version - check completion immediately after updating progress
-state.activeBounties.forEach(bounty => {
-    if (bounty.progress >= bounty.goal.target) return; // Already completed
-    
-    const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
-    if (!bountyInfo) return;
 
-    console.log("Checking bounty:", bountyInfo.name);
-    console.log("Bounty goal:", bountyInfo.goal);
-    console.log("Current progress:", bounty.progress);
 
-    let bountyProgressMade = false;
-
-    if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && data.concepts) {
-        console.log("This is a concept bounty!");
-        console.log("Looking for target:", bountyInfo.goal.target);
-        console.log("Concepts in data:", data.concepts);
-        
-        const normalizedConcepts = data.concepts.map(c => normalizeConcept(c));
-        console.log("Normalized concepts:", normalizedConcepts);
-        
-        if (normalizedConcepts.includes(bountyInfo.goal.target)) {
-            console.log("MATCH FOUND! Updating progress");
-            bounty.progress += 1; 
-            bountyProgressMade = true;
-        } else {
-            console.log("No match found");
-        }
-    }
-    
-    // Handle other bounty types
-    if (bountyInfo.goal.type === 'earn_xp' && typeOfAction === 'earn_xp') {
-        console.log("XP bounty - adding:", data);
-        bounty.progress += data || 0;
-        bountyProgressMade = true;
-    }
-    
-    if (bountyInfo.goal.type === 'log_session' && typeOfAction === 'log_session') {
-        console.log("Session bounty - adding 1");
-        bounty.progress += 1;
-        bountyProgressMade = true;
-    }
-    
-    if (bountyInfo.goal.type === 'log_image' && typeOfAction === 'log_image') {
-        console.log("Image bounty - adding 1");
-        bounty.progress += 1;
-        bountyProgressMade = true;
-    }
-    
-    if (bountyProgressMade) {
-        progressMade = true;
-        console.log(`Bounty progress updated for ${bountyInfo.name}: ${bounty.progress}/${bountyInfo.goal.target}`);
-        
-     
-        if (bounty.progress >= bountyInfo.goal.target) {
-            console.log(`Bounty completed: ${bountyInfo.name}`);
-            state.xp += bountyInfo.successReward.xp; 
-            state.coins += bountyInfo.successReward.coins; 
-            
-            showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
-            
-            // Update displays
-            if (xpDisplay && coinsDisplay) {
-                xpDisplay.innerText = state.xp.toLocaleString();
-                coinsDisplay.innerText = state.coins.toLocaleString();
-            }
+    state.activeQuests.forEach(quest => {
+        if (quest.type === typeOfAction && !quest.claimed) {
+           
+            const amount = (quest.type === 'earn_xp') ? details : 1;
+            state.questProgress[quest.id] += amount;
             needsUiUpdate = true;
-            
-            // Mark bounty for removal
-            bounty.completed = true;
         }
-    }
-});
-
-    // Check for completed bounties AFTER updating all progress
-    state.activeBounties = state.activeBounties.filter(bounty => {
-        const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
-        if (!bountyInfo) return true; // Keep if we can't find info
-        
-        if (bounty.progress >= bountyInfo.goal.target) {
-            console.log(`Bounty completed: ${bountyInfo.name}`);
-            state.xp += bountyInfo.successReward.xp; 
-            state.coins += bountyInfo.successReward.coins; 
-            
-            showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
-            
-            // Update displays
-            if (xpDisplay && coinsDisplay) {
-                xpDisplay.innerText = state.xp.toLocaleString();
-                coinsDisplay.innerText = state.coins.toLocaleString();
-            }
-            needsUiUpdate = true;
-            return false; // Remove completed bounty
-        }
-        return true; // Keep active bounty
     });
 
-    // Update quest progress
-    if (state.activeQuests && Array.isArray(state.activeQuests)) {
-        state.activeQuests.forEach(quest => {
-            if (quest.claimed) return;
-            
-            let questProgressUpdated = false;
-            
-            if (quest.type === 'log_session' && typeOfAction === 'log_session') {
-                state.questProgress[quest.id] = (state.questProgress[quest.id] || 0) + 1;
-                questProgressUpdated = true;
-            }
-            
-            if (quest.type === 'earn_xp' && typeOfAction === 'earn_xp') {
-                state.questProgress[quest.id] = (state.questProgress[quest.id] || 0) + (data || 0);
-                questProgressUpdated = true;
-            }
-            
-            if (quest.type === 'log_image' && typeOfAction === 'log_image') {
-                state.questProgress[quest.id] = (state.questProgress[quest.id] || 0) + 1;
-                questProgressUpdated = true;
-            }
-            
-            if (questProgressUpdated) {
-                progressMade = true;
-                needsUiUpdate = true;
-            }
-        });
-    }
 
-    if (progressMade) {
-        console.log("Progress was made, saving state");
-        saveState();
+    state.activeBounties.forEach(bounty => {
+
+        const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
+        if (!bountyInfo) return; 
+        let progressMade = 0;
+
+       
+        if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && details.concepts) {
+            const normalizedConcepts = details.concepts.map(c => normalizeConcept(c));
+            if (normalizedConcepts.includes(bountyInfo.goal.target)) {
+                progressMade = 1;
+            }
+        }
+
+        
+        else if (bountyInfo.goal.type === typeOfAction) {
+          
+            progressMade = (typeOfAction === 'earn_xp') ? details : 1;
+        }
+
+        if (progressMade > 0) {
+            bounty.progress += progressMade;
+            console.log(`Bounty progress for ${bountyInfo.name}: ${bounty.progress}/${bountyInfo.goal.target}`);
+            needsUiUpdate = true;
+            
+            if (bounty.progress >= bountyInfo.goal.target) {
+                state.xp += bountyInfo.successReward.xp; 
+                state.coins += bountyInfo.successReward.coins; 
+                showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
+                
+                
+                bounty.completed = true; 
+                
+                xpDisplay.innerText = state.xp.toLocaleString();
+                coinsDisplay.innerText = state.coins.toLocaleString();
+            }
+        }
+    });
+
+    const completedBounties = state.activeBounties.filter(b => b.completed).length > 0;
+    if (completedBounties) {
+        state.activeBounties = state.activeBounties.filter(b => !b.completed);
     }
     
     if (needsUiUpdate) {
-        renderQuests();
-        updateActiveTimers();
+        saveState();
+        renderQuests(); 
+        updateActiveTimers(); 
     }
 }
 function renderQuests() {
