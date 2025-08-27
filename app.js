@@ -515,7 +515,7 @@ function renderLog() {
   }
   function animateValue(element, start, end, duration) { if (start === end) {element.innerText=end; return}; let startTimestamp = null; const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); element.innerText = Math.floor(progress * (end - start) + start); if (progress < 1) window.requestAnimationFrame(step); }; window.requestAnimationFrame(step); }
   function openEditModal(logId) {
-      const entryToEdit = state.log.find(entry => entry.timestamp === logId);
+    const entryToEdit = state.log.find(entry => entry.id === logId);
       if (!entryToEdit) return;
   
       state.currentlyEditingLogId = logId;
@@ -831,12 +831,22 @@ logList.addEventListener('click', (e) => {
       }
   }
 });
-  editForm.addEventListener('submit', (e) => { e.preventDefault(); const entryToUpdate = state.log.find(entry => entry.timestamp === state.currentlyEditingLogId); if (entryToUpdate) { entryToUpdate.description = editDescriptionInput.value; entryToUpdate.confidence = editConfidenceInput.value; } saveState(); renderLog(); closeEditModal(); });
-  cancelEditButton.addEventListener('click', closeEditModal);
-  modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) { closeEditModal(); } });
+editForm.addEventListener('submit', (e) => { 
+    e.preventDefault(); 
+    const entryToUpdate = state.log.find(entry => entry.id === state.currentlyEditingLogId);
+    if (entryToUpdate) { 
+        entryToUpdate.description = editDescriptionInput.value; 
+        entryToUpdate.confidence = editConfidenceInput.value; 
+    } 
+    saveState(); 
+    renderLog(); 
+    closeEditModal(); 
+});
 
-const powerupContainer =
-document.getElementById('powerup-area');
+cancelEditButton.addEventListener('click', closeEditModal);
+modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) { closeEditModal(); } });
+
+const powerupContainer = document.getElementById('powerup-area');
 if(powerupContainer) {
     powerupContainer.addEventListener('click', (e) => {
         const powerupButton = e.target.closest('.powerup-button');
