@@ -414,6 +414,8 @@ function updateProgress(typeOfAction, data = {}) {
         console.log("Bounty goal:", bountyInfo.goal);
         console.log("Current progress:", bounty.progress);
 
+        let bountyProgressMade = false;
+
         if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && data.concepts) {
             console.log("This is a concept bounty!");
             console.log("Looking for target:", bountyInfo.goal.target);
@@ -425,7 +427,7 @@ function updateProgress(typeOfAction, data = {}) {
             if (normalizedConcepts.includes(bountyInfo.goal.target)) {
                 console.log("MATCH FOUND! Updating progress");
                 bounty.progress += 1; 
-                progressMade = true;
+                bountyProgressMade = true;
             } else {
                 console.log("No match found");
             }
@@ -435,31 +437,38 @@ function updateProgress(typeOfAction, data = {}) {
         if (bountyInfo.goal.type === 'earn_xp' && typeOfAction === 'earn_xp') {
             console.log("XP bounty - adding:", data);
             bounty.progress += data || 0;
-            progressMade = true;
+            bountyProgressMade = true;
         }
         
         if (bountyInfo.goal.type === 'log_session' && typeOfAction === 'log_session') {
             console.log("Session bounty - adding 1");
             bounty.progress += 1;
-            progressMade = true;
+            bountyProgressMade = true;
         }
         
         if (bountyInfo.goal.type === 'log_image' && typeOfAction === 'log_image') {
             console.log("Image bounty - adding 1");
             bounty.progress += 1;
-            progressMade = true;
+            bountyProgressMade = true;
         }
         
-        // Check if bounty is completed
-        if (progressMade && bounty.progress >= bountyInfo.goal.target) {
+        if (bountyProgressMade) {
+            progressMade = true;
+            console.log(`Bounty progress updated for ${bountyInfo.name}: ${bounty.progress}/${bountyInfo.goal.target}`);
+        }
+    });
+
+    // Check for completed bounties AFTER updating all progress
+    state.activeBounties = state.activeBounties.filter(bounty => {
+        const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
+        if (!bountyInfo) return true; // Keep if we can't find info
+        
+        if (bounty.progress >= bountyInfo.goal.target) {
             console.log(`Bounty completed: ${bountyInfo.name}`);
             state.xp += bountyInfo.successReward.xp; 
             state.coins += bountyInfo.successReward.coins; 
             
             showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
-            
-            // Remove completed bounty from active bounties
-            state.activeBounties = state.activeBounties.filter(b => b.id !== bounty.id);
             
             // Update displays
             if (xpDisplay && coinsDisplay) {
@@ -467,7 +476,9 @@ function updateProgress(typeOfAction, data = {}) {
                 coinsDisplay.innerText = state.coins.toLocaleString();
             }
             needsUiUpdate = true;
+            return false; // Remove completed bounty
         }
+        return true; // Keep active bounty
     });
 
     // Update quest progress
