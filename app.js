@@ -1083,7 +1083,6 @@ if (shopListContainer) {
           }
       });
   }
-  
   acceptAiSuggestionButton.addEventListener('click', () => {
     if (!tempAiSuggestion) {
         console.error("Accept button clicked, but tempAiSuggestion state is missing.");
@@ -1108,9 +1107,32 @@ if (shopListContainer) {
 
     addXP(logData);
     
-    rejectAiSuggestion();
-  });
 
+    aiResultsDiv.classList.add('hidden'); 
+    aiLogForm.reset();
+    
+
+    if (tempAiSuggestion.sourceType === 'image') {
+        imagePreviewContainer.style.display = 'none';
+        imageUploadInput.value = '';
+        document.getElementById('image-context-text').value = '';
+        uploadedImageBase64 = null;
+        
+
+        const imagePreviewBox = document.getElementById('image-preview-box');
+        const imageAnalysisForm = document.getElementById('image-analysis-form');
+        if (imagePreviewBox) imagePreviewBox.classList.add('hidden');
+        if (imageAnalysisForm) imageAnalysisForm.classList.add('hidden');
+    }
+    
+
+    tempAiSuggestion = null;
+    
+
+    showNotification(`Logged: ${description}`);
+    
+    console.log('AI suggestion accepted and UI cleared.');
+});
 const themeToggleButton = document.getElementById('theme-toggle-button');
 
 
@@ -1297,18 +1319,33 @@ function usePowerup(itemId) {
   renderPowerups();
 }
 function rejectAiSuggestion() {
-  aiResultsDiv.style.display = 'none';
-  aiLogForm.reset();
-  
 
-  imagePreviewContainer.style.display = 'none';
-  imageUploadInput.value = '';
+    aiResultsDiv.classList.add('hidden');
+    
 
-  document.getElementById('image-context-text').value = ''; 
-  uploadedImageBase64 = null;
+    aiLogForm.reset();
+    
   
-  tempAiSuggestion = null;
-  console.log('AI suggestion UI has been cleared.');
+    imagePreviewContainer.style.display = 'none';
+    imageUploadInput.value = '';
+    uploadedImageBase64 = null;
+    
+  
+    const imageContextText = document.getElementById('image-context-text');
+    if (imageContextText) {
+        imageContextText.value = '';
+    }
+    
+
+    const imagePreviewBox = document.getElementById('image-preview-box');
+    const imageAnalysisForm = document.getElementById('image-analysis-form');
+    if (imagePreviewBox) imagePreviewBox.classList.add('hidden');
+    if (imageAnalysisForm) imageAnalysisForm.classList.add('hidden');
+    
+
+    tempAiSuggestion = null;
+    
+    console.log('AI suggestion UI has been cleared and reset.');
 }
 
 rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
