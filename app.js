@@ -1332,36 +1332,11 @@ function usePowerup(itemId) {
   saveState();
   renderPowerups();
 }
+
 function rejectAiSuggestion() {
     clearAiSuggestion();
-    aiResultsDiv.classList.add('hidden');
-    
-
-    aiLogForm.reset();
-    
-  
-    imagePreviewContainer.style.display = 'none';
-    imageUploadInput.value = '';
-    uploadedImageBase64 = null;
-    
-  
-    const imageContextText = document.getElementById('image-context-text');
-    if (imageContextText) {
-        imageContextText.value = '';
-    }
-    
-
-    const imagePreviewBox = document.getElementById('image-preview-box');
-    const imageAnalysisForm = document.getElementById('image-analysis-form');
-    if (imagePreviewBox) imagePreviewBox.classList.add('hidden');
-    if (imageAnalysisForm) imageAnalysisForm.classList.add('hidden');
-    
-
-    tempAiSuggestion = null;
-    
-    console.log('AI suggestion UI has been cleared and reset.');
+    console.log('AI suggestion rejected and UI cleared.');
 }
-
 rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
 
   imageUploadInput.addEventListener('change', async (e) => {
