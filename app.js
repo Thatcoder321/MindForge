@@ -198,6 +198,9 @@ function payToRefreshBounties() {
     
     state.coins -= 10;
     coinsDisplay.innerText = state.coins.toLocaleString();
+    if (coinsDisplay) {
+        coinsDisplay.innerText = state.coins.toLocaleString();
+    }
     showNotification("-10 🪙 for an early bounty refresh!");
     
     refreshBounties(); 
@@ -429,6 +432,13 @@ function addXP(data) {
     
     const previousXP = state.xp - xpAmount;
     const previousCoins = state.coins - coinsEarned;
+
+    if (xpDisplay && coinsDisplay) {
+        animateValue(xpDisplay, previousXP, state.xp, 800);
+        animateValue(coinsDisplay, previousCoins, state.coins, 800);
+    } else {
+       
+    }
     animateValue(xpDisplay, previousXP, state.xp, 800);
     animateValue(coinsDisplay, previousCoins, state.coins, 800);
     
@@ -509,6 +519,9 @@ function addXP(data) {
     renderShop();
     updateActiveTimers();
     coinsDisplay.innerText = state.coins.toLocaleString();
+    if (coinsDisplay) {
+        coinsDisplay.innerText = state.coins.toLocaleString();
+    }
 }
 function renderLog() {
     const logList = document.getElementById('log-list');
@@ -976,7 +989,11 @@ if (questContainer) {
                 createParticleExplosion(claimButton, quest.reward.xp);
                 
                 saveState();
-                renderQuests(); 
+                renderQuests();
+                if (xpDisplay && coinsDisplay) {
+                    xpDisplay.innerText = state.xp.toLocaleString();
+                    coinsDisplay.innerText = state.coins.toLocaleString();
+                }
                 xpDisplay.innerText = state.xp.toLocaleString();
                 coinsDisplay.innerText = state.coins.toLocaleString();
             }
@@ -1137,6 +1154,11 @@ function updateActiveTimers() {
                 state.xp += bountyInfo.failureReward.xp;
                 state.coins += bountyInfo.failureReward.coins;
                 showNotification(`Bounty Failed: +${bountyInfo.failureReward.xp} XP & ${bountyInfo.failureReward.coins} 🪙`);
+                if (xpDisplay && coinsDisplay) {
+                    xpDisplay.innerText = state.xp.toLocaleString();
+                    coinsDisplay.innerText = state.coins.toLocaleString();
+                }
+
                 xpDisplay.innerText = state.xp.toLocaleString();
                 coinsDisplay.innerText = state.coins.toLocaleString();
             }
