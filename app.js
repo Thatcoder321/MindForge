@@ -766,7 +766,9 @@ function renderLog() {
         shopList.appendChild(itemCard);
     });
 }function updateStatsPage() {
-    console.log("Updating stats page with live data and concept normalization...");
+    console.log("=== DEBUGGING STATS PAGE ===");
+    console.log("Current state.log:", state.log);
+    console.log("Number of log entries:", state.log.length);
   
     const totalSessionsEl = document.getElementById('total-sessions');
     const avgXpEl = document.getElementById('avg-xp');
@@ -774,22 +776,34 @@ function renderLog() {
     const xpCtx = document.getElementById('xp-by-concept-chart')?.getContext('2d');
     const confidenceCtx = document.getElementById('confidence-chart')?.getContext('2d');
   
+    console.log("DOM elements found:", {
+      totalSessionsEl: !!totalSessionsEl,
+      avgXpEl: !!avgXpEl,
+      topConceptEl: !!topConceptEl,
+      xpCtx: !!xpCtx,
+      confidenceCtx: !!confidenceCtx
+    });
+  
     if (!totalSessionsEl || !xpCtx || !confidenceCtx) {
+        console.error("Missing required DOM elements!");
         return;
     }
   
     const conceptData = {};
     const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 };
   
-
-  
     state.log.forEach(entry => {
+        console.log("Processing log entry:", entry);
+        
         if (entry.confidence && confidenceData.hasOwnProperty(entry.confidence)) {
             confidenceData[entry.confidence]++;
         }
+        
         if (entry.concepts && Array.isArray(entry.concepts) && entry.concepts.length > 0) {
             entry.concepts.forEach(concept => {
-                const normalized = normalizeConcept(concept); 
+                console.log("Processing concept:", concept);
+                const normalized = normalizeConcept(concept);
+                console.log("Normalized to:", normalized);
                 if (!conceptData[normalized]) {
                     conceptData[normalized] = 0;
                 }
@@ -798,11 +812,21 @@ function renderLog() {
         }
     });
   
+    console.log("Final conceptData:", conceptData);
+    console.log("Final confidenceData:", confidenceData);
+  
     totalSessionsEl.innerText = state.log.length;
     const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
     avgXpEl.innerText = avgXp;
     const topConcept = Object.keys(conceptData).length > 0 ? Object.entries(conceptData).sort((a, b) => b[1] - a[1])[0][0] : 'None';
     topConceptEl.innerText = topConcept;
+  
+    console.log("Set values:", {
+      totalSessions: state.log.length,
+      avgXp: avgXp,
+      topConcept: topConcept
+    });
+  
   
 
     const rootStyles = getComputedStyle(document.documentElement);
