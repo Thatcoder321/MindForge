@@ -1425,17 +1425,17 @@ if (themeToggleButton) {
     });
 }
 
-// In app.js
+
 
 function updateActiveTimers() {
-    // 1. Get BOTH containers
+
     const desktopContainer = document.getElementById('active-powerup-timers');
     const mobileContainer = document.getElementById('mobile-timers-area');
     if (!desktopContainer || !mobileContainer) return;
 
     const now = new Date().getTime();
 
-    // 2. Check for Bounty Failures (Run this logic only ONCE)
+   
     let bountyFailed = false;
     state.activeBounties.forEach(bounty => {
         if (now > bounty.expiresAt) {
@@ -1458,47 +1458,71 @@ function updateActiveTimers() {
         saveState();
     }
     
-    // 3. Get a fresh list of all timers that are still active
     const activeTimers = [
         ...state.activePowerups,
         ...state.activeBounties
     ].filter(timer => timer.expiresAt > now);
     
-    // 4. Clear both containers before rendering
+
     desktopContainer.innerHTML = '';
     mobileContainer.innerHTML = '';
-
-    // 5. Add a title to the mobile section ONLY if there are active timers
     if (activeTimers.length > 0) {
         const mobileTitle = document.createElement('h3');
         mobileTitle.className = 'text-lg font-semibold mb-md';
         mobileTitle.innerText = 'Active Timers';
         mobileContainer.appendChild(mobileTitle);
     }
-    
-    // 6. Loop ONCE and render the timer in BOTH places
     activeTimers.forEach(timerItem => {
+       
         const timeLeft = timerItem.expiresAt - now;
         const minutes = Math.floor(timeLeft / (1000 * 60));
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
         const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        
-        // Find the item's info (works for both bounties and powerups)
         const itemInfo = bountyMasterList.find(i => i.id === timerItem.id) || shopItems.find(i => i.id === timerItem.id);
         if (!itemInfo) return;
-
-        // --- Render Desktop Timer ---
-        const desktopTimer = document.createElement('div');
-        desktopTimer.className = 'timer-capsule';
-        desktopTimer.innerHTML = `<span>${itemInfo.name}</span><span>${timeString}</span>`;
-        if (timeLeft < 10000) desktopTimer.classList.add('expiring');
-        desktopContainer.appendChild(desktopTimer);
-
-        // --- Render Mobile Timer ---
         const mobileTimer = document.createElement('div');
         mobileTimer.className = 'mobile-timer-capsule';
         mobileTimer.innerHTML = `<span class="item-name">${itemInfo.name}</span><span class="time-left">${timeString}</span>`;
         mobileContainer.appendChild(mobileTimer);
+    });
+
+   
+    const activeDesktopTimerIds = new Set(activeTimers.map(t => t.id));
+    const displayedDesktopTimerIds = new Set([...desktopContainer.children].map(el => el.dataset.timerId));
+
+
+    displayedDesktopTimerIds.forEach(id => {
+        if (!activeDesktopTimerIds.has(id)) {
+            const elToRemove = desktopContainer.querySelector(`[data-timer-id="${id}"]`);
+            if (elToRemove) elToRemove.remove();
+        }
+    });
+
+
+    activeTimers.forEach(timerItem => {
+        const timeLeft = timerItem.expiresAt - now;
+        const timeString = `${Math.floor(timeLeft / 60000)}:${Math.floor((timeLeft % 60000) / 1000).toString().padStart(2, '0')}`;
+        const itemInfo = bountyMasterList.find(i => i.id === timerItem.id) || shopItems.find(i => i.id === timerItem.id);
+        if (!itemInfo) return;
+
+        let timerEl = desktopContainer.querySelector(`[data-timer-id="${timerItem.id}"]`);
+        
+        if (!timerEl) {
+            timerEl = document.createElement('div');
+            timerEl.className = 'timer-capsule';
+            timerEl.dataset.timerId = timerItem.id; 
+            desktopContainer.appendChild(timerEl);
+        }
+
+   
+        timerEl.innerHTML = `<span>${itemInfo.name}</span><span>${timeString}</span>`;
+        
+  
+        if (timeLeft < 10000) {
+            timerEl.classList.add('expiring');
+        } else {
+            timerEl.classList.remove('expiring');
+        }
     });
 }
 function renderPowerups() {

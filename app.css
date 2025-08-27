@@ -672,29 +672,22 @@ header nav {
   height: 20px;
 }
 
-
 #active-powerup-timers {
+
   position: fixed;
-
-  top: 0;
-  left: 0;
-  right: 0; 
+  top: 1.5rem;   
+  right: 2rem;  
   
-  z-index: 99; 
+  z-index: 99;
   
-
-  padding: 0.75rem;
-  padding-top: 70px;
 
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: flex-end; 
   
-
   pointer-events: none;
 }
-
 
 
 .timer-capsule {
