@@ -941,7 +941,44 @@ function renderLog() {
             </div>`;
         shopList.appendChild(itemCard);
     });
-}function updateStatsPage() {
+    const consumableTitle = document.createElement('h3');
+consumableTitle.className = 'shop-category-title';
+consumableTitle.innerText = 'Consumables';
+shopList.appendChild(consumableTitle);
+
+
+shopItems.forEach(item => {
+
+    if(item.type !== 'consumable') return; 
+
+  
+    const canAfford = state.coins >= item.cost;
+    
+    const itemCard = document.createElement('div');
+    itemCard.className = 'card flex justify-between items-center';
+
+    let buttonHtml;
+    if (!canAfford) {
+        buttonHtml = `<button class="btn btn-secondary" disabled>Insufficient Coins</button>`;
+    } else {
+
+        buttonHtml = `<button class="btn btn-primary" data-item-id="${item.id}">Buy</button>`;
+    }
+
+    itemCard.innerHTML = `
+        <div>
+            <h3 class="font-semibold">${item.name}</h3>
+            <p class="text-sm text-muted">${item.description}</p>
+        </div>
+        <div class="text-right">
+            <p class="font-bold mb-sm">${item.cost} 🪙</p>
+            ${buttonHtml}
+        </div>`;
+    shopList.appendChild(itemCard);
+});
+}
+
+function updateStatsPage() {
     console.log("=== DEBUGGING STATS PAGE ===");
     console.log("Current state.log:", state.log);
     console.log("Number of log entries:", state.log.length);
