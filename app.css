@@ -22,21 +22,25 @@
 }
 
 .light-theme {
-  /* Light Theme Colors */
+
   --background: 0 0% 98%;
   --foreground: 240 10% 3.9%;
   --card: 0 0% 100%;
   --muted-foreground: 240 3.8% 46.1%;
   --border: 240 5.9% 90%;
 
-  --primary: hsl(221, 83%, 53%);
-  --primary-darker: hsl(221, 83%, 48%);
-  --primary-foreground: hsl(0, 0%, 98%);
+  --card: hsl(220, 20%, 100%);   
+  --muted-foreground: hsl(223, 10%, 45%);
+  --border: hsl(220, 15%, 90%);     
 
-  --secondary: hsl(240, 4.8%, 95.9%);
-  --secondary-darker: hsl(240, 5.9%, 90%);
-  --secondary-foreground: hsl(240, 5.9%, 10%);
 
+  --primary: hsl(220, 10%, 15%);     
+  --primary-darker: hsl(220, 10%, 5%);
+  --primary-foreground: hsl(220, 15%, 96%); 
+
+  --secondary: hsl(220, 15%, 93%);     
+  --secondary-darker: hsl(220, 15%, 78%);
+  --secondary-foreground: hsl(223, 15%, 20%);
   --notification-background: hsl(240, 10%, 3.9%);
   --notification-foreground: hsl(0, 0%, 98%);
   --notification-border: hsl(240, 3.7%, 15.9%);
@@ -980,5 +984,12 @@ header nav {
 
   #mobile-timers-area {
     display: block; 
+  }
+  .theme-toggle {
+   
+    top: 4.5rem; 
+    right: 1rem; 
+    width: 36px;
+    height: 36px;
   }
 }
