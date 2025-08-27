@@ -24,8 +24,8 @@
         timeLimit: 60,
 
         goal: { type: 'log_session', target: 3 },
-        sucessReward: { xp: 100, coins: 30 },
-        faliureReward: { xp: 20, coins: 5 }
+        successReward: { xp: 100, coins: 30 }, 
+        failureReward: { xp: 20, coins: 5 }  
     },
     {
         id: 'bounty_xp_sprint',
@@ -35,8 +35,8 @@
         cost: 20,
         timeLimit: 90,
         goal: { type: 'earn_xp', target: 150 },
-        sucessReward: { xp: 150, coins: 45 },
-        faliureReward: { xp: 30, coins: 10 }
+        successReward: { xp: 150, coins: 45 }, 
+        failureReward: { xp: 30, coins: 10 }   
     },
       {
           id: 'potion_double_xp',
@@ -156,33 +156,34 @@
   function loadState() {
     const savedState = localStorage.getItem('mindforgeState');
     if (savedState) {
-      state = JSON.parse(savedState);
-      state = { ...state, ...loadedState };
+        const loadedState = JSON.parse(savedState); 
+        state = { ...state, ...loadedState };
 
-      state.activeBounties = state.activeBounties || [];
-      // Ensure state object has all necessary keys to prevent errors with old data
-      state.xp = state.xp || 0;
-      state.coins = state.coins || 0;
-      state.log = state.log || [];
-      state.inventory = state.inventory || []; // Add inventory if it's missing
-      state.activeTheme = state.activeTheme ||
-      'theme_dark';
-      state.activePowerups = state.activePowerups || [];
-      state.currentlyEditingLogId = state.currentlyEditingLogId || null;
+        state.activeBounties = state.activeBounties || [];
+        
+        state.xp = state.xp || 0;
+        state.coins = state.coins || 0;
+        state.log = state.log || [];
+        state.inventory = state.inventory || [];
+        state.activeTheme = state.activeTheme || 'theme_dark';
+        state.activePowerups = state.activePowerups || [];
+        state.currentlyEditingLogId = state.currentlyEditingLogId || null;
 
-      // Map over old log entries to ensure they have the confidence property
-      state.log = state.log.map(entry => ({ 
-        description: 'Logged quick effort', 
-        confidence: 'medium', 
-        ...entry 
-      }));
+        
+        state.log = state.log.map(entry => ({ 
+            description: 'Logged quick effort', 
+            confidence: 'medium', 
+            ...entry 
+        }));
     }
+
+    if (!state.inventory.includes('theme_dark')) {
+        state.inventory.push('theme_dark');
+    }
+}
 
    
-    if (!state.inventory.includes('theme_dark')) {
-      state.inventory.push('theme_dark');
-    }
-  }
+
   function resizeImage(file, maxSize = 1024) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { let width = img.width; let height = img.height; if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } } const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', 0.9)); }; img.onerror = reject; img.src = event.target.result; }; reader.onerror = reject; reader.readAsDataURL(file); }); }
   let currentOnboardingStep = 0;
 const popover = document.getElementById('onboarding-popover');
@@ -267,13 +268,13 @@ function refreshDailyQuests() {
 function updateProgress(typeOfAction, amount) {
     let needsUiUpdate = false;
 
+
     state.activeQuests.forEach(quest => {
         if (quest.type === typeOfAction && !quest.claimed) {
             state.questProgress[quest.id] += amount;
             needsUiUpdate = true;
         }
     });
-
 
     state.activeBounties.forEach(bounty => {
         if (bounty.goal.type === typeOfAction) {
@@ -284,15 +285,15 @@ function updateProgress(typeOfAction, amount) {
             if (bounty.progress >= bounty.goal.target) {
                 const bountyInfo = shopItems.find(i => i.id === bounty.id);
 
-                state.xp += bountyInfo.successReward.xp;
-                state.coins += bountyInfo.successReward.coins;
+                state.xp += bountyInfo.successReward.xp; 
+                state.coins += bountyInfo.successReward.coins; 
                 
                 showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
                 
-                
+          
                 state.activeBounties = state.activeBounties.filter(b => b.id !== bounty.id);
                 
-              
+      
                 xpDisplay.innerText = state.xp.toLocaleString();
                 coinsDisplay.innerText = state.coins.toLocaleString();
             }
@@ -464,33 +465,44 @@ function buyBounty(bountyId) {
     updateActiveTimers();
     coinsDisplay.innerText = state.coins.toLocaleString();
 }
-  function renderLog() {
-      const logList = document.getElementById('log-list');
-      if (!logList) return;
-  
-      logList.innerHTML = ''; 
-      state.log.slice().reverse().forEach(entry => {
-          const li = document.createElement('li');
-        
-          li.className = 'log-entry';
-          li.dataset.logId = entry.timestamp;
-  
-          const confidenceText = entry.confidence ? (entry.confidence.charAt(0).toUpperCase() + entry.confidence.slice(1)) : 'Not Set';
-  
-      
-          li.innerHTML = `
-              <div class="log-details">
-                  <p class="description">${entry.description}</p>
-                  <p class="log-meta">Confidence: ${confidenceText}</p>
-              </div>
-              <div class="log-actions">
-                  <span class="xp-gain">+${entry.xp} XP</span>
-                  <button class="edit-log-button">Edit</button>
-              </div>
-          `;
-          logList.appendChild(li);
-      });
-  }
+function renderLog() {
+    const logList = document.getElementById('log-list');
+    if (!logList) {
+        console.error('log-list element not found!');
+        return;
+    }
+
+    logList.innerHTML = ''; 
+    
+    if (state.log.length === 0) {
+        logList.innerHTML = '<p class="empty-state-text">No activities logged yet. Start by logging your first session!</p>';
+        return;
+    }
+    
+    state.log.slice().reverse().forEach(entry => {
+        const li = document.createElement('li');
+        li.className = 'log-entry';
+        li.dataset.logId = entry.timestamp;
+
+        const confidenceText = entry.confidence ? 
+            (entry.confidence.charAt(0).toUpperCase() + entry.confidence.slice(1)) : 
+            'Not Set';
+
+        li.innerHTML = `
+            <div class="log-details">
+                <p class="description">${entry.description}</p>
+                <p class="log-meta">Confidence: ${confidenceText}</p>
+                <p class="log-timestamp">${new Date(entry.timestamp).toLocaleString()}</p>
+            </div>
+            <div class="log-actions">
+                <span class="xp-gain">+${entry.xp} XP</span>
+                <button class="edit-log-button">Edit</button>
+            </div>
+        `;
+        logList.appendChild(li);
+    });
+}
+
   function showNotification(message) {
    
     let container = document.getElementById('notification-container');
@@ -1027,21 +1039,35 @@ function updateActiveTimers() {
         if (now > bounty.expiresAt) {
             bountyFailed = true;
             const bountyInfo = shopItems.find(i => i.id === bounty.id);
-            state.xp += bountyInfo.faliureReward.xp;
-            state.coins += bountyInfo.faliureReward.coins;
-            showNotification(`Bounty Failed: +${bountyInfo.faliureReward.xp} XP & ${bountyInfo.faliureReward.coins} 🪙`);
+            state.xp += bountyInfo.failureReward.xp;
+            state.coins += bountyInfo.failureReward.coins; 
+            showNotification(`Bounty Failed: +${bountyInfo.failureReward.xp} XP & ${bountyInfo.failureReward.coins} 🪙`);
             xpDisplay.innerText = state.xp.toLocaleString();
             coinsDisplay.innerText = state.coins.toLocaleString();
         }
     });
+    
     if (bountyFailed) {
         state.activeBounties = state.activeBounties.filter(b => b.expiresAt > now);
         saveState();
     }
+
     let activeTimers = [];
 
-    state.activePowerups.forEach(p => activeTimers.push({ ...p }));
-    state.activeBounties.forEach(b => activeTimers.push({ ...b }));
+
+    state.activePowerups.forEach(p => activeTimers.push({ ...p, type: 'powerup' }));
+    
+
+    state.activeBounties.forEach(b => {
+        const bountyInfo = shopItems.find(i => i.id === b.id);
+        activeTimers.push({ 
+            ...b, 
+            type: 'bounty',
+            displayName: bountyInfo?.name || 'Unknown Bounty',
+            progress: b.progress,
+            target: b.goal.target
+        });
+    });
 
     container.innerHTML = ''; 
 
@@ -1055,13 +1081,24 @@ function updateActiveTimers() {
             const timerEl = document.createElement('div');
             timerEl.className = 'timer-capsule';
 
+            let displayContent;
+            if (timerItem.type === 'bounty') {
+                displayContent = `
+                    <div class="bounty-timer-content">
+                        <span>${timerItem.displayName}</span>
+                        <span class="bounty-progress">${timerItem.progress}/${timerItem.target}</span>
+                        <span class="timer-display">${minutes}:${seconds.toString().padStart(2, '0')}</span>
+                    </div>
+                `;
+            } else {
+                const itemName = shopItems.find(i => i.id === timerItem.id)?.name || 'Unknown Item';
+                displayContent = `
+                    <span>${itemName}</span>
+                    <span>${minutes}:${seconds.toString().padStart(2, '0')}</span>
+                `;
+            }
 
-            const itemName = shopItems.find(i => i.id === timerItem.id)?.name || timerItem.displayType;
-
-            timerEl.innerHTML = `
-                <span>${itemName}</span>
-                <span>${minutes}:${seconds.toString().padStart(2, '0')}</span>
-            `;
+            timerEl.innerHTML = displayContent;
             
             if (timeLeft < 10000) {
                 timerEl.classList.add('expiring');
@@ -1232,6 +1269,7 @@ rejectAiSuggestionButton.addEventListener('click', rejectAiSuggestion);
       renderPowerups();
       renderQuests();
       renderLog();
+      updateProgress();
       setInterval(updatePowerupTimers, 1000);
 
       if (!localStorage.getItem('mindforge_onboarded')) {
