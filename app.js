@@ -386,54 +386,44 @@ function refreshDailyQuests() {
     state.questsLastUpdated = today;
     saveState();
 }
-
-function updateProgress(typeOfAction, amount, data = {}) {
-    let needsUiUpdate = false;
-
-
-    state.activeQuests.forEach(quest => {
-        if (quest.type === typeOfAction && !quest.claimed) {
-            state.questProgress[quest.id] += amount;
-            needsUiUpdate = true;
-        }
-
-        else if (quest.type === 'log_image' && typeOfAction === 'log_image') {
-             state.questProgress[quest.id] += amount;
-             needsUiUpdate = true;
-        }
-    });
-
-
-    state.activeBounties.forEach(bounty => {
-        const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
-        if (!bountyInfo) return; 
-
-        let progressMade = false;
+function updateProgress(typeOfAction, data = {}) {
+    console.log("=== BOUNTY DEBUG ===");
+    console.log("Action type:", typeOfAction);
+    console.log("Data:", data);
+    
+    let progressMade = false;
+    state.bounties.forEach(bounty => {
+        if (bounty.progress >= bounty.goal.target) return; 
         
-      
-        if (bountyInfo.goal.type === typeOfAction) {
-            bounty.progress += amount;
-            progressMade = true;
-        } 
-       
-        else if (bountyInfo.goal.type === 'log_image' && typeOfAction === 'log_image') {
-             bounty.progress += amount;
-             progressMade = true;
-        }
+        const bountyInfo = bountyItems.find(b => b.id === bounty.id);
+        if (!bountyInfo) return;
 
-        else if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && data.concepts) {
+        console.log("Checking bounty:", bountyInfo.name);
+        console.log("Bounty goal:", bountyInfo.goal);
+        console.log("Current progress:", bounty.progress);
+
+        if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && data.concepts) {
+            console.log("This is a concept bounty!");
+            console.log("Looking for target:", bountyInfo.goal.target);
+            console.log("Concepts in data:", data.concepts);
             
             const normalizedConcepts = data.concepts.map(c => normalizeConcept(c));
+            console.log("Normalized concepts:", normalizedConcepts);
+            
             if (normalizedConcepts.includes(bountyInfo.goal.target)) {
+                console.log("MATCH FOUND! Updating progress");
                 bounty.progress += 1; 
                 progressMade = true;
+            } else {
+                console.log("No match found");
             }
         }
         
         if (progressMade) {
              console.log(`Bounty progress for ${bounty.id}: ${bounty.progress}/${bountyInfo.goal.target}`);
-
-         
+             console.log("Progress was made, saving state");
+             saveState();
+             updateBountyPage();
              if (bounty.progress >= bountyInfo.goal.target) {
    
                 state.xp += bountyInfo.successReward.xp; 
