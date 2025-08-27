@@ -404,59 +404,79 @@ function updateProgress(typeOfAction, data = {}) {
     let needsUiUpdate = false;
     
     // Update bounty progress
-    state.activeBounties.forEach(bounty => {
-        if (bounty.progress >= bounty.goal.target) return; // Already completed
+// Fixed version - check completion immediately after updating progress
+state.activeBounties.forEach(bounty => {
+    if (bounty.progress >= bounty.goal.target) return; // Already completed
+    
+    const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
+    if (!bountyInfo) return;
+
+    console.log("Checking bounty:", bountyInfo.name);
+    console.log("Bounty goal:", bountyInfo.goal);
+    console.log("Current progress:", bounty.progress);
+
+    let bountyProgressMade = false;
+
+    if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && data.concepts) {
+        console.log("This is a concept bounty!");
+        console.log("Looking for target:", bountyInfo.goal.target);
+        console.log("Concepts in data:", data.concepts);
         
-        const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
-        if (!bountyInfo) return;
-
-        console.log("Checking bounty:", bountyInfo.name);
-        console.log("Bounty goal:", bountyInfo.goal);
-        console.log("Current progress:", bounty.progress);
-
-        let bountyProgressMade = false;
-
-        if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && data.concepts) {
-            console.log("This is a concept bounty!");
-            console.log("Looking for target:", bountyInfo.goal.target);
-            console.log("Concepts in data:", data.concepts);
+        const normalizedConcepts = data.concepts.map(c => normalizeConcept(c));
+        console.log("Normalized concepts:", normalizedConcepts);
+        
+        if (normalizedConcepts.includes(bountyInfo.goal.target)) {
+            console.log("MATCH FOUND! Updating progress");
+            bounty.progress += 1; 
+            bountyProgressMade = true;
+        } else {
+            console.log("No match found");
+        }
+    }
+    
+    // Handle other bounty types
+    if (bountyInfo.goal.type === 'earn_xp' && typeOfAction === 'earn_xp') {
+        console.log("XP bounty - adding:", data);
+        bounty.progress += data || 0;
+        bountyProgressMade = true;
+    }
+    
+    if (bountyInfo.goal.type === 'log_session' && typeOfAction === 'log_session') {
+        console.log("Session bounty - adding 1");
+        bounty.progress += 1;
+        bountyProgressMade = true;
+    }
+    
+    if (bountyInfo.goal.type === 'log_image' && typeOfAction === 'log_image') {
+        console.log("Image bounty - adding 1");
+        bounty.progress += 1;
+        bountyProgressMade = true;
+    }
+    
+    if (bountyProgressMade) {
+        progressMade = true;
+        console.log(`Bounty progress updated for ${bountyInfo.name}: ${bounty.progress}/${bountyInfo.goal.target}`);
+        
+     
+        if (bounty.progress >= bountyInfo.goal.target) {
+            console.log(`Bounty completed: ${bountyInfo.name}`);
+            state.xp += bountyInfo.successReward.xp; 
+            state.coins += bountyInfo.successReward.coins; 
             
-            const normalizedConcepts = data.concepts.map(c => normalizeConcept(c));
-            console.log("Normalized concepts:", normalizedConcepts);
+            showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
             
-            if (normalizedConcepts.includes(bountyInfo.goal.target)) {
-                console.log("MATCH FOUND! Updating progress");
-                bounty.progress += 1; 
-                bountyProgressMade = true;
-            } else {
-                console.log("No match found");
+            // Update displays
+            if (xpDisplay && coinsDisplay) {
+                xpDisplay.innerText = state.xp.toLocaleString();
+                coinsDisplay.innerText = state.coins.toLocaleString();
             }
+            needsUiUpdate = true;
+            
+            // Mark bounty for removal
+            bounty.completed = true;
         }
-        
-        // Handle other bounty types
-        if (bountyInfo.goal.type === 'earn_xp' && typeOfAction === 'earn_xp') {
-            console.log("XP bounty - adding:", data);
-            bounty.progress += data || 0;
-            bountyProgressMade = true;
-        }
-        
-        if (bountyInfo.goal.type === 'log_session' && typeOfAction === 'log_session') {
-            console.log("Session bounty - adding 1");
-            bounty.progress += 1;
-            bountyProgressMade = true;
-        }
-        
-        if (bountyInfo.goal.type === 'log_image' && typeOfAction === 'log_image') {
-            console.log("Image bounty - adding 1");
-            bounty.progress += 1;
-            bountyProgressMade = true;
-        }
-        
-        if (bountyProgressMade) {
-            progressMade = true;
-            console.log(`Bounty progress updated for ${bountyInfo.name}: ${bounty.progress}/${bountyInfo.goal.target}`);
-        }
-    });
+    }
+});
 
     // Check for completed bounties AFTER updating all progress
     state.activeBounties = state.activeBounties.filter(bounty => {
