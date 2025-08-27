@@ -391,46 +391,39 @@ function updateProgress(typeOfAction, details = {}) {
     let needsUiUpdate = false;
 
 
-    state.activeQuests.forEach(quest => {
-        if (quest.type === typeOfAction && !quest.claimed) {
-           
-            const amount = (quest.type === 'earn_xp') ? details : 1;
-            state.questProgress[quest.id] += amount;
-            needsUiUpdate = true;
-        }
-    });
+    state.activeQuests.forEach(quest => { /* ... */ });
 
-
+    
     state.activeBounties.forEach(bounty => {
-
+        
         const bountyInfo = bountyMasterList.find(b => b.id === bounty.id);
-        if (!bountyInfo) return; 
+        if (!bountyInfo || bounty.completed) return; 
+
         let progressMade = 0;
 
-       
-        if (bountyInfo.goal.type === 'log_concept' && typeOfAction === 'log_session' && details.concepts) {
+  
+        if (bounty.goal.type === 'log_concept' && typeOfAction === 'log_session' && details.concepts) {
             const normalizedConcepts = details.concepts.map(c => normalizeConcept(c));
-            if (normalizedConcepts.includes(bountyInfo.goal.target)) {
+            if (normalizedConcepts.includes(bounty.goal.target)) {
                 progressMade = 1;
             }
-        }
-
-        
-        else if (bountyInfo.goal.type === typeOfAction) {
-          
+        } else if (bounty.goal.type === typeOfAction) {
             progressMade = (typeOfAction === 'earn_xp') ? details : 1;
         }
 
         if (progressMade > 0) {
             bounty.progress += progressMade;
-            console.log(`Bounty progress for ${bountyInfo.name}: ${bounty.progress}/${bountyInfo.goal.target}`);
             needsUiUpdate = true;
-            
-            if (bounty.progress >= bountyInfo.goal.target) {
+            console.log(`Bounty progress for ${bountyInfo.name}: ${bounty.progress}/${bountyInfo.goal.target}`);
+
+           
+            const targetValue = (bounty.goal.type === 'log_concept') ? 1 : bounty.goal.target;
+
+            if (bounty.progress >= targetValue) {
+                console.log("BOUNTY COMPLETED!");
                 state.xp += bountyInfo.successReward.xp; 
                 state.coins += bountyInfo.successReward.coins; 
                 showNotification(`Bounty Complete! +${bountyInfo.successReward.xp} XP & ${bountyInfo.successReward.coins} 🪙`);
-                
                 
                 bounty.completed = true; 
                 
@@ -440,6 +433,7 @@ function updateProgress(typeOfAction, details = {}) {
         }
     });
 
+  
     const completedBounties = state.activeBounties.filter(b => b.completed).length > 0;
     if (completedBounties) {
         state.activeBounties = state.activeBounties.filter(b => !b.completed);
