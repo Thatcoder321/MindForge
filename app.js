@@ -699,34 +699,33 @@ function buyItem(itemId) {
         coinsDisplay.innerText = state.coins.toLocaleString();
     }
 }
+
+
 function renderLog() {
     const logList = document.getElementById('log-list');
-    if (!logList) {
-        console.error('log-list element not found!');
-        return;
-    }
+    if (!logList) return;
 
     logList.innerHTML = ''; 
     
+
     if (state.log.length === 0) {
-        logList.innerHTML = '<p class="empty-state-text">No activities logged yet. Start by logging your first session!</p>';
-        return;
+        logList.innerHTML = `
+            <div class="empty-state-card">
+                <h3>Your Journey Begins!</h3>
+                <p>You haven't logged any study sessions yet. Click the 'Log' tab and describe your work to start earning XP and tracking your progress.</p>
+            </div>
+        `;
+        return; 
     }
     
     state.log.slice().reverse().forEach(entry => {
         const li = document.createElement('li');
         li.className = 'log-entry';
-        li.dataset.logId = entry.id;
-
-        const confidenceText = entry.confidence ? 
-            (entry.confidence.charAt(0).toUpperCase() + entry.confidence.slice(1)) : 
-            'Not Set';
-
+        li.dataset.logId = entry.id; 
         li.innerHTML = `
             <div class="log-details">
                 <p class="description">${entry.description}</p>
-                <p class="log-meta">Confidence: ${confidenceText}</p>
-                <p class="log-timestamp">${new Date(entry.timestamp).toLocaleString()}</p>
+                <p class="log-meta">Confidence: ${entry.confidence ? (entry.confidence.charAt(0).toUpperCase() + entry.confidence.slice(1)) : 'Not Set'}</p>
             </div>
             <div class="log-actions">
                 <span class="xp-gain">+${entry.xp} XP</span>
@@ -736,7 +735,6 @@ function renderLog() {
         logList.appendChild(li);
     });
 }
-
   function showNotification(message) {
    
     let container = document.getElementById('notification-container');
@@ -988,7 +986,18 @@ function updateStatsPage() {
     const topConceptEl = document.getElementById('top-concept');
     const xpCtx = document.getElementById('xp-by-concept-chart')?.getContext('2d');
     const confidenceCtx = document.getElementById('confidence-chart')?.getContext('2d');
-  
+    if (state.log.length === 0) {
+       
+        if (xpChartContainer) xpChartContainer.innerHTML = `<p class="empty-state-text">Log some sessions to see your XP breakdown by concept!</p>`;
+        if (confidenceChartContainer) confidenceChartContainer.innerHTML = `<p class="empty-state-text">Your confidence levels will appear here as you log more work.</p>`;
+        
+       
+        totalSessionsEl.innerText = 0;
+        avgXpEl.innerText = 0;
+        topConceptEl.innerText = 'None';
+        
+        return; 
+    }
     console.log("DOM elements found:", {
       totalSessionsEl: !!totalSessionsEl,
       avgXpEl: !!avgXpEl,
