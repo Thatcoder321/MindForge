@@ -765,124 +765,121 @@ function renderLog() {
             </div>`;
         shopList.appendChild(itemCard);
     });
-}
-function updateStatsPage() {
-  console.log("Updating stats page with live data and concept normalization...");
+}function updateStatsPage() {
+    console.log("Updating stats page with live data and concept normalization...");
+  
+    const totalSessionsEl = document.getElementById('total-sessions');
+    const avgXpEl = document.getElementById('avg-xp');
+    const topConceptEl = document.getElementById('top-concept');
+    const xpCtx = document.getElementById('xp-by-concept-chart')?.getContext('2d');
+    const confidenceCtx = document.getElementById('confidence-chart')?.getContext('2d');
+  
+    if (!totalSessionsEl || !xpCtx || !confidenceCtx) {
+        return;
+    }
+  
+    const conceptData = {};
+    const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 };
+  
 
-  const totalSessionsEl = document.getElementById('total-sessions');
-  const avgXpEl = document.getElementById('avg-xp');
-  const topConceptEl = document.getElementById('top-concept');
-  const xpCtx = document.getElementById('xp-by-concept-chart')?.getContext('2d');
-  const confidenceCtx = document.getElementById('confidence-chart')?.getContext('2d');
+  
+    state.log.forEach(entry => {
+        if (entry.confidence && confidenceData.hasOwnProperty(entry.confidence)) {
+            confidenceData[entry.confidence]++;
+        }
+        if (entry.concepts && Array.isArray(entry.concepts) && entry.concepts.length > 0) {
+            entry.concepts.forEach(concept => {
+                const normalized = normalizeConcept(concept); 
+                if (!conceptData[normalized]) {
+                    conceptData[normalized] = 0;
+                }
+                conceptData[normalized] += entry.xp || 0;
+            });
+        }
+    });
+  
+    totalSessionsEl.innerText = state.log.length;
+    const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
+    avgXpEl.innerText = avgXp;
+    const topConcept = Object.keys(conceptData).length > 0 ? Object.entries(conceptData).sort((a, b) => b[1] - a[1])[0][0] : 'None';
+    topConceptEl.innerText = topConcept;
+  
 
-  if (!totalSessionsEl || !xpCtx || !confidenceCtx) {
-      return;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const foregroundColor = rootStyles.getPropertyValue('--foreground').trim();
+    const mutedForegroundColor = rootStyles.getPropertyValue('--muted-foreground').trim();
+    const borderColor = rootStyles.getPropertyValue('--border').trim();
+    const primaryColor = rootStyles.getPropertyValue('--primary').trim();
+    const cardColor = rootStyles.getPropertyValue('--card').trim();
+  
+    if (xpChart) xpChart.destroy();
+    if (confidenceChart) confidenceChart.destroy();
+  
+    xpChart = new Chart(xpCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(conceptData),
+            datasets: [{
+                label: 'XP Earned',
+                data: Object.values(conceptData),
+                backgroundColor: `hsl(${primaryColor})`, 
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    ticks: { 
+                        color: `hsl(${mutedForegroundColor})`,
+                        font: { size: 12 }
+                    }, 
+                    grid: { color: `hsl(${borderColor})` } 
+                },
+                x: {
+                    ticks: { 
+                        color: `hsl(${mutedForegroundColor})`,
+                        font: { size: 12 }
+                    },
+                    grid: { display: false } 
+                }
+            },
+            plugins: { 
+                legend: { 
+                    display: false 
+                }
+            }
+        }
+    });
+  
+    confidenceChart = new Chart(confidenceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['High', 'Medium', 'Low'],
+            datasets: [{
+                data: [confidenceData.high, confidenceData.medium, confidenceData.low],
+                backgroundColor: [
+                    'hsl(142, 71%, 45%)', // Green for high
+                    'hsl(48, 95%, 53%)',  // Yellow for medium
+                    'hsl(0, 84%, 60%)'    // Red for low
+                ],
+                borderColor: `hsl(${cardColor})`, 
+                borderWidth: 5,
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { 
+                        color: `hsl(${mutedForegroundColor})`,
+                        font: { size: 14 }
+                    }
+                }
+            }
+        }
+    });
   }
-
-  const conceptData = {};
-  const confidenceData = { high: 0, medium: 0, low: 0, not_picked: 0 }; // Keep not_picked for now
-
-
-  state.log.forEach(entry => {
-      if (entry.confidence && confidenceData.hasOwnProperty(entry.confidence)) {
-          confidenceData[entry.confidence]++;
-      }
-      if (entry.concepts && Array.isArray(entry.concepts) && entry.concepts.length > 0) {
-          entry.concepts.forEach(concept => {
-              const normalized = normalizeConcept(concept);
-              if (!conceptData[normalized]) {
-                  conceptData[normalized] = 0;
-              }
-              conceptData[normalized] += entry.xp || 0;
-          });
-      }
-  });
-
-
-
-
-  totalSessionsEl.innerText = state.log.length;
-  const avgXp = state.log.length > 0 ? (state.xp / state.log.length).toFixed(0) : 0;
-  avgXpEl.innerText = avgXp;
-  const topConcept = Object.keys(conceptData).length > 0 ? Object.entries(conceptData).sort((a, b) => b[1] - a[1])[0][0] : 'None';
-  topConceptEl.innerText = topConcept;
-
-  // Get CSS custom property values for consistent theming
-  const rootStyles = getComputedStyle(document.documentElement);
-  const foregroundColor = rootStyles.getPropertyValue('--foreground').trim();
-  const mutedForegroundColor = rootStyles.getPropertyValue('--muted-foreground').trim();
-  const borderColor = rootStyles.getPropertyValue('--border').trim();
-  const primaryColor = rootStyles.getPropertyValue('--primary').trim();
-  const cardColor = rootStyles.getPropertyValue('--card').trim();
-
-  if (xpChart) xpChart.destroy();
-  if (confidenceChart) confidenceChart.destroy();
-
-  xpChart = new Chart(xpCtx, {
-      type: 'bar',
-      data: {
-          labels: Object.keys(conceptData),
-          datasets: [{
-              label: 'XP Earned',
-              data: Object.values(conceptData),
-              backgroundColor: `hsl(${primaryColor})`, 
-              borderRadius: 4,
-          }]
-      },
-      options: {
-          scales: {
-              y: { 
-                  beginAtZero: true,
-                  ticks: { 
-                      color: `hsl(${mutedForegroundColor})`,
-                      font: { size: 12 }
-                  }, 
-                  grid: { color: `hsl(${borderColor})` } 
-              },
-              x: {
-                  ticks: { 
-                      color: `hsl(${mutedForegroundColor})`,
-                      font: { size: 12 }
-                  },
-                  grid: { display: false } 
-              }
-          },
-          plugins: { 
-              legend: { 
-                  display: false 
-              }
-          }
-      }
-  });
-
-  confidenceChart = new Chart(confidenceCtx, {
-      type: 'doughnut',
-      data: {
-          labels: ['High', 'Medium', 'Low'],
-          datasets: [{
-              data: [confidenceData.high, confidenceData.medium, confidenceData.low],
-              backgroundColor: [
-                  'hsl(142, 71%, 45%)', // Green for high
-                  'hsl(48, 95%, 53%)',  // Yellow for medium
-                  'hsl(0, 84%, 60%)'    // Red for low
-              ],
-              borderColor: `hsl(${cardColor})`, 
-              borderWidth: 5,
-          }]
-      },
-      options: {
-          plugins: {
-              legend: {
-                  position: 'top',
-                  labels: { 
-                      color: `hsl(${mutedForegroundColor})`,
-                      font: { size: 14 }
-                  }
-              }
-          }
-      }
-  });
-}
 
 getAiInsightsButton.addEventListener('click', async (e) => {
  
