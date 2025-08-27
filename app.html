@@ -176,7 +176,33 @@
       </div>
     </div>
   </div>
+  <div id="chat-window" class="chat-window hidden">
+    <div class="chat-header">
+      <h3>AI Tutor</h3>
+      <button id="close-chat-button" class="close-chat-btn">&times;</button>
+    </div>
+    <div id="chat-message-list" class="chat-message-list">
+     
+      <div class="chat-message ai-message">
+        <p>Hello! I'm your AI Tutor. Ask me any math question you have.</p>
+      </div>
+    </div>
+    <div class="chat-footer">
+        <form id="chat-form" class="chat-form">
+            <input type="text" id="chat-input" placeholder="Ask a question..." autocomplete="off" required>
+            <button type="submit" class="send-btn">
+         
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+        </form>
+        <p class="chat-message-counter">Messages remaining: <span id="message-count">5</span></p>
+    </div>
+  </div>
 
+  <button id="chat-bubble" class="chat-bubble">
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+  </button>
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>

@@ -10,6 +10,7 @@
     questsLastUpdated: null,
 
     activeBounties: [],
+    chatMessagesRemaining: 5,
     availableBounties: [],
     bounties: [],
     bountyRefreshCooldown: null
@@ -27,6 +28,13 @@
           type: 'powerup',
           duration: 30
       },
+      {
+        id: 'tutor_messages_10',
+        type: 'consumable', 
+        name: 'AI Tutor: 10 Messages',
+        description: 'Refill your chat messages to ask the AI for more help.',
+        cost: 5
+    }
 
         
      
@@ -136,6 +144,13 @@
   const getAiInsightsButton = document.getElementById('get-ai-insights-button');
   const aiInsightsResultDiv = document.getElementById('ai-insights-result');
   const markdownConverter = new showdown.Converter();
+  const chatBubble = document.getElementById('chat-bubble');
+const chatWindow = document.getElementById('chat-window');
+const closeChatButton = document.getElementById('close-chat-button');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatMessageList = document.getElementById('chat-message-list');
+const messageCountEl = document.getElementById('message-count');
   let uploadedImageBase64 = null;
   let tempAiSuggestion = null;
 
@@ -169,7 +184,83 @@
         state.inventory.push('theme_dark');
     }
 }
+function openChat() {
+    if (chatWindow) chatWindow.classList.remove('hidden');
+    if (messageCountEl) messageCountEl.innerText = state.chatMessagesRemaining;
+}
 
+function closeChat() {
+    if (chatWindow) chatWindow.classList.add('hidden');
+}
+
+function addMessageToUI(sender, message) {
+    if (!chatMessageList) return;
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender}-message`;
+    messageDiv.innerHTML = `<p>${message}</p>`; // Use innerHTML to render line breaks if AI sends them
+    chatMessageList.appendChild(messageDiv);
+    // Auto-scroll to the bottom
+    chatMessageList.scrollTop = chatMessageList.scrollHeight;
+}
+
+async function handleSendMessage(event) {
+    event.preventDefault();
+    const userMessage = chatInput.value.trim();
+    if (!userMessage) return;
+
+    
+    if (state.chatMessagesRemaining <= 0) {
+        addMessageToUI('ai', "You're out of messages! Visit the Shop to buy more.");
+        chatInput.value = '';
+        return;
+    }
+
+   
+    addMessageToUI('user', userMessage);
+    chatInput.value = '';
+
+ 
+    state.chatMessagesRemaining--;
+    if (messageCountEl) messageCountEl.innerText = state.chatMessagesRemaining;
+    saveState();
+
+
+    addMessageToUI('ai', "<em>Typing...</em>");
+
+ 
+    
+
+try {
+
+    const response = await fetch('/api/getTutorResponse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userMessage: userMessage })
+    });
+
+    if (!response.ok) {
+        throw new Error("The AI tutor is currently unavailable.");
+    }
+
+    const data = await response.json();
+    const aiResponse = data.aiResponse;
+
+    if (chatMessageList.lastChild && chatMessageList.lastChild.innerText === "Typing...") {
+      chatMessageList.removeChild(chatMessageList.lastChild);
+    }
+    
+
+    addMessageToUI('ai', aiResponse);
+
+} catch (error) {
+    console.error("Error fetching AI tutor response:", error);
+    
+    if (chatMessageList.lastChild && chatMessageList.lastChild.innerText === "Typing...") {
+      chatMessageList.removeChild(chatMessageList.lastChild);
+    }
+    
+    addMessageToUI('ai', `Sorry, I'm having trouble connecting right now. Error: ${error.message}`);
+}}
 const conceptMap = {
     "geometry proofs": "Geometry Proofs", 
     "congruence proofs": "Geometry Proofs", 
@@ -533,43 +624,45 @@ function addXP(data) {
     renderLog();
 }
   
-  function buyItem(itemId) {
+  // In app.js
+
+function buyItem(itemId) {
     const item = shopItems.find(i => i.id === itemId);
+    if (!item) return;
 
-    if(!item) {
-        console.error('Attempted to buy an item that does not exist: ', itemId);
-        return;
+   
+    if (item.type === 'consumable') {
+        if (state.coins < item.cost) {
+            showNotification("You don't have enough coins!");
+            return;
+        }
+        state.coins -= item.cost;
+
+        if (item.id === 'tutor_messages_10') {
+            state.chatMessagesRemaining += 10;
+            showNotification("+10 Tutor Messages purchased!");
+           
+            if (messageCountEl) messageCountEl.innerText = state.chatMessagesRemaining;
+        }
+    } else if (item.type === 'powerup') {
+        if (state.inventory.includes(itemId)) {
+            showNotification("You already own this power-up!");
+            return;
+        }
+        if (state.coins < item.cost) {
+            showNotification("You don't have enough coins!");
+            return;
+        }
+        state.coins -= item.cost;
+        state.inventory.push(item.id);
+        renderPowerups();
     }
-    if(state.inventory.includes(itemId)) {
-        console.warn('Attempted to buy an item that is already owned: ', itemId);
-        return;
-    }
-
-    if(state.coins < item.cost) {
-        alert("You don't have enough coins for this item!");
-        return;
-    }
-
-    const previousCoins = state.coins;
-    state.coins -= item.cost;
-    animateValue(coinsDisplay, previousCoins, state.coins, 800);
-
-    const shopCoinDisplayAmount = document.getElementById('shop-coin-display-amount');
-    if (shopCoinDisplayAmount) {
-      shopCoinDisplayAmount.innerText = state.coins;
-    }
 
 
-    state.inventory.push(item.id);
-    
     saveState();
-
     renderShop();
-
-
-    
-    renderPowerups();
-  }
+    if (coinsDisplay) coinsDisplay.innerText = state.coins.toLocaleString();
+}
   function buyBounty(bountyId) {
     const bounty = bountyMasterList.find(i => i.id === bountyId);
     if (!bounty) {
@@ -1049,7 +1142,15 @@ if (dashboardPage) {
       }
   });
 }
-
+if (chatBubble) {
+    chatBubble.addEventListener('click', openChat);
+}
+if (closeChatButton) {
+    closeChatButton.addEventListener('click', closeChat);
+}
+if (chatForm) {
+    chatForm.addEventListener('submit', handleSendMessage);
+}
 
 logList.addEventListener('click', (e) => {
  
