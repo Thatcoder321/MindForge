@@ -593,11 +593,9 @@ function addXP(data) {
     
 
     updateProgress('earn_xp', xpAmount);
-    updateProgress('log_session', 1, logEntry); 
-
+    updateProgress('log_session', logEntry); 
     renderLog();
 }
-
   
   function buyItem(itemId) {
     const item = shopItems.find(i => i.id === itemId);
