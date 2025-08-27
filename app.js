@@ -1059,7 +1059,7 @@ function updateStatsPage() {
             datasets: [{
                 label: 'XP Earned',
                 data: Object.values(conceptData),
-                backgroundColor: `hsl(${primaryColor})`, 
+                backgroundColor: 'hsl(217,91%,60%)',
                 borderRadius: 4,
             }]
         },
