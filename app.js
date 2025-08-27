@@ -202,7 +202,15 @@ function addMessageToUI(sender, message) {
     // Auto-scroll to the bottom
     chatMessageList.scrollTop = chatMessageList.scrollHeight;
 }
+function playSound(soundFile) {
 
+    const audio = new Audio(`sounds/${soundFile}`);
+
+    audio.play().catch(error => {
+        
+        console.log("Audio play failed, likely requires user interaction first.", error);
+    });
+}
 async function handleSendMessage(event) {
     event.preventDefault();
     const userMessage = chatInput.value.trim();
@@ -580,7 +588,7 @@ function addXP(data) {
     const isQuickAdd = typeof data === 'number';
     let xpAmount = isQuickAdd ? data : data.xp;
     let description = isQuickAdd ? 'Logged quick effort' : data.description;
-
+    playSound('xp-gain.mp3');
     const now = new Date().getTime();
     state.activePowerups = state.activePowerups.filter(p => p.expiresAt > now);
 
@@ -629,7 +637,7 @@ function addXP(data) {
 function buyItem(itemId) {
     const item = shopItems.find(i => i.id === itemId);
     if (!item) return;
-
+    playSound('buy-item.mp3');
    
     if (item.type === 'consumable') {
         if (state.coins < item.cost) {
@@ -677,7 +685,7 @@ function buyItem(itemId) {
         showNotification("You already have this bounty active!");
         return;
     }
-
+    playSound('buy-item.mp3');
     state.coins -= bounty.cost;
 
     const expirationTime = new Date().getTime() + bounty.timeLimit * 60 * 1000;
@@ -1249,11 +1257,12 @@ if (questContainer) {
             const questId = claimButton.dataset.questId;
             const quest = state.activeQuests.find(q => q.id === questId);
             if (quest && !quest.claimed) {
+                
                 quest.claimed = true; 
                 state.xp += quest.reward.xp;
                 state.coins += quest.reward.coins;
                 showNotification(`Reward claimed: +${quest.reward.xp} XP & ${quest.reward.coins} Coins!`);
-                
+                playSound('xp-gain.mp3');
                 createParticleExplosion(claimButton, quest.reward.xp);
                 
                 saveState();
