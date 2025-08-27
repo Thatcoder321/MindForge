@@ -1143,18 +1143,24 @@ getAiInsightsButton.addEventListener('click', async (e) => {
           body: JSON.stringify({ log: state.log }),
       });
 
-      if (!response.ok) { throw new Error('The AI advisor is busy, please try again.'); }
+      if (!response.ok) {
+       
+        if (response.status === 429) {
+            const errorData = await response.json();
+           
+            throw new Error(errorData.error || 'Daily limit reached.');
+        } else {
+           
+            throw new Error('The AI advisor is busy, please try again.');
+        }
+    }
 
-      const data = await response.json();
-      if (data.insights) {
-          const htmlInsights = markdownConverter.makeHtml(data.insights);
-          aiInsightsResultDiv.innerHTML = htmlInsights;
-          aiInsightsResultDiv.classList.remove('hidden'); 
-      }
-  } catch (error) {
-      console.error('Failed to get AI insights:', error);
-      aiInsightsResultDiv.innerHTML = `<p style="color: red;">${error.message}</p>`;
-      aiInsightsResultDiv.classList.remove('hidden');
+    const data = await response.json();
+    if (data.insights) {
+        const htmlInsights = markdownConverter.makeHtml(data.insights);
+        aiInsightsResultDiv.innerHTML = htmlInsights;
+        aiInsightsResultDiv.classList.remove('hidden');
+    }
   } finally {
 
       getAiInsightsButton.disabled = false;

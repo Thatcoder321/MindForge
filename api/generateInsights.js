@@ -1,4 +1,6 @@
 import {OpenAI} from 'openai';
+const ipRequestCount = {};
+const RATE_LIMIT = 3;
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 
@@ -9,7 +11,25 @@ export default async function handler(req,res) {
         return res.status(405).json({error: 'Method Not Allowed'});
 
     }
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
+    if (ip) {
+      const today = new Date().toISOString().split('T')[0];
+      const ipKey = `${ip}_${today}`; 
+  
+
+      const currentCount = ipRequestCount[ipKey] || 0;
+      
+      if (currentCount >= RATE_LIMIT) {
+       
+        console.warn(`Rate limit exceeded for IP: ${ip}`);
+
+        return res.status(429).json({ error: 'You have reached your daily limit for AI insights. Please try again tomorrow.' });
+      }
+      ipRequestCount[ipKey] = currentCount + 1;
+    console.log(`Request #${ipRequestCount[ipKey]} for IP: ${ip}`);
+  }
+      
     const {log} = req.body;
     
     if(!log || !Array.isArray(log) || log.length === 0) {
