@@ -1425,20 +1425,22 @@ if (themeToggleButton) {
     });
 }
 
+// In app.js
 
 function updateActiveTimers() {
-    const container = document.getElementById('active-powerup-timers');
-    if (!container) return;
+    // 1. Get BOTH containers
+    const desktopContainer = document.getElementById('active-powerup-timers');
+    const mobileContainer = document.getElementById('mobile-timers-area');
+    if (!desktopContainer || !mobileContainer) return;
 
     const now = new Date().getTime();
+
+    // 2. Check for Bounty Failures (Run this logic only ONCE)
     let bountyFailed = false;
-
-
     state.activeBounties.forEach(bounty => {
         if (now > bounty.expiresAt) {
             bountyFailed = true;
-           
-            const bountyInfo = bountyMasterList.find(i => i.id === bounty.id); 
+            const bountyInfo = bountyMasterList.find(i => i.id === bounty.id);
             if (bountyInfo) {
                 state.xp += bountyInfo.failureReward.xp;
                 state.coins += bountyInfo.failureReward.coins;
@@ -1447,9 +1449,6 @@ function updateActiveTimers() {
                     xpDisplay.innerText = state.xp.toLocaleString();
                     coinsDisplay.innerText = state.coins.toLocaleString();
                 }
-
-                xpDisplay.innerText = state.xp.toLocaleString();
-                coinsDisplay.innerText = state.coins.toLocaleString();
             }
         }
     });
@@ -1459,89 +1458,48 @@ function updateActiveTimers() {
         saveState();
     }
     
-
+    // 3. Get a fresh list of all timers that are still active
     const activeTimers = [
         ...state.activePowerups,
         ...state.activeBounties
     ].filter(timer => timer.expiresAt > now);
+    
+    // 4. Clear both containers before rendering
+    desktopContainer.innerHTML = '';
+    mobileContainer.innerHTML = '';
 
-  
-    const displayedTimerIds = new Set([...container.children].map(el => el.dataset.timerId));
-    const activeTimerIds = new Set(activeTimers.map(t => t.id));
-
-
-    displayedTimerIds.forEach(id => {
-        if (!activeTimerIds.has(id)) {
-            const elToRemove = container.querySelector(`[data-timer-id="${id}"]`);
-            if (elToRemove) elToRemove.remove();
-        }
-    });
-
-   
+    // 5. Add a title to the mobile section ONLY if there are active timers
+    if (activeTimers.length > 0) {
+        const mobileTitle = document.createElement('h3');
+        mobileTitle.className = 'text-lg font-semibold mb-md';
+        mobileTitle.innerText = 'Active Timers';
+        mobileContainer.appendChild(mobileTitle);
+    }
+    
+    // 6. Loop ONCE and render the timer in BOTH places
     activeTimers.forEach(timerItem => {
         const timeLeft = timerItem.expiresAt - now;
         const minutes = Math.floor(timeLeft / (1000 * 60));
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
         const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-        let timerEl = container.querySelector(`[data-timer-id="${timerItem.id}"]`);
         
-       
+        // Find the item's info (works for both bounties and powerups)
         const itemInfo = bountyMasterList.find(i => i.id === timerItem.id) || shopItems.find(i => i.id === timerItem.id);
-        if (!itemInfo) return; 
+        if (!itemInfo) return;
 
-        if (!timerEl) { 
-            timerEl = document.createElement('div');
-            timerEl.className = 'timer-capsule';
-            timerEl.dataset.timerId = timerItem.id;
-            
-            let displayContent;
-           
-            if (itemInfo.goal) { 
-                displayContent = `
-                    <div class="bounty-timer-content">
-                        <span>${itemInfo.name}</span>
-                        <span class="bounty-progress" data-role="progress">${timerItem.progress}/${itemInfo.goal.target}</span>
-                        <span class="timer-display" data-role="time">${timeString}</span>
-                    </div>`;
-            } else { 
-                displayContent = `
-                    <span>${itemInfo.name}</span>
-                    <span data-role="time">${timeString}</span>`;
-            }
-            timerEl.innerHTML = displayContent;
-            container.appendChild(timerEl);
-        } else { 
-            const timeDisplay = timerEl.querySelector('[data-role="time"]');
-            if (timeDisplay) timeDisplay.innerText = timeString;
+        // --- Render Desktop Timer ---
+        const desktopTimer = document.createElement('div');
+        desktopTimer.className = 'timer-capsule';
+        desktopTimer.innerHTML = `<span>${itemInfo.name}</span><span>${timeString}</span>`;
+        if (timeLeft < 10000) desktopTimer.classList.add('expiring');
+        desktopContainer.appendChild(desktopTimer);
 
-       
-            if (timerItem.progress !== undefined && itemInfo.goal) {
-                 const progressDisplay = timerEl.querySelector('[data-role="progress"]');
-                 if(progressDisplay) progressDisplay.innerText = `${timerItem.progress}/${itemInfo.goal.target}`;
-            }
-        }
-
-        if (timeLeft < 10000) {
-            timerEl.classList.add('expiring');
-        } else {
-            timerEl.classList.remove('expiring');
-        }
+        // --- Render Mobile Timer ---
+        const mobileTimer = document.createElement('div');
+        mobileTimer.className = 'mobile-timer-capsule';
+        mobileTimer.innerHTML = `<span class="item-name">${itemInfo.name}</span><span class="time-left">${timeString}</span>`;
+        mobileContainer.appendChild(mobileTimer);
     });
-
-
-    const cooldownTimerEl = document.getElementById('bounty-cooldown-timer');
-    if (cooldownTimerEl) {
-        const now = new Date().getTime();
-        const timeLeft = state.bountyRefreshCooldown ? state.bountyRefreshCooldown - now : 0;
-        if (timeLeft > 0) {
-            const minutes = Math.floor(timeLeft / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-            cooldownTimerEl.innerText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        } else {
-            renderShop();
-        }
-    }
 }
 function renderPowerups() {
     const powerupList = document.getElementById('powerup-list');
