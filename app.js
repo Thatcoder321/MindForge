@@ -361,11 +361,12 @@ function addXP(data) {
     
 
     const logEntry = {
+        id: new Date().toISOString() + Math.random(),
         description: description,
         xp: xpAmount,
         confidence: isQuickAdd ? 'not_picked' : data.confidence,
         concepts: isQuickAdd ? [] : (data.concepts || []),
-        timestamp: new Date().toISOString() + Math.random()
+        timestamp: new Date().toISOString()
     };
     
     state.log.push(logEntry);
@@ -471,7 +472,7 @@ function renderLog() {
     state.log.slice().reverse().forEach(entry => {
         const li = document.createElement('li');
         li.className = 'log-entry';
-        li.dataset.logId = entry.timestamp;
+        li.dataset.logId = entry.id;
 
         const confidenceText = entry.confidence ? 
             (entry.confidence.charAt(0).toUpperCase() + entry.confidence.slice(1)) : 
