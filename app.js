@@ -1427,6 +1427,7 @@ if (themeToggleButton) {
 
 
 
+
 function updateActiveTimers() {
 
     const desktopContainer = document.getElementById('active-powerup-timers');
@@ -1452,32 +1453,28 @@ function updateActiveTimers() {
             }
         }
     });
-
     if (bountyFailed) {
         state.activeBounties = state.activeBounties.filter(b => b.expiresAt > now);
         saveState();
     }
     
+   
     const activeTimers = [
         ...state.activePowerups,
         ...state.activeBounties
     ].filter(timer => timer.expiresAt > now);
-    
 
-    desktopContainer.innerHTML = '';
+    
     mobileContainer.innerHTML = '';
-    if (activeTimers.length > 0) {
+    if (activeTimers.length > 0 && !mobileContainer.querySelector('h3')) {
         const mobileTitle = document.createElement('h3');
         mobileTitle.className = 'text-lg font-semibold mb-md';
         mobileTitle.innerText = 'Active Timers';
         mobileContainer.appendChild(mobileTitle);
     }
     activeTimers.forEach(timerItem => {
-       
         const timeLeft = timerItem.expiresAt - now;
-        const minutes = Math.floor(timeLeft / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-        const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        const timeString = `${Math.floor(timeLeft / 60000)}:${Math.floor((timeLeft % 60000) / 1000).toString().padStart(2, '0')}`;
         const itemInfo = bountyMasterList.find(i => i.id === timerItem.id) || shopItems.find(i => i.id === timerItem.id);
         if (!itemInfo) return;
         const mobileTimer = document.createElement('div');
@@ -1487,41 +1484,35 @@ function updateActiveTimers() {
     });
 
    
-    const activeDesktopTimerIds = new Set(activeTimers.map(t => t.id));
-    const displayedDesktopTimerIds = new Set([...desktopContainer.children].map(el => el.dataset.timerId));
-
-
-    displayedDesktopTimerIds.forEach(id => {
-        if (!activeDesktopTimerIds.has(id)) {
-            const elToRemove = desktopContainer.querySelector(`[data-timer-id="${id}"]`);
-            if (elToRemove) elToRemove.remove();
-        }
-    });
-
-
     activeTimers.forEach(timerItem => {
         const timeLeft = timerItem.expiresAt - now;
         const timeString = `${Math.floor(timeLeft / 60000)}:${Math.floor((timeLeft % 60000) / 1000).toString().padStart(2, '0')}`;
         const itemInfo = bountyMasterList.find(i => i.id === timerItem.id) || shopItems.find(i => i.id === timerItem.id);
         if (!itemInfo) return;
 
+      
         let timerEl = desktopContainer.querySelector(`[data-timer-id="${timerItem.id}"]`);
         
+
         if (!timerEl) {
             timerEl = document.createElement('div');
-            timerEl.className = 'timer-capsule';
-            timerEl.dataset.timerId = timerItem.id; 
+            timerEl.className = 'timer-capsule'; 
+            timerEl.dataset.timerId = timerItem.id;
             desktopContainer.appendChild(timerEl);
         }
 
-   
+      
         timerEl.innerHTML = `<span>${itemInfo.name}</span><span>${timeString}</span>`;
         
   
-        if (timeLeft < 10000) {
-            timerEl.classList.add('expiring');
-        } else {
-            timerEl.classList.remove('expiring');
+        timerEl.classList.toggle('expiring', timeLeft < 10000);
+    });
+
+  
+    const activeTimerIds = new Set(activeTimers.map(t => t.id));
+    desktopContainer.querySelectorAll('.timer-capsule').forEach(el => {
+        if (!activeTimerIds.has(el.dataset.timerId)) {
+            el.remove();
         }
     });
 }
