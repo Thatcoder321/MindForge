@@ -1146,3 +1146,66 @@ html.light-theme #edit-modal-backdrop.modal .dialog .dialog-title {
   border-bottom-width: 2px;
   filter: brightness(0.9);
 }
+
+
+.timer-capsule {
+  position: relative; 
+  pointer-events: all; 
+}
+
+
+.timer-capsule::before {
+  
+  content: attr(data-description); 
+  
+
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  margin-top: 10px; 
+  
+
+  width: 250px;
+  padding: 0.75rem 1rem;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  line-height: 1.6;
+  
+
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none; 
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+
+.timer-capsule::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 1.5rem; 
+  margin-top: 4px; 
+
+
+  width: 12px;
+  height: 12px;
+  background-color: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  border-left: 1px solid hsl(var(--border));
+  transform: rotate(45deg);
+
+
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.timer-capsule:hover::before,
+.timer-capsule:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}

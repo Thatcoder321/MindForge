@@ -1529,6 +1529,7 @@ function updateActiveTimers() {
             timerEl = document.createElement('div');
             timerEl.className = 'timer-capsule'; 
             timerEl.dataset.timerId = timerItem.id;
+            timerEl.dataset.description = itemInfo.description;
             desktopContainer.appendChild(timerEl);
         }
 
