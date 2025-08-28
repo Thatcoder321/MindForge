@@ -1164,14 +1164,13 @@ getAiInsightsButton.addEventListener('click', async (e) => {
   }
 
   const buttonText = getAiInsightsButton.querySelector('.button-text');
-  const spinner = getAiInsightsButton.querySelector('.spinner');
+
 
   // --- Start Loading Animation ---
   getAiInsightsButton.disabled = true;
   getAiInsightsButton.classList.add('loading');
-  buttonText.style.opacity = '0';
-  spinner.classList.remove('hidden');
-  spinner.style.opacity = '1';
+ 
+  buttonText.innerText = "Analyzing...";
 
   try {
       const response = await fetch('/api/generateInsights', {
@@ -1205,6 +1204,7 @@ getAiInsightsButton.addEventListener('click', async (e) => {
       buttonText.style.opacity = '1';
       spinner.style.opacity = '0';
       setTimeout(() => spinner.classList.add('hidden'), 200);
+      buttonText.innerText = "Analyze My Progress";
   }
 });
   // --- Event Listeners ---
@@ -1342,14 +1342,12 @@ if (shopListContainer) {
       
       const description = document.getElementById('ai-log-description').value;
       const buttonText = aiLogButton.querySelector('.button-text');
-      const spinner = aiLogButton.querySelector('.spinner');
+    
   
-      // --- Start Loading Animation ---
+
       aiLogButton.disabled = true;
-      aiLogButton.classList.add('loading'); // Add the pulsing animation class
-      buttonText.style.opacity = '0'; // Fade out the text
-      spinner.classList.remove('hidden');
-      spinner.style.opacity = '1'; // Fade in the spinner
+      aiLogButton.classList.add('loading');
+      buttonText.innerText = "Analyzing...";
   
       try {
           const response = await fetch('/api/generateXP', {
@@ -1377,7 +1375,8 @@ if (shopListContainer) {
           aiLogButton.classList.remove('loading'); 
           buttonText.style.opacity = '1'; 
           spinner.style.opacity = '0'; 
-          setTimeout(() => spinner.classList.add('hidden'), 200); 
+          setTimeout(() => spinner.classList.add('hidden'), 200);
+          buttonText.innerText = "Analyze & Generate XP"; 
       }
   });
 
