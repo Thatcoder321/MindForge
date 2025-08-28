@@ -31,7 +31,7 @@
 
   --card: hsl(220, 20%, 100%);   
   --muted-foreground: hsl(223, 10%, 45%);
-  --border: hsl(220, 15%, 90%);     
+  --border: hsl(220, 15%, 85%);
 
 
   --primary: hsl(220, 10%, 15%);     
@@ -238,21 +238,31 @@ main { margin-top: 2rem; }
 }
 
 .edit-log-button {
-  background-color: transparent;
-  color: hsl(var(--muted-foreground));
-  border: 1px solid hsl(var(--border));
+
   padding: 0.25rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 600;
   border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.2s ease;
+  
+
+  background-color: transparent;
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
 }
 
 .edit-log-button:hover {
+
   background-color: hsl(var(--secondary));
   color: hsl(var(--secondary-foreground));
   border-color: hsl(var(--secondary));
+}
+
+.edit-log-button:active {
+  transform: translateY(1px);
+  border-bottom-width: 2px;
+  filter: brightness(0.9);
 }
 
 .form-group {
@@ -261,7 +271,7 @@ main { margin-top: 2rem; }
 
 .label {
   display: block;
-  font-size: 0.875rem; /* 14px */
+  font-size: 0.875rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: hsl(var(--muted-foreground));
@@ -358,7 +368,29 @@ main { margin-top: 2rem; }
   border-color: hsla(0, 0%, 98%, 0.4);
   border-top-color: hsl(0, 0%, 98%);
 }
+.light-theme .edit-log-button {
+ 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom-width: 3px;
+  transform: translateY(0);
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border-color: var(--secondary-darker);
+}
 
+.light-theme .edit-log-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  border-bottom-width: 4px;
+}
+
+.light-theme .edit-log-button:active {
+  transform: translateY(1px);
+  border-bottom-width: 2px;
+  filter: brightness(0.9);
+}
 
 #image-preview-box {
   max-width: 100%;
@@ -804,6 +836,7 @@ header nav {
   transform: translateY(20px) scale(0.95);
   transition: transform 0.3s ease-out, opacity 0.3s ease-out;
   pointer-events: none;
+  backdrop-filter: none;
 }
 .chat-window:not(.hidden) {
   opacity: 1;
@@ -973,8 +1006,40 @@ header nav {
 #mobile-timers-area {
   display: none;
 }
+.light-theme .card,
 
 
+
+.light-theme .dialog-title {
+  color: hsl(var(--foreground));
+}
+.light-theme .quest-card { 
+  border: 1px solid hsl(220, 15%, 85%);
+}
+.light-theme .log-entry { 
+
+  border: 1px solid hsl(220, 15%, 85%);
+}
+
+.dialog {
+
+  background-color: hsl(var(--card)); 
+  
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); 
+}
+
+.light-theme .dialog {
+  background-color: hsl(var(--card)); 
+}
 @media (max-width: 768px) {
 
   #active-powerup-timers {
@@ -992,4 +1057,83 @@ header nav {
     width: 36px;
     height: 36px;
   }
+}
+
+.light-theme .chat-window {
+
+  background-color: white; 
+  
+
+  backdrop-filter: none; 
+}
+
+
+
+.light-theme .card,
+
+.light-theme .dialog {
+
+  border: 1px solid hsl(220, 15%, 85%);
+}
+
+.light-theme .tabs-list {
+    border-bottom: 1px solid hsl(220, 15%, 85%);
+}
+
+.light-theme .nav-button.active {
+
+    border-bottom-color: hsl(var(--primary));
+}
+
+
+
+
+
+html.light-theme #edit-modal-backdrop.modal .dialog {
+  
+  background-color: white !important;
+  
+  
+  color: hsl(223, 15%, 20%) !important;
+}
+
+html.light-theme #edit-modal-backdrop.modal .dialog .dialog-title {
+  color: hsl(223, 15%, 20%) !important;
+}
+
+.danger-zone {
+  border-color: hsl(0, 72%, 51%); 
+}
+
+.btn-destructive {
+
+  position: relative; 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; 
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid;
+  cursor: pointer;
+  border-bottom-width: 4px;
+  transform: translateY(0);
+  transition: all 0.1s ease-out;
+
+
+  background-color: hsl(0, 84%, 60%);
+  color: hsl(0, 0%, 100%);
+  border-color: hsl(0, 84%, 40%);
+}
+.btn-destructive:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  border-bottom-width: 6px;
+}
+.btn-destructive:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
+  filter: brightness(0.9);
 }

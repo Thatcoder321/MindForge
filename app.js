@@ -151,6 +151,8 @@ const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const chatMessageList = document.getElementById('chat-message-list');
 const messageCountEl = document.getElementById('message-count');
+
+const resetProgressButton = document.getElementById('reset-progress-button');
   let uploadedImageBase64 = null;
   let tempAiSuggestion = null;
 
@@ -1202,6 +1204,7 @@ if (dashboardPage) {
       }
   });
 }
+
 if (chatBubble) {
     chatBubble.addEventListener('click', openChat);
 }
@@ -1246,6 +1249,17 @@ if(powerupContainer) {
         if (powerupButton) {
             const itemId = powerupButton.dataset.itemId;
             usePowerup(itemId);
+        }
+    });
+}
+if (resetProgressButton) {
+    resetProgressButton.addEventListener('click', () => {
+       
+        if (confirm("Are you sure you want to delete ALL of your progress? This action cannot be undone.")) {
+          
+            localStorage.clear();
+           
+            location.reload();
         }
     });
 }

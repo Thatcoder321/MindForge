@@ -25,6 +25,7 @@
         <button class="nav-button" data-page="log">Log</button>
         <button class="nav-button" data-page="shop">Shop</button>
         <button class="nav-button" data-page="stats">Stats</button>
+        <button class="nav-button" data-page="settings">Settings</button>
       </nav>
 
       <button id="theme-toggle-button" class="theme-toggle">
@@ -161,9 +162,47 @@
             </div>
           </div>
         </div>
+        
+        </section>
+        <section id="settings" class="page">
+          <h2 class="mb-lg">Settings</h2>
+          <div class="space-y-lg">
+            
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">About MindForge</h3></div>
+              <div class="card-body">
+                <p class="text-muted">
+                  MindForge v1.0 is a project by Nethul Kankanamge for the Hack Club Summer of Making. This application turns the process of studying into a rewarding, game-like experience.
+                </p>
+              </div>
+            </div>
+      
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Credits</h3></div>
+              <div class="card-body">
+                <p class="text-muted">
+                  Built with vanilla HTML, CSS, and JavaScript. Powered by the OpenAI API. Special thanks to Aram for the feedback that made this project even better.
+                </p>
+              </div>
+            </div>
+      
+            <div class="card danger-zone">
+              <div class="card-header"><h3 class="card-title">Danger Zone</h3></div>
+              <div class="card-body">
+                <p class="text-muted mb-md">
+                  This action will permanently delete all of your XP, coins, log history, and purchased items. This cannot be undone.
+                </p>
+                <button id="reset-progress-button" class="btn btn-destructive">Reset All Progress</button>
+              </div>
+            </div>
+      
+          </div>
+      </main>
+
       </section>
     </main>
   </div>
+
 
   <!-- Edit Modal -->
   <div id="edit-modal-backdrop" class="modal hidden">
