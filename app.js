@@ -1337,48 +1337,49 @@ if (shopListContainer) {
     });
 }
 
-  aiLogForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const description = document.getElementById('ai-log-description').value;
-      const buttonText = aiLogButton.querySelector('.button-text');
+
+aiLogForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-  
+    const description = document.getElementById('ai-log-description').value;
+    const buttonText = aiLogButton.querySelector('.button-text');
 
-      aiLogButton.disabled = true;
-      aiLogButton.classList.add('loading');
-      buttonText.innerText = "Analyzing...";
-  
-      try {
-          const response = await fetch('/api/generateXP', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ description })
-          });
-  
-          if (!response.ok) { throw new Error('Network response was not ok'); }
-  
-          const data = await response.json();
-          tempAiSuggestion = { ...data, originalDescription: description, sourceType: 'text' }; 
 
+    aiLogButton.disabled = true;
+    aiLogButton.classList.add('loading'); 
+    if (buttonText) {
+        buttonText.innerText = "Analyzing..."; 
+    }
   
-          aiSuggestedXp.innerText = data.xp;
-          aiJustification.innerText = data.justification;
-          aiResultsDiv.classList.remove('hidden');
+    try {
+        const response = await fetch('/api/generateXP', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description })
+        });
   
-      } catch (error) {
-          console.error('Failed to fetch AI suggestion:', error);
-          alert('Could not get an AI suggestion. Please try again.');
-      } finally {
-          // --- End Loading Animation ---
-          aiLogButton.disabled = false;
-          aiLogButton.classList.remove('loading'); 
-          buttonText.style.opacity = '1'; 
-          spinner.style.opacity = '0'; 
-          setTimeout(() => spinner.classList.add('hidden'), 200);
-          buttonText.innerText = "Analyze & Generate XP"; 
-      }
-  });
+        if (!response.ok) { throw new Error('Network response was not ok'); }
+  
+        const data = await response.json();
+        tempAiSuggestion = { ...data, originalDescription: description, sourceType: 'text' }; 
+
+        aiSuggestedXp.innerText = data.xp;
+        aiJustification.innerText = data.justification;
+        aiResultsDiv.classList.remove('hidden');
+  
+    } catch (error) {
+        console.error('Failed to fetch AI suggestion:', error);
+        alert('Could not get an AI suggestion. Please try again.');
+    } finally {
+   
+        aiLogButton.disabled = false;
+        aiLogButton.classList.remove('loading'); 
+        if (buttonText) {
+         
+            buttonText.innerText = "Analyze & Generate XP"; 
+        }
+    }
+});
 
   const themeSelectorContainer = document.getElementById('theme-selector-area');
   if (themeSelectorContainer) {
