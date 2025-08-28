@@ -465,12 +465,15 @@ function startOnboarding() {
       currentOnboardingStep++;
       if (currentOnboardingStep < onboardingSteps.length) {
           showOnboardingStep(currentOnboardingStep);
-      } else {
-          overlay.classList.add('hidden');
-          popover.classList.remove('visible');
-          localStorage.setItem('mindforge_onboarded', 'true');
-          onboardingButton.removeEventListener('click', handleOnboardingClick);
-      }
+        } else {
+            
+            overlay.remove();
+            popover.remove();
+          
+        
+            localStorage.setItem('mindforge_onboarded', 'true');
+           
+        }
   });
 }
 
