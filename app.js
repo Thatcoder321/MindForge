@@ -500,7 +500,7 @@ function refreshDailyQuests() {
     state.questsLastUpdated = today;
     saveState();
 }
-// In app.js
+
 
 function updateProgress(typeOfAction, details = {}) {
     let needsUiUpdate = false;
@@ -641,12 +641,13 @@ function addXP(data) {
     } else {
        
     }
+
+    updateProgress('earn_xp', xpAmount);
+    updateProgress('log_session', logEntry); 
     animateValue(xpDisplay, previousXP, state.xp, 800);
     animateValue(coinsDisplay, previousCoins, state.coins, 800);
     
 
-    updateProgress('earn_xp', xpAmount);
-    updateProgress('log_session', logEntry); 
     renderLog();
 }
   
